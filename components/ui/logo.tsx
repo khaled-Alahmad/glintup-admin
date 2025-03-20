@@ -22,10 +22,10 @@ export function Logo({
       <div className="relative flex items-center">
         <span
           className={`font-bold ${sizeClasses[size]} ${
-            variant === "light" ? "text-white" : "text-primary"
+            variant === "light" ? "text-white" : "text-white"
           }`}
         >
-          GLINT<span className="text-accent">UP</span>
+          GLINT<span className="text-white">UP</span>
         </span>
       </div>
     </Link>

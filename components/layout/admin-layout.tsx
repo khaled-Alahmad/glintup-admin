@@ -99,7 +99,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </Link>{" "}
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
-                  <Link href={"/profile/1"} >
+                  <Link href={"/profile/edit"} >
                     <span className="mr-2">⚙️</span> إعدادات الحساب
                   </Link>{" "}
                 </DropdownMenuItem>

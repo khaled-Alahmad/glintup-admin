@@ -279,7 +279,7 @@ export default function AddSalon() {
               <div className="space-y-4">
                 {/* <h3 className="text-lg font-medium"</h3> */}
                 <Label htmlFor="logo">
-                  صور معرض الغلاف<span className="text-red-500">*</span>
+                  عدة صور للغلاف<span className="text-red-500">*</span>
                 </Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center">

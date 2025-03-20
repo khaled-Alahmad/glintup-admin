@@ -15,9 +15,13 @@ import {
   HandHeart,
   X,
   FileText,
+  Gift,
 } from "lucide-react";
+import { CalendarClock } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Logo } from "../ui/logo";
 
 interface AdminSidebarProps {
   mobile?: boolean;
@@ -51,6 +55,18 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       href: "/services",
       icon: HandHeart,
       active: pathname.startsWith("/services"),
+    },
+    {
+      name: "بطاقات الهدايا",
+      href: "/gift-cards",
+      icon: Gift,
+      active: pathname.startsWith("/gift-cards"),
+    },
+    {
+      name: "الأحداث",
+      href: "/events",
+      icon: CalendarClock,
+      active: pathname.startsWith("/events"),
     },
     {
       name: "الحجوزات",
@@ -111,7 +127,8 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
           </Button>
         )}
         <div className="flex items-center gap-2 font-semibold text-xl">
-          <span className="text-sidebar-foreground">Glintup</span>
+          <Logo />
+          {/* <span className="text-sidebar-foreground">Glintup</span> */}
           <span className="text-sidebar-foreground/70 text-sm">
             لوحة التحكم
           </span>
