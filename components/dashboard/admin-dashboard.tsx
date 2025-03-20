@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bar, BarChart, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowUpRight, CalendarCheck2, DollarSign, Plus, Store, Users } from "lucide-react"
+import { ArrowUpRight, Banknote, CalendarCheck2, DollarSign, Plus, Store, Users } from "lucide-react"
 import { RecentAppointments } from "@/components/dashboard/recent-appointments"
 import { TopSalons } from "@/components/dashboard/top-salons"
 
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
       {/* Statistics Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="stats-card card-hover overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-1 bg-blue-500"></div>
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">صالونات مسجلة</CardTitle>
             <Store className="h-4 w-4 text-blue-500" />
@@ -128,10 +128,10 @@ export default function AdminDashboard() {
           <div className="absolute inset-x-0 top-0 h-1 bg-pink-500"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
-            <DollarSign className="h-4 w-4 text-pink-500" />
+            <Banknote  className="h-4 w-4 text-pink-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">22,458 ر.س</div>
+            <div className="text-2xl font-bold">22,458 د.إ</div>
             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
               <span className="text-green-500 flex items-center text-xs font-medium">
                 <ArrowUpRight className="h-3 w-3" />
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         <Card className="bg-white dark:bg-gray-800 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">حجوزات قيد التأكيد</CardTitle>
+            <CardTitle className="text-sm font-medium">حجوزات قيد الإنتظار</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">35</div>
@@ -198,23 +198,23 @@ export default function AdminDashboard() {
             <CardTitle>المهام السريعة</CardTitle>
             <CardDescription>المهام التي تحتاج إلى اهتمامك</CardDescription>
           </div>
-          <Button size="sm" className="rounded-full bg-primary hover:bg-primary/90">
+          {/* <Button size="sm" className="rounded-full bg-primary hover:bg-primary/90">
             <Plus className="h-4 w-4 mr-1" />
             إضافة
-          </Button>
+          </Button> */}
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="bg-muted/30 p-4 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex justify-between items-center mb-2">
                 <div>
-                  <Badge className="bg-blue-500 text-white border-0">مراجعة إعلانات</Badge>
+                  <Badge className="bg-primary text-white border-0">مراجعة إعلانات</Badge>
                   <h4 className="font-medium mt-2">مراجعة 5 إعلانات جديدة</h4>
                 </div>
                 <div className="text-sm text-muted-foreground">24%</div>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: "24%" }}></div>
+                <div className="bg-primary h-2 rounded-full" style={{ width: "24%" }}></div>
               </div>
             </div>
 
@@ -295,10 +295,10 @@ export default function AdminDashboard() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `${value} ر.س`}
+                  tickFormatter={(value) => `${value} د.إ`}
                 />
                 <Tooltip
-                  formatter={(value) => [`${value} ر.س`, "الإيرادات"]}
+                  formatter={(value) => [`${value} د.إ`, "الإيرادات"]}
                   labelFormatter={(label) => `شهر ${label}`}
                 />
                 <Line

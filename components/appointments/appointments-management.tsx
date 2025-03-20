@@ -31,7 +31,7 @@ const appointments = [
     date: "2024-04-03",
     service: "قص شعر وصبغة",
     duration: "120 دقيقة",
-    price: "450 ر.س",
+    price: "450 د.إ",
     status: "مؤكد",
   },
   {
@@ -44,7 +44,7 @@ const appointments = [
     date: "2024-04-03",
     service: "مكياج",
     duration: "60 دقيقة",
-    price: "350 ر.س",
+    price: "350 د.إ",
     status: "معلق",
   },
   {
@@ -57,7 +57,7 @@ const appointments = [
     date: "2024-04-03",
     service: "علاج بالكيراتين",
     duration: "180 دقيقة",
-    price: "800 ر.س",
+    price: "800 د.إ",
     status: "مؤكد",
   },
   {
@@ -70,7 +70,7 @@ const appointments = [
     date: "2024-04-03",
     service: "مانيكير وباديكير",
     duration: "90 دقيقة",
-    price: "200 ر.س",
+    price: "200 د.إ",
     status: "ملغي",
   },
   {
@@ -83,7 +83,7 @@ const appointments = [
     date: "2024-04-03",
     service: "حمام مغربي",
     duration: "120 دقيقة",
-    price: "300 ر.س",
+    price: "300 د.إ",
     status: "مكتمل",
   },
 ]

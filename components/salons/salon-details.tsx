@@ -85,16 +85,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     rating: 4.8,
     totalReviews: 245,
     totalBookings: 1245,
-    revenue: "52,450 ر.س",
+    revenue: "52,450 د.إ",
     joinDate: "12 يناير 2023",
   }
 
   const services = [
-    { id: "1", name: "قص شعر", duration: "60 دقيقة", price: "150 ر.س", bookings: 320 },
-    { id: "2", name: "صبغة شعر", duration: "120 دقيقة", price: "300 ر.س", bookings: 180 },
-    { id: "3", name: "تسريحة شعر", duration: "90 دقيقة", price: "200 ر.س", bookings: 210 },
-    { id: "4", name: "مكياج", duration: "60 دقيقة", price: "250 ر.س", bookings: 150 },
-    { id: "5", name: "مانيكير وباديكير", duration: "90 دقيقة", price: "180 ر.س", bookings: 95 },
+    { id: "1", name: "قص شعر", duration: "60 دقيقة", price: "150 د.إ", bookings: 320 },
+    { id: "2", name: "صبغة شعر", duration: "120 دقيقة", price: "300 د.إ", bookings: 180 },
+    { id: "3", name: "تسريحة شعر", duration: "90 دقيقة", price: "200 د.إ", bookings: 210 },
+    { id: "4", name: "مكياج", duration: "60 دقيقة", price: "250 د.إ", bookings: 150 },
+    { id: "5", name: "مانيكير وباديكير", duration: "90 دقيقة", price: "180 د.إ", bookings: 95 },
   ]
 
   const reviews = [

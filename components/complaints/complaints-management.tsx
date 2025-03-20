@@ -51,7 +51,7 @@ const complaints = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     date: "2024-04-02",
     title: "مشكلة في الدفع",
-    description: "تم خصم مبلغ أكبر من المتفق عليه عند الدفع، وأريد استرداد الفرق.",
+    description: "تم خصم تكلفة أكبر من المتفق عليه عند الدفع، وأريد استرداد الفرق.",
     status: "قيد المعالجة",
     priority: "عالية",
     category: "مدفوعات",
@@ -241,7 +241,7 @@ export default function ComplaintsManagement() {
         </Card>
 
         <Card className="stats-card card-hover overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-1 bg-blue-500"></div>
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">تذاكر الدعم</CardTitle>
             <MessageCircle className="h-4 w-4 text-blue-500" />

@@ -171,7 +171,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="amount">المبلغ</Label>
+                <Label htmlFor="amount">التكلفة</Label>
                 <Input id="amount" defaultValue="1200" type="number" />
               </div>
             </div>

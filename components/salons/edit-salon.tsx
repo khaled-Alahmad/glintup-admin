@@ -1,83 +1,97 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Upload, MapPin, Phone, Mail, Clock } from "lucide-react"
-import Link from "next/link"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Upload, MapPin, Phone, Mail, Clock } from "lucide-react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 interface EditSalonProps {
-  salonId: string
+  salonId: string;
 }
 
 export default function EditSalon({ salonId }: EditSalonProps) {
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
-  const [coverPreview, setCoverPreview] = useState<string | null>(null)
-  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([])
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   // In a real app, you would fetch salon data based on salonId
   useEffect(() => {
     // Simulating data fetching
-    setLogoPreview("/placeholder.svg?height=128&width=128")
-    setCoverPreview("/placeholder.svg?height=400&width=800")
+    setLogoPreview("/placeholder.svg?height=128&width=128");
+    setCoverPreview("/placeholder.svg?height=400&width=800");
     setGalleryPreviews([
       "/placeholder.svg?height=200&width=300",
       "/placeholder.svg?height=200&width=300",
       "/placeholder.svg?height=200&width=300",
-    ])
-  }, [salonId])
+    ]);
+  }, [salonId]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
+    const files = e.target.files;
     if (files) {
-      const newPreviews: string[] = []
+      const newPreviews: string[] = [];
       Array.from(files).forEach((file) => {
-        const reader = new FileReader()
+        const reader = new FileReader();
         reader.onloadend = () => {
-          newPreviews.push(reader.result as string)
+          newPreviews.push(reader.result as string);
           if (newPreviews.length === files.length) {
-            setGalleryPreviews([...galleryPreviews, ...newPreviews])
+            setGalleryPreviews([...galleryPreviews, ...newPreviews]);
           }
-        }
-        reader.readAsDataURL(file)
-      })
+        };
+        reader.readAsDataURL(file);
+      });
     }
-  }
+  };
 
   const removeGalleryImage = (index: number) => {
-    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index))
-  }
+    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,7 +101,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">تعديل بيانات الصالون</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          تعديل بيانات الصالون
+        </h1>
       </div>
 
       <Tabs defaultValue="basic" className="w-full">
@@ -101,9 +117,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         <TabsContent value="basic" className="mt-4">
           <form
             onSubmit={(e) => {
-              e.preventDefault()
+              e.preventDefault();
               // هنا يتم معالجة إرسال البيانات
-              console.log("تم حفظ التغييرات")
+              console.log("تم حفظ التغييرات");
             }}
           >
             <Card>
@@ -175,14 +191,18 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="featured">صالون مميز</Label>
-                        <p className="text-sm text-muted-foreground">عرض الصالون في قسم الصالونات المميزة</p>
+                        <p className="text-sm text-muted-foreground">
+                          عرض الصالون في قسم الصالونات المميزة
+                        </p>
                       </div>
                       <Switch id="featured" defaultChecked />
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="verified">صالون موثق</Label>
-                        <p className="text-sm text-muted-foreground">إضافة علامة التوثيق إلى الصالون</p>
+                        <p className="text-sm text-muted-foreground">
+                          إضافة علامة التوثيق إلى الصالون
+                        </p>
                       </div>
                       <Switch id="verified" defaultChecked />
                     </div>
@@ -203,7 +223,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           <Card>
             <CardHeader>
               <CardTitle>معلومات الاتصال</CardTitle>
-              <CardDescription>تعديل معلومات الاتصال والموقع للصالون</CardDescription>
+              <CardDescription>
+                تعديل معلومات الاتصال والموقع للصالون
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -211,14 +233,22 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   <Label htmlFor="email">البريد الإلكتروني</Label>
                   <div className="relative">
                     <Mail className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="email" defaultValue="princess@salon.com" className="pr-9" />
+                    <Input
+                      id="email"
+                      defaultValue="princess@salon.com"
+                      className="pr-9"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">رقم الهاتف</Label>
                   <div className="relative">
                     <Phone className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="phone" defaultValue="+966 50 123 4567" className="pr-9" />
+                    <Input
+                      id="phone"
+                      defaultValue="+966 50 123 4567"
+                      className="pr-9"
+                    />
                   </div>
                 </div>
               </div>
@@ -274,7 +304,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     { day: "الجمعة", from: "16:00", to: "22:00" },
                     { day: "السبت", from: "09:00", to: "21:00" },
                   ].map((workDay) => (
-                    <div key={workDay.day} className="flex items-center justify-between gap-4 p-3 border rounded-lg">
+                    <div
+                      key={workDay.day}
+                      className="flex items-center justify-between gap-4 p-3 border rounded-lg"
+                    >
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span>{workDay.day}</span>
@@ -286,7 +319,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 24 }).map((_, i) => (
-                              <SelectItem key={i} value={`${String(i).padStart(2, "0")}:00`}>
+                              <SelectItem
+                                key={i}
+                                value={`${String(i).padStart(2, "0")}:00`}
+                              >
                                 {`${String(i).padStart(2, "0")}:00`}
                               </SelectItem>
                             ))}
@@ -299,7 +335,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 24 }).map((_, i) => (
-                              <SelectItem key={i} value={`${String(i).padStart(2, "0")}:00`}>
+                              <SelectItem
+                                key={i}
+                                value={`${String(i).padStart(2, "0")}:00`}
+                              >
                                 {`${String(i).padStart(2, "0")}:00`}
                               </SelectItem>
                             ))}
@@ -367,11 +406,19 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   ) : (
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600 mb-1">اسحب وأفلت شعار الصالون هنا أو انقر للتصفح</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت شعار الصالون هنا أو انقر للتصفح
+                      </p>
                       <p className="text-xs text-gray-500">PNG, JPG حتى 2MB</p>
                     </div>
                   )}
-                  <Input id="logo" type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                  <Input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleLogoChange}
+                  />
                   <Label htmlFor="logo" className="mt-4">
                     <Button type="button" variant="outline">
                       تغيير الشعار
@@ -404,11 +451,19 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   ) : (
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600 mb-1">اسحب وأفلت صورة الغلاف هنا أو انقر للتصفح</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت صورة الغلاف هنا أو انقر للتصفح
+                      </p>
                       <p className="text-xs text-gray-500">PNG, JPG حتى 5MB</p>
                     </div>
                   )}
-                  <Input id="cover" type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
+                  <Input
+                    id="cover"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverChange}
+                  />
                   <Label htmlFor="cover" className="mt-4">
                     <Button type="button" variant="outline">
                       تغيير صورة الغلاف
@@ -424,8 +479,12 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div className="flex flex-col items-center">
                     <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600 mb-1">اسحب وأفلت صور الصالون هنا أو انقر للتصفح</p>
-                    <p className="text-xs text-gray-500">PNG, JPG حتى 5MB لكل صورة</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      اسحب وأفلت صور الصالون هنا أو انقر للتصفح
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG حتى 5MB لكل صورة
+                    </p>
                   </div>
                   <Input
                     id="gallery"
@@ -445,7 +504,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 {galleryPreviews.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     {galleryPreviews.map((preview, index) => (
-                      <div key={index} className="relative rounded-md overflow-hidden h-40">
+                      <div
+                        key={index}
+                        className="relative rounded-md overflow-hidden h-40"
+                      >
                         <img
                           src={preview || "/placeholder.svg"}
                           alt={`صورة ${index + 1}`}
@@ -489,7 +551,14 @@ export default function EditSalon({ salonId }: EditSalonProps) {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">قائمة الخدمات</h3>
-                <Button size="sm">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    document
+                      .getElementById("service-form")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -508,16 +577,56 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
               <div className="space-y-4">
                 {[
-                  { name: "قص الشعر", duration: "60", price: "150" },
-                  { name: "صبغة شعر", duration: "120", price: "300" },
-                  { name: "تسريحة شعر", duration: "90", price: "200" },
-                  { name: "مكياج", duration: "60", price: "250" },
-                  { name: "مانيكير وباديكير", duration: "90", price: "180" },
-                ].map((service, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  {
+                    id: 1,
+                    name: "قص الشعر",
+                    duration: "60",
+                    price: "150",
+                    description: "قص الشعر بأحدث التقنيات والموضات",
+                  },
+                  {
+                    id: 2,
+                    name: "صبغة شعر",
+                    duration: "120",
+                    price: "300",
+                    description: "صبغة شعر بألوان عالمية وتقنيات حديثة",
+                  },
+                  {
+                    id: 3,
+                    name: "تسريحة شعر",
+                    duration: "90",
+                    price: "200",
+                    description: "تسريحات متنوعة للمناسبات والحفلات",
+                  },
+                  {
+                    id: 4,
+                    name: "مكياج",
+                    duration: "60",
+                    price: "250",
+                    description: "مكياج احترافي للمناسبات والسهرات",
+                  },
+                  {
+                    id: 5,
+                    name: "مانيكير وباديكير",
+                    duration: "90",
+                    price: "180",
+                    description: "عناية كاملة بالأظافر",
+                  },
+                ].map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="space-y-1">
-                      <p className="font-medium">{service.name}</p>
-                      <p className="text-sm text-muted-foreground">{service.duration} دقيقة</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{service.name}</p>
+                        <Badge variant="outline">
+                          {service.duration} دقيقة
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {service.description}
+                      </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <p className="font-medium">{service.price} ر.س</p>
@@ -537,7 +646,11 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                             <path d="m15 5 4 4" />
                           </svg>
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500"
+                        >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -563,7 +676,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
               <Separator />
 
-              <div className="space-y-4">
+              <div id="service-form" className="space-y-4">
                 <h3 className="text-lg font-medium">إضافة خدمة جديدة</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -572,16 +685,42 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="service-duration">المدة (بالدقائق)</Label>
-                    <Input id="service-duration" placeholder="المدة" type="number" />
+                    <Input
+                      id="service-duration"
+                      placeholder="المدة"
+                      type="number"
+                      min="1"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="service-price">السعر (ر.س)</Label>
-                    <Input id="service-price" placeholder="السعر" type="number" />
+                    <Input
+                      id="service-price"
+                      placeholder="السعر"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="service-description">وصف الخدمة</Label>
                   <Textarea id="service-description" placeholder="وصف الخدمة" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="service-category">فئة الخدمة</Label>
+                  <Select>
+                    <SelectTrigger id="service-category">
+                      <SelectValue placeholder="اختر فئة الخدمة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hair">خدمات الشعر</SelectItem>
+                      <SelectItem value="skin">خدمات البشرة</SelectItem>
+                      <SelectItem value="nails">خدمات الأظافر</SelectItem>
+                      <SelectItem value="makeup">خدمات المكياج</SelectItem>
+                      <SelectItem value="other">خدمات أخرى</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex justify-end">
                   <Button>إضافة الخدمة</Button>
@@ -599,6 +738,5 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         <Button>حفظ التغييرات</Button>
       </div>
     </div>
-  )
+  );
 }
-

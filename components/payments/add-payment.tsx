@@ -109,9 +109,9 @@ export default function AddPayment() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="amount">
-                  المبلغ (ر.س) <span className="text-red-500">*</span>
+                  التكلفة (د.إ) <span className="text-red-500">*</span>
                 </Label>
-                <Input id="amount" type="number" placeholder="أدخل المبلغ" required />
+                <Input id="amount" type="number" placeholder="أدخل التكلفة" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="payment-method">
@@ -160,7 +160,7 @@ export default function AddPayment() {
 
             <div className="space-y-2">
               <Label htmlFor="commission">
-                العمولة (ر.س) <span className="text-red-500">*</span>
+                العمولة (د.إ) <span className="text-red-500">*</span>
               </Label>
               <Input id="commission" type="number" placeholder="أدخل قيمة العمولة" required />
             </div>

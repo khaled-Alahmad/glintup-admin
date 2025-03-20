@@ -1,41 +1,155 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ArrowLeft, Calendar, Clock } from "lucide-react"
-import Link from "next/link"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { DatePicker } from "@/components/ui/date-picker"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Calendar, Clock, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
-interface EditAppointmentProps {
-  appointmentId: string
+// قائمة الخدمات المتاحة مع الأسعار والمدد
+const availableServices = [
+  { id: "1", name: "قص شعر", price: 150, duration: 60 },
+  { id: "2", name: "صبغة شعر", price: 350, duration: 120 },
+  { id: "3", name: "تسريحة شعر", price: 200, duration: 90 },
+  { id: "4", name: "مكياج", price: 300, duration: 60 },
+  { id: "5", name: "مانيكير وباديكير", price: 180, duration: 90 },
+  { id: "6", name: "علاج بالكيراتين", price: 500, duration: 150 },
+  { id: "7", name: "حمام مغربي", price: 250, duration: 120 },
+  { id: "8", name: "تنظيف بشرة", price: 220, duration: 60 },
+];
+
+interface SelectedService {
+  id: string;
+  name: string;
+  price: number;
+  duration: number;
+  quantity: number;
 }
 
-export default function EditAppointment({ appointmentId }: EditAppointmentProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date("2024-04-03"))
-  const { toast } = useToast()
+interface EditAppointmentProps {
+  appointmentId: string;
+}
+
+export default function EditAppointment({
+  appointmentId,
+}: EditAppointmentProps) {
+  const [date, setDate] = useState<Date | undefined>(new Date("2024-04-03"));
+  const [selectedServices, setSelectedServices] = useState<SelectedService[]>(
+    []
+  );
+  const [currentServiceId, setCurrentServiceId] = useState<string>("");
+  const { toast } = useToast();
+  const router = useRouter();
+
+  // حساب إجمالي السعر والمدة
+  const totalPrice = selectedServices.reduce(
+    (sum, service) => sum + service.price * service.quantity,
+    0
+  );
+  const totalDuration = selectedServices.reduce(
+    (sum, service) => sum + service.duration * service.quantity,
+    0
+  );
 
   // في تطبيق حقيقي، ستقوم بجلب بيانات الحجز بناءً على appointmentId
   useEffect(() => {
     // محاكاة جلب البيانات
-  }, [appointmentId])
+    // في هذا المثال، نقوم بتعيين بعض الخدمات الافتراضية
+    setSelectedServices([
+      { ...availableServices[0], quantity: 1 },
+      { ...availableServices[1], quantity: 1 },
+    ]);
+  }, [appointmentId]);
+
+  const handleAddService = () => {
+    if (!currentServiceId) return;
+
+    const serviceExists = selectedServices.find(
+      (s) => s.id === currentServiceId
+    );
+
+    if (serviceExists) {
+      // زيادة الكمية إذا كانت الخدمة موجودة بالفعل
+      setSelectedServices((prev) =>
+        prev.map((service) =>
+          service.id === currentServiceId
+            ? { ...service, quantity: service.quantity + 1 }
+            : service
+        )
+      );
+    } else {
+      // إضافة خدمة جديدة
+      const serviceToAdd = availableServices.find(
+        (s) => s.id === currentServiceId
+      );
+      if (serviceToAdd) {
+        setSelectedServices((prev) => [
+          ...prev,
+          { ...serviceToAdd, quantity: 1 },
+        ]);
+      }
+    }
+
+    setCurrentServiceId("");
+  };
+
+  const handleRemoveService = (id: string) => {
+    setSelectedServices((prev) => prev.filter((service) => service.id !== id));
+  };
+
+  const handleUpdateQuantity = (id: string, quantity: number) => {
+    if (quantity < 1) return;
+
+    setSelectedServices((prev) =>
+      prev.map((service) =>
+        service.id === id ? { ...service, quantity } : service
+      )
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+
+    if (selectedServices.length === 0) {
+      toast({
+        title: "خطأ في تحديث الحجز",
+        description: "يجب إضافة خدمة واحدة على الأقل",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // هنا يتم معالجة إرسال البيانات
     toast({
       title: "تم تحديث الحجز بنجاح",
       description: "تم تحديث بيانات الحجز في النظام",
-    })
-  }
+    });
+
+    // التوجيه إلى صفحة تفاصيل الحجز
+    router.push(`/appointments/${appointmentId}`);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -45,7 +159,9 @@ export default function EditAppointment({ appointmentId }: EditAppointmentProps)
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">تعديل الحجز</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          تعديل الحجز
+        </h1>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -95,33 +211,136 @@ export default function EditAppointment({ appointmentId }: EditAppointmentProps)
 
             <Separator />
 
-            {/* معلومات الخدمة */}
-            <h3 className="text-lg font-medium">معلومات الخدمة</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            {/* معلومات الخدمات */}
+            <h3 className="text-lg font-medium">معلومات الخدمات</h3>
+
+            {/* إضافة خدمة جديدة */}
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
                 <Label htmlFor="service">
-                  الخدمة <span className="text-red-500">*</span>
+                  إضافة خدمة <span className="text-red-500">*</span>
                 </Label>
-                <Select defaultValue="1">
+                <Select
+                  value={currentServiceId}
+                  onValueChange={setCurrentServiceId}
+                >
                   <SelectTrigger id="service">
                     <SelectValue placeholder="اختر الخدمة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">قص شعر</SelectItem>
-                    <SelectItem value="2">صبغة شعر</SelectItem>
-                    <SelectItem value="3">تسريحة شعر</SelectItem>
-                    <SelectItem value="4">مكياج</SelectItem>
-                    <SelectItem value="5">مانيكير وباديكير</SelectItem>
+                    {availableServices.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.name} ({service.price} د.إ - {service.duration}{" "}
+                        دقيقة)
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="price">
-                  السعر (ر.س) <span className="text-red-500">*</span>
-                </Label>
-                <Input id="price" type="number" defaultValue="450" required />
-              </div>
+              <Button
+                type="button"
+                onClick={handleAddService}
+                disabled={!currentServiceId}
+                className="mb-0.5"
+              >
+                <Plus className="h-4 w-4 ml-1" />
+                إضافة
+              </Button>
             </div>
+
+            {/* قائمة الخدمات المختارة */}
+            {selectedServices.length > 0 ? (
+              <div className="border rounded-md overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-right p-3">الخدمة</th>
+                      <th className="text-center p-3">المدة (دقيقة)</th>
+                      <th className="text-center p-3">السعر (د.إ)</th>
+                      <th className="text-center p-3">الكمية</th>
+                      <th className="text-center p-3">الإجمالي (د.إ)</th>
+                      <th className="p-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedServices.map((service) => (
+                      <tr key={service.id} className="border-t">
+                        <td className="p-3">{service.name}</td>
+                        <td className="p-3 text-center">{service.duration}</td>
+                        <td className="p-3 text-center">{service.price}</td>
+                        <td className="p-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  service.id,
+                                  service.quantity - 1
+                                )
+                              }
+                            >
+                              -
+                            </Button>
+                            <span className="w-8 text-center">
+                              {service.quantity}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  service.id,
+                                  service.quantity + 1
+                                )
+                              }
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center font-medium">
+                          {service.price * service.quantity}
+                        </td>
+                        <td className="p-3 text-center">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => handleRemoveService(service.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="border-t bg-muted/30">
+                      <td className="p-3 font-bold">الإجمالي</td>
+                      <td className="p-3 text-center font-bold">
+                        {totalDuration} دقيقة
+                      </td>
+                      <td className="p-3"></td>
+                      <td className="p-3"></td>
+                      <td className="p-3 text-center font-bold">
+                        {totalPrice} د.إ
+                      </td>
+                      <td className="p-3"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-6 border rounded-md bg-muted/20">
+                <p className="text-muted-foreground">
+                  لم يتم إضافة أي خدمات بعد
+                </p>
+              </div>
+            )}
 
             <Separator />
 
@@ -134,7 +353,11 @@ export default function EditAppointment({ appointmentId }: EditAppointmentProps)
                 </Label>
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 ml-2 text-muted-foreground" />
-                  <DatePicker selected={date} onSelect={setDate} placeholder="اختر تاريخ الحجز" />
+                  <DatePicker
+                    selected={date}
+                    onSelect={setDate}
+                    placeholder="اختر تاريخ الحجز"
+                  />
                 </div>
               </div>
               <div className="space-y-2">
@@ -167,34 +390,30 @@ export default function EditAppointment({ appointmentId }: EditAppointmentProps)
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="duration">
-                  المدة (بالدقائق) <span className="text-red-500">*</span>
-                </Label>
-                <Input id="duration" type="number" defaultValue="120" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">
-                  حالة الحجز <span className="text-red-500">*</span>
-                </Label>
-                <Select defaultValue="confirmed">
-                  <SelectTrigger id="status">
-                    <SelectValue placeholder="اختر حالة الحجز" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">معلق</SelectItem>
-                    <SelectItem value="confirmed">مؤكد</SelectItem>
-                    <SelectItem value="completed">مكتمل</SelectItem>
-                    <SelectItem value="cancelled">ملغي</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">
+                حالة الحجز <span className="text-red-500">*</span>
+              </Label>
+              <Select defaultValue="confirmed">
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="اختر حالة الحجز" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">معلق</SelectItem>
+                  <SelectItem value="confirmed">مؤكد</SelectItem>
+                  <SelectItem value="completed">مكتمل</SelectItem>
+                  <SelectItem value="cancelled">ملغي</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="notes">ملاحظات</Label>
-              <Textarea id="notes" defaultValue="العميلة تفضل الصبغة باللون البني الفاتح" rows={4} />
+              <Textarea
+                id="notes"
+                defaultValue="العميلة تفضل الصبغة باللون البني الفاتح"
+                rows={4}
+              />
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
@@ -206,6 +425,5 @@ export default function EditAppointment({ appointmentId }: EditAppointmentProps)
         </Card>
       </form>
     </div>
-  )
+  );
 }
-

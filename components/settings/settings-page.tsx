@@ -1,23 +1,48 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bell, CreditCard, Lock, Palette, Percent, Save, Settings, Smartphone, Users } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Bell,
+  CreditCard,
+  Lock,
+  Palette,
+  Percent,
+  Save,
+  Settings,
+  Smartphone,
+  Users,
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("general")
+  const [activeTab, setActiveTab] = useState("general");
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-heading">إعدادات النظام</h1>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-heading">
+          إعدادات النظام
+        </h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
@@ -30,7 +55,9 @@ export default function SettingsPage() {
             <nav className="flex flex-col space-y-1 px-2">
               <Button
                 variant={activeTab === "general" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "general" ? "" : "hover:bg-muted"}`}
+                className={`justify-start ${
+                  activeTab === "general" ? "" : "hover:bg-muted"
+                }`}
                 onClick={() => setActiveTab("general")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -38,47 +65,51 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "appearance" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "appearance" ? "" : "hover:bg-muted"}`}
+                className={`justify-start ${
+                  activeTab === "appearance" ? "" : "hover:bg-muted"
+                }`}
                 onClick={() => setActiveTab("appearance")}
               >
                 <Palette className="h-4 w-4 ml-2" />
                 المظهر
               </Button>
-              <Button
+              {/* <Button
                 variant={activeTab === "notifications" ? "default" : "ghost"}
                 className={`justify-start ${activeTab === "notifications" ? "" : "hover:bg-muted"}`}
                 onClick={() => setActiveTab("notifications")}
               >
                 <Bell className="h-4 w-4 ml-2" />
                 الإشعارات
-              </Button>
-              <Button
+              </Button> */}
+              {/* <Button
                 variant={activeTab === "users" ? "default" : "ghost"}
                 className={`justify-start ${activeTab === "users" ? "" : "hover:bg-muted"}`}
                 onClick={() => setActiveTab("users")}
               >
                 <Users className="h-4 w-4 ml-2" />
                 المستخدمين
-              </Button>
-              <Button
+              </Button> */}
+              {/* <Button
                 variant={activeTab === "security" ? "default" : "ghost"}
                 className={`justify-start ${activeTab === "security" ? "" : "hover:bg-muted"}`}
                 onClick={() => setActiveTab("security")}
               >
                 <Lock className="h-4 w-4 ml-2" />
                 الأمان
-              </Button>
-              <Button
+              </Button> */}
+              {/* <Button
                 variant={activeTab === "payments" ? "default" : "ghost"}
                 className={`justify-start ${activeTab === "payments" ? "" : "hover:bg-muted"}`}
                 onClick={() => setActiveTab("payments")}
               >
                 <CreditCard className="h-4 w-4 ml-2" />
                 المدفوعات
-              </Button>
+              </Button> */}
               <Button
                 variant={activeTab === "commissions" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "commissions" ? "" : "hover:bg-muted"}`}
+                className={`justify-start ${
+                  activeTab === "commissions" ? "" : "hover:bg-muted"
+                }`}
                 onClick={() => setActiveTab("commissions")}
               >
                 <Percent className="h-4 w-4 ml-2" />
@@ -86,7 +117,9 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "app" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "app" ? "" : "hover:bg-muted"}`}
+                className={`justify-start ${
+                  activeTab === "app" ? "" : "hover:bg-muted"
+                }`}
                 onClick={() => setActiveTab("app")}
               >
                 <Smartphone className="h-4 w-4 ml-2" />
@@ -115,19 +148,26 @@ export default function SettingsPage() {
                     <Input id="app-url" defaultValue="https://glintup.com" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="admin-email">البريد الإلكتروني للإدارة</Label>
+                    <Label htmlFor="admin-email">
+                      البريد الإلكتروني للإدارة
+                    </Label>
                     <Input id="admin-email" defaultValue="admin@glintup.com" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="support-email">البريد الإلكتروني للدعم</Label>
-                    <Input id="support-email" defaultValue="support@glintup.com" />
+                    <Label htmlFor="support-email">
+                      البريد الإلكتروني للدعم
+                    </Label>
+                    <Input
+                      id="support-email"
+                      defaultValue="support@glintup.com"
+                    />
                   </div>
                 </div>
               </div>
 
-              <Separator />
+              {/* <Separator /> */}
 
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 <h3 className="text-lg font-medium">إعدادات اللغة والمنطقة</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -182,9 +222,9 @@ export default function SettingsPage() {
                     </Select>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
-              <Separator />
+              {/* <Separator />
 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">إعدادات متقدمة</h3>
@@ -203,10 +243,10 @@ export default function SettingsPage() {
                       <Label htmlFor="debug-mode">وضع التصحيح</Label>
                       <p className="text-sm text-muted-foreground">تفعيل وضع التصحيح سيظهر معلومات إضافية للمطورين</p>
                     </div>
-                    <Switch id="debug-mode" />
+                    <Switch className="switch-custom" id="debug-mode" />
                   </div>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button className="rounded-full">
@@ -226,9 +266,16 @@ export default function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">السمة</h3>
-                <RadioGroup defaultValue="light" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <RadioGroup
+                  defaultValue="light"
+                  className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                >
                   <div>
-                    <RadioGroupItem value="light" id="theme-light" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="light"
+                      id="theme-light"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="theme-light"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
@@ -236,12 +283,18 @@ export default function SettingsPage() {
                       <div className="mb-3 h-24 w-full rounded-md bg-[#f8fafc] border"></div>
                       <div className="text-center">
                         <p className="font-medium">فاتح</p>
-                        <p className="text-sm text-muted-foreground">سمة فاتحة للنظام</p>
+                        <p className="text-sm text-muted-foreground">
+                          سمة فاتحة للنظام
+                        </p>
                       </div>
                     </Label>
                   </div>
                   <div>
-                    <RadioGroupItem value="dark" id="theme-dark" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="dark"
+                      id="theme-dark"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="theme-dark"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
@@ -249,12 +302,18 @@ export default function SettingsPage() {
                       <div className="mb-3 h-24 w-full rounded-md bg-[#1e293b] border"></div>
                       <div className="text-center">
                         <p className="font-medium">داكن</p>
-                        <p className="text-sm text-muted-foreground">سمة داكنة للنظام</p>
+                        <p className="text-sm text-muted-foreground">
+                          سمة داكنة للنظام
+                        </p>
                       </div>
                     </Label>
                   </div>
                   <div>
-                    <RadioGroupItem value="system" id="theme-system" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="system"
+                      id="theme-system"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="theme-system"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-white p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
@@ -262,7 +321,9 @@ export default function SettingsPage() {
                       <div className="mb-3 h-24 w-full rounded-md bg-gradient-to-r from-[#f8fafc] to-[#1e293b] border"></div>
                       <div className="text-center">
                         <p className="font-medium">تلقائي</p>
-                        <p className="text-sm text-muted-foreground">يتبع إعدادات النظام</p>
+                        <p className="text-sm text-muted-foreground">
+                          يتبع إعدادات النظام
+                        </p>
                       </div>
                     </Label>
                   </div>
@@ -273,19 +334,30 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">الألوان الأساسية</h3>
-                <RadioGroup defaultValue="blue" className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <RadioGroup
+                  defaultValue="blue"
+                  className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                >
                   <div>
-                    <RadioGroupItem value="blue" id="color-blue" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="blue"
+                      id="color-blue"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="color-blue"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
                     >
-                      <div className="mb-3 h-10 w-10 rounded-full bg-blue-500"></div>
+                      <div className="mb-3 h-10 w-10 rounded-full bg-primary"></div>
                       <p className="font-medium">أزرق</p>
                     </Label>
                   </div>
                   <div>
-                    <RadioGroupItem value="purple" id="color-purple" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="purple"
+                      id="color-purple"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="color-purple"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
@@ -295,7 +367,11 @@ export default function SettingsPage() {
                     </Label>
                   </div>
                   <div>
-                    <RadioGroupItem value="green" id="color-green" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="green"
+                      id="color-green"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="color-green"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
@@ -305,7 +381,11 @@ export default function SettingsPage() {
                     </Label>
                   </div>
                   <div>
-                    <RadioGroupItem value="pink" id="color-pink" className="peer sr-only" />
+                    <RadioGroupItem
+                      value="pink"
+                      id="color-pink"
+                      className="peer sr-only"
+                    />
                     <Label
                       htmlFor="color-pink"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-gray-50 hover:border-primary peer-checked:border-primary peer-checked:bg-primary/5 [&:has([data-state=checked])]:border-primary"
@@ -326,14 +406,18 @@ export default function SettingsPage() {
                     <Label htmlFor="logo">شعار التطبيق</Label>
                     <div className="flex items-center gap-4">
                       <div className="h-16 w-16 rounded-md border flex items-center justify-center bg-muted">
-                        <img src="/placeholder.svg?height=64&width=64" alt="شعار التطبيق" className="h-12 w-12" />
+                        <img
+                          src="/placeholder.svg?height=64&width=64"
+                          alt="شعار التطبيق"
+                          className="h-12 w-12"
+                        />
                       </div>
                       <Button variant="outline" size="sm">
                         تغيير الشعار
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="favicon">أيقونة التطبيق</Label>
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-md border flex items-center justify-center bg-muted">
@@ -343,7 +427,7 @@ export default function SettingsPage() {
                         تغيير الأيقونة
                       </Button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </CardContent>
@@ -360,37 +444,49 @@ export default function SettingsPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-md">
             <CardHeader>
               <CardTitle>إعدادات الإشعارات</CardTitle>
-              <CardDescription>إدارة إعدادات الإشعارات في النظام</CardDescription>
+              <CardDescription>
+                إدارة إعدادات الإشعارات في النظام
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">إشعارات البريد الإلكتروني</h3>
+                <h3 className="text-lg font-medium">
+                  إشعارات البريد الإلكتروني
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>إشعارات الحجوزات الجديدة</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار عند إنشاء حجز جديد</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال إشعار عند إنشاء حجز جديد
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>إشعارات الشكاوى الجديدة</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار عند تقديم شكوى جديدة</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال إشعار عند تقديم شكوى جديدة
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>إشعارات التقييمات الجديدة</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار عند إضافة تقييم جديد</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال إشعار عند إضافة تقييم جديد
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>التقارير الأسبوعية</Label>
-                      <p className="text-sm text-muted-foreground">إرسال تقرير أسبوعي بإحصائيات النظام</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال تقرير أسبوعي بإحصائيات النظام
+                      </p>
                     </div>
                     <Switch />
                   </div>
@@ -405,21 +501,27 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>إشعارات الحجوزات الجديدة</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار عند إنشاء حجز جديد</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال إشعار عند إنشاء حجز جديد
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>إشعارات الشكاوى الجديدة</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار عند تقديم شكوى جديدة</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال إشعار عند تقديم شكوى جديدة
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>إشعارات التقييمات الجديدة</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار عند إضافة تقييم جديد</p>
+                      <p className="text-sm text-muted-foreground">
+                        إرسال إشعار عند إضافة تقييم جديد
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -432,7 +534,9 @@ export default function SettingsPage() {
                 <h3 className="text-lg font-medium">إعدادات متقدمة</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email-provider">مزود خدمة البريد الإلكتروني</Label>
+                    <Label htmlFor="email-provider">
+                      مزود خدمة البريد الإلكتروني
+                    </Label>
                     <Select defaultValue="smtp">
                       <SelectTrigger id="email-provider">
                         <SelectValue placeholder="اختر مزود الخدمة" />
@@ -472,7 +576,9 @@ export default function SettingsPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-md">
             <CardHeader>
               <CardTitle>إعدادات المستخدمين</CardTitle>
-              <CardDescription>إدارة إعدادات المستخدمين في النظام</CardDescription>
+              <CardDescription>
+                إدارة إعدادات المستخدمين في النظام
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -481,21 +587,27 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تفعيل التسجيل</Label>
-                      <p className="text-sm text-muted-foreground">السماح للمستخدمين الجدد بالتسجيل في النظام</p>
+                      <p className="text-sm text-muted-foreground">
+                        السماح للمستخدمين الجدد بالتسجيل في النظام
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تأكيد البريد الإلكتروني</Label>
-                      <p className="text-sm text-muted-foreground">طلب تأكيد البريد الإلكتروني عند التسجيل</p>
+                      <p className="text-sm text-muted-foreground">
+                        طلب تأكيد البريد الإلكتروني عند التسجيل
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تسجيل الدخول بوسائل التواصل الاجتماعي</Label>
-                      <p className="text-sm text-muted-foreground">السماح بتسجيل الدخول عبر حسابات التواصل الاجتماعي</p>
+                      <p className="text-sm text-muted-foreground">
+                        السماح بتسجيل الدخول عبر حسابات التواصل الاجتماعي
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -510,14 +622,18 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تغيير البريد الإلكتروني</Label>
-                      <p className="text-sm text-muted-foreground">السماح للمستخدمين بتغيير بريدهم الإلكتروني</p>
+                      <p className="text-sm text-muted-foreground">
+                        السماح للمستخدمين بتغيير بريدهم الإلكتروني
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>حذف الحساب</Label>
-                      <p className="text-sm text-muted-foreground">السماح للمستخدمين بحذف حساباتهم</p>
+                      <p className="text-sm text-muted-foreground">
+                        السماح للمستخدمين بحذف حساباتهم
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -580,20 +696,26 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تفعيل المصادقة الثنائية</Label>
-                      <p className="text-sm text-muted-foreground">طلب رمز تحقق إضافي عند تسجيل الدخول</p>
+                      <p className="text-sm text-muted-foreground">
+                        طلب رمز تحقق إضافي عند تسجيل الدخول
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تغيير كلمة المرور الدوري</Label>
-                      <p className="text-sm text-muted-foreground">طلب تغيير كلمة المرور كل 90 يوم</p>
+                      <p className="text-sm text-muted-foreground">
+                        طلب تغيير كلمة المرور كل 90 يوم
+                      </p>
                     </div>
                     <Switch />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="password-length">الحد الأدنى لطول كلمة المرور</Label>
+                      <Label htmlFor="password-length">
+                        الحد الأدنى لطول كلمة المرور
+                      </Label>
                       <Select defaultValue="8">
                         <SelectTrigger id="password-length">
                           <SelectValue placeholder="اختر الطول" />
@@ -607,7 +729,9 @@ export default function SettingsPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="password-complexity">تعقيد كلمة المرور</Label>
+                      <Label htmlFor="password-complexity">
+                        تعقيد كلمة المرور
+                      </Label>
                       <Select defaultValue="medium">
                         <SelectTrigger id="password-complexity">
                           <SelectValue placeholder="اختر التعقيد" />
@@ -631,7 +755,9 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تسجيل الخروج التلقائي</Label>
-                      <p className="text-sm text-muted-foreground">تسجيل الخروج تلقائياً بعد فترة من عدم النشاط</p>
+                      <p className="text-sm text-muted-foreground">
+                        تسجيل الخروج تلقائياً بعد فترة من عدم النشاط
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -676,14 +802,18 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>حماية من هجمات القوة الغاشمة</Label>
-                      <p className="text-sm text-muted-foreground">حظر المستخدم بعد عدة محاولات فاشلة لتسجيل الدخول</p>
+                      <p className="text-sm text-muted-foreground">
+                        حظر المستخدم بعد عدة محاولات فاشلة لتسجيل الدخول
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>تسجيل محاولات تسجيل الدخول</Label>
-                      <p className="text-sm text-muted-foreground">تسجيل جميع محاولات تسجيل الدخول الناجحة والفاشلة</p>
+                      <p className="text-sm text-muted-foreground">
+                        تسجيل جميع محاولات تسجيل الدخول الناجحة والفاشلة
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -703,7 +833,9 @@ export default function SettingsPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-md">
             <CardHeader>
               <CardTitle>إعدادات المدفوعات</CardTitle>
-              <CardDescription>إدارة إعدادات المدفوعات وبوابات الدفع</CardDescription>
+              <CardDescription>
+                إدارة إعدادات المدفوعات وبوابات الدفع
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -712,28 +844,36 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>بطاقات الائتمان</Label>
-                      <p className="text-sm text-muted-foreground">قبول الدفع عن طريق بطاقات الائتمان</p>
+                      <p className="text-sm text-muted-foreground">
+                        قبول الدفع عن طريق بطاقات الائتمان
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Apple Pay</Label>
-                      <p className="text-sm text-muted-foreground">قبول الدفع عن طريق Apple Pay</p>
+                      <p className="text-sm text-muted-foreground">
+                        قبول الدفع عن طريق Apple Pay
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>مدى</Label>
-                      <p className="text-sm text-muted-foreground">قبول الدفع عن طريق بطاقات مدى</p>
+                      <p className="text-sm text-muted-foreground">
+                        قبول الدفع عن طريق بطاقات مدى
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>المحافظ الإلكترونية</Label>
-                      <p className="text-sm text-muted-foreground">قبول الدفع عن طريق المحافظ الإلكترونية</p>
+                      <p className="text-sm text-muted-foreground">
+                        قبول الدفع عن طريق المحافظ الإلكترونية
+                      </p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -746,7 +886,9 @@ export default function SettingsPage() {
                 <h3 className="text-lg font-medium">مزودي خدمات الدفع</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="payment-gateway">بوابة الدفع الرئيسية</Label>
+                    <Label htmlFor="payment-gateway">
+                      بوابة الدفع الرئيسية
+                    </Label>
                     <Select defaultValue="stripe">
                       <SelectTrigger id="payment-gateway">
                         <SelectValue placeholder="اختر بوابة الدفع" />
@@ -785,15 +927,24 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="invoice-footer">تذييل الفاتورة</Label>
-                    <Input id="invoice-footer" defaultValue="شكراً لاستخدامكم خدمات Glintup" />
+                    <Input
+                      id="invoice-footer"
+                      defaultValue="شكراً لاستخدامكم خدمات Glintup"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="tax-rate">نسبة الضريبة</Label>
                     <Input id="tax-rate" defaultValue="15" type="number" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="invoice-due-days">مدة استحقاق الفاتورة (بالأيام)</Label>
-                    <Input id="invoice-due-days" defaultValue="30" type="number" />
+                    <Label htmlFor="invoice-due-days">
+                      مدة استحقاق الفاتورة (بالأيام)
+                    </Label>
+                    <Input
+                      id="invoice-due-days"
+                      defaultValue="30"
+                      type="number"
+                    />
                   </div>
                 </div>
               </div>
@@ -814,8 +965,14 @@ export default function SettingsPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="refund-period">فترة السماح للاسترجاع (بالأيام)</Label>
-                      <Input id="refund-period" defaultValue="14" type="number" />
+                      <Label htmlFor="refund-period">
+                        فترة السماح للاسترجاع (بالأيام)
+                      </Label>
+                      <Input
+                        id="refund-period"
+                        defaultValue="14"
+                        type="number"
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="refund-policy">سياسة الاسترجاع</Label>
@@ -847,31 +1004,45 @@ export default function SettingsPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-md">
             <CardHeader>
               <CardTitle>إعدادات العمولات</CardTitle>
-              <CardDescription>إدارة إعدادات العمولات والمدفوعات للصالونات</CardDescription>
+              <CardDescription>
+                إدارة إعدادات العمولات والمدفوعات للصالونات
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">نسب العمولة</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="default-commission">نسبة العمولة الافتراضية (%)</Label>
-                    <Input id="default-commission" defaultValue="10" type="number" />
+                    <Label htmlFor="default-commission">
+                      نسبة العمولة Glintup (%)
+                    </Label>
+                    <Input
+                      id="default-commission"
+                      defaultValue="10"
+                      type="number"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="premium-commission">نسبة العمولة للصالونات المميزة (%)</Label>
-                    <Input id="premium-commission" defaultValue="8" type="number" />
+                    <Label htmlFor="premium-commission">
+                      نسبة العمولة للحجز (%)
+                    </Label>
+                    <Input
+                      id="premium-commission"
+                      defaultValue="8"
+                      type="number"
+                    />
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="new-salon-commission">نسبة العمولة للصالونات الجديدة (%)</Label>
                     <Input id="new-salon-commission" defaultValue="5" type="number" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="min-commission">الحد الأدنى للعمولة (ر.س)</Label>
+                    <Label htmlFor="min-commission">الحد الأدنى للعمولة (د.إ)</Label>
                     <Input id="min-commission" defaultValue="5" type="number" />
-                  </div>
+                  </div> */}
                 </div>
               </div>
-
+              {/* 
               <Separator />
 
               <div className="space-y-4">
@@ -883,7 +1054,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="fixed" id="commission-fixed" />
-                    <Label htmlFor="commission-fixed">مبلغ ثابت لكل حجز</Label>
+                    <Label htmlFor="commission-fixed">تكلفة ثابت لكل حجز</Label>
                   </div>
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="tiered" id="commission-tiered" />
@@ -929,7 +1100,7 @@ export default function SettingsPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="min-payout">الحد الأدنى للدفع (ر.س)</Label>
+                    <Label htmlFor="min-payout">الحد الأدنى للدفع (د.إ)</Label>
                     <Input id="min-payout" defaultValue="100" type="number" />
                   </div>
                   <div className="space-y-2">
@@ -948,8 +1119,8 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <Separator />
-
+              <Separator /> */}
+              {/* 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">إعدادات متقدمة</h3>
                 <div className="space-y-4">
@@ -962,8 +1133,8 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>خصم العمولة من المبلغ المدفوع</Label>
-                      <p className="text-sm text-muted-foreground">خصم العمولة تلقائياً من المبلغ المدفوع للصالون</p>
+                      <Label>خصم العمولة من التكلفة المدفوع</Label>
+                      <p className="text-sm text-muted-foreground">خصم العمولة تلقائياً من التكلفة المدفوع للصالون</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
@@ -975,7 +1146,7 @@ export default function SettingsPage() {
                     <Switch defaultChecked />
                   </div>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button className="rounded-full">
@@ -990,7 +1161,9 @@ export default function SettingsPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-md">
             <CardHeader>
               <CardTitle>إعدادات التطبيق</CardTitle>
-              <CardDescription>إدارة إعدادات تطبيق الهاتف المحمول</CardDescription>
+              <CardDescription>
+                إدارة إعدادات تطبيق الهاتف المحمول
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -1001,20 +1174,28 @@ export default function SettingsPage() {
                     <Input id="app-version" defaultValue="1.2.0" readOnly />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="min-version">الحد الأدنى للإصدار المدعوم</Label>
+                    <Label htmlFor="min-version">
+                      الحد الأدنى للإصدار المدعوم
+                    </Label>
                     <Input id="min-version" defaultValue="1.0.0" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="android-link">رابط تطبيق Android</Label>
-                    <Input id="android-link" defaultValue="https://play.google.com/store/apps/details?id=com.glintup" />
+                    <Input
+                      id="android-link"
+                      defaultValue="https://play.google.com/store/apps/details?id=com.glintup"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="ios-link">رابط تطبيق iOS</Label>
-                    <Input id="ios-link" defaultValue="https://apps.apple.com/app/glintup/id1234567890" />
+                    <Input
+                      id="ios-link"
+                      defaultValue="https://apps.apple.com/app/glintup/id1234567890"
+                    />
                   </div>
                 </div>
               </div>
-
+              {/* 
               <Separator />
 
               <div className="space-y-4">
@@ -1105,7 +1286,7 @@ export default function SettingsPage() {
                     <Input id="image-quality" defaultValue="80" type="number" min="1" max="100" />
                   </div>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button className="rounded-full">
@@ -1117,6 +1298,5 @@ export default function SettingsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
-

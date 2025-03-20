@@ -330,9 +330,9 @@ export default function ReviewsManagement() {
                           </Avatar>
                           <span>{review.salonName}</span>
                         </div>
-                        <span className="mx-2">•</span>
+                        {/* <span className="mx-2">•</span>
                         <span className="font-medium">الخدمة:</span>
-                        <span>{review.serviceType}</span>
+                        <span>{review.serviceType}</span> */}
                       </div>
                       <div className="bg-muted/30 p-3 rounded-lg">
                         <p className="text-sm">{review.comment}</p>

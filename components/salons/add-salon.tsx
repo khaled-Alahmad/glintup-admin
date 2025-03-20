@@ -1,72 +1,85 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Upload } from "lucide-react"
-import Link from "next/link"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Upload } from "lucide-react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 
 export default function AddSalon() {
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
-  const [coverPreview, setCoverPreview] = useState<string | null>(null)
-  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([])
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
+    const files = e.target.files;
     if (files) {
-      const newPreviews: string[] = []
+      const newPreviews: string[] = [];
       Array.from(files).forEach((file) => {
-        const reader = new FileReader()
+        const reader = new FileReader();
         reader.onloadend = () => {
-          newPreviews.push(reader.result as string)
+          newPreviews.push(reader.result as string);
           if (newPreviews.length === files.length) {
-            setGalleryPreviews([...galleryPreviews, ...newPreviews])
+            setGalleryPreviews([...galleryPreviews, ...newPreviews]);
           }
-        }
-        reader.readAsDataURL(file)
-      })
+        };
+        reader.readAsDataURL(file);
+      });
     }
-  }
+  };
 
   const removeGalleryImage = (index: number) => {
-    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index))
-  }
+    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // هنا يتم معالجة إرسال البيانات
-    console.log("تم إرسال النموذج")
-  }
+    console.log("تم إرسال النموذج");
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -76,7 +89,9 @@ export default function AddSalon() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إضافة صالون جديد</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          إضافة صالون جديد
+        </h1>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -98,13 +113,21 @@ export default function AddSalon() {
                 <Label htmlFor="owner">
                   اسم المالك <span className="text-red-500">*</span>
                 </Label>
-                <Input id="owner" placeholder="أدخل اسم مالك الصالون" required />
+                <Input
+                  id="owner"
+                  placeholder="أدخل اسم مالك الصالون"
+                  required
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">وصف الصالون</Label>
-              <Textarea id="description" placeholder="أدخل وصف الصالون" rows={4} />
+              <Textarea
+                id="description"
+                placeholder="أدخل وصف الصالون"
+                rows={4}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,7 +172,12 @@ export default function AddSalon() {
                 <Label htmlFor="email">
                   البريد الإلكتروني <span className="text-red-500">*</span>
                 </Label>
-                <Input id="email" type="email" placeholder="البريد الإلكتروني" required />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="البريد الإلكتروني"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">
@@ -163,7 +191,12 @@ export default function AddSalon() {
               <Label htmlFor="address">
                 العنوان <span className="text-red-500">*</span>
               </Label>
-              <Textarea id="address" placeholder="العنوان التفصيلي" className="min-h-[80px]" required />
+              <Textarea
+                id="address"
+                placeholder="العنوان التفصيلي"
+                className="min-h-[80px]"
+                required
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -197,7 +230,7 @@ export default function AddSalon() {
 
             {/* الصور */}
             <h3 className="text-lg font-medium">صور الصالون</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="logo">
                   شعار الصالون <span className="text-red-500">*</span>
@@ -243,7 +276,74 @@ export default function AddSalon() {
                   )}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-4">
+                {/* <h3 className="text-lg font-medium"</h3> */}
+                <Label htmlFor="logo">
+                  صور معرض الغلاف<span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 mb-1">
+                      اسحب وأفلت صور الصالون هنا أو انقر للتصفح
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG حتى 5MB لكل صورة
+                    </p>
+                  </div>
+                  <Input
+                    id="gallery"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleGalleryChange}
+                  />
+                  <Label htmlFor="gallery" className="mt-4">
+                    <Button type="button" variant="outline">
+                      إضافة صور جديدة
+                    </Button>
+                  </Label>
+                </div>
+
+                {galleryPreviews.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    {galleryPreviews.map((preview, index) => (
+                      <div
+                        key={index}
+                        className="relative rounded-md overflow-hidden h-40"
+                      >
+                        <img
+                          src={preview || "/placeholder.svg"}
+                          alt={`صورة ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6"
+                          onClick={() => removeGalleryImage(index)}
+                        >
+                          <span className="sr-only">حذف</span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-4 w-4"
+                          >
+                            <path d="M18 6L6 18M6 6l12 12" />
+                          </svg>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* <div className="space-y-2">
                 <Label htmlFor="cover">صورة الغلاف</Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   {coverPreview ? (
@@ -278,7 +378,7 @@ export default function AddSalon() {
                     </Label>
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <Separator />
@@ -289,14 +389,18 @@ export default function AddSalon() {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="featured">صالون مميز</Label>
-                  <p className="text-sm text-muted-foreground">عرض الصالون في قسم الصالونات المميزة</p>
+                  <p className="text-sm text-muted-foreground">
+                    عرض الصالون في قسم الصالونات المميزة
+                  </p>
                 </div>
                 <Switch id="featured" />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="verified">صالون موثق</Label>
-                  <p className="text-sm text-muted-foreground">إضافة علامة التوثيق إلى الصالون</p>
+                  <p className="text-sm text-muted-foreground">
+                    إضافة علامة التوثيق إلى الصالون
+                  </p>
                 </div>
                 <Switch id="verified" />
               </div>
@@ -311,6 +415,5 @@ export default function AddSalon() {
         </Card>
       </form>
     </div>
-  )
+  );
 }
-

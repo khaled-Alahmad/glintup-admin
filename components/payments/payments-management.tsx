@@ -29,11 +29,11 @@ const payments = [
     salonName: "صالون الأميرة",
     salonLogo: "/placeholder.svg?height=32&width=32",
     date: "2024-04-03",
-    amount: "450 ر.س",
+    amount: "450 د.إ",
     method: "بطاقة ائتمان",
     status: "مكتمل",
     bookingId: "B-1234",
-    commission: "45 ر.س",
+    commission: "45 د.إ",
   },
   {
     id: "2",
@@ -42,11 +42,11 @@ const payments = [
     salonName: "صالون إليت",
     salonLogo: "/placeholder.svg?height=32&width=32",
     date: "2024-04-03",
-    amount: "350 ر.س",
+    amount: "350 د.إ",
     method: "Apple Pay",
     status: "مكتمل",
     bookingId: "B-1235",
-    commission: "35 ر.س",
+    commission: "35 د.إ",
   },
   {
     id: "3",
@@ -55,11 +55,11 @@ const payments = [
     salonName: "صالون جلام",
     salonLogo: "/placeholder.svg?height=32&width=32",
     date: "2024-04-03",
-    amount: "800 ر.س",
+    amount: "800 د.إ",
     method: "بطاقة ائتمان",
     status: "معلق",
     bookingId: "B-1236",
-    commission: "80 ر.س",
+    commission: "80 د.إ",
   },
   {
     id: "4",
@@ -68,11 +68,11 @@ const payments = [
     salonName: "صالون مس بيوتي",
     salonLogo: "/placeholder.svg?height=32&width=32",
     date: "2024-04-03",
-    amount: "200 ر.س",
+    amount: "200 د.إ",
     method: "محفظة إلكترونية",
     status: "مسترجع",
     bookingId: "B-1237",
-    commission: "0 ر.س",
+    commission: "0 د.إ",
   },
   {
     id: "5",
@@ -81,11 +81,11 @@ const payments = [
     salonName: "صالون روز",
     salonLogo: "/placeholder.svg?height=32&width=32",
     date: "2024-04-03",
-    amount: "300 ر.س",
+    amount: "300 د.إ",
     method: "بطاقة ائتمان",
     status: "مكتمل",
     bookingId: "B-1238",
-    commission: "30 ر.س",
+    commission: "30 د.إ",
   },
 ]
 
@@ -98,7 +98,7 @@ const refunds = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     requestDate: "2024-04-02",
     processDate: "2024-04-03",
-    amount: "200 ر.س",
+    amount: "200 د.إ",
     reason: "إلغاء الحجز من قبل الصالون",
     status: "مكتمل",
     bookingId: "B-1237",
@@ -111,7 +111,7 @@ const refunds = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     requestDate: "2024-04-03",
     processDate: "",
-    amount: "150 ر.س",
+    amount: "150 د.إ",
     reason: "عدم رضا عن الخدمة",
     status: "قيد المراجعة",
     bookingId: "B-1240",
@@ -208,7 +208,7 @@ export default function PaymentsManagement() {
             <CardTitle className="text-sm font-medium">إجمالي المدفوعات</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">22,458 ر.س</div>
+            <div className="text-2xl font-bold">22,458 د.إ</div>
             <p className="text-xs text-muted-foreground mt-1">هذا الشهر</p>
           </CardContent>
         </Card>
@@ -218,7 +218,7 @@ export default function PaymentsManagement() {
             <CardTitle className="text-sm font-medium">إجمالي العمولات</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,245 ر.س</div>
+            <div className="text-2xl font-bold">2,245 د.إ</div>
             <p className="text-xs text-muted-foreground mt-1">هذا الشهر</p>
           </CardContent>
         </Card>
@@ -228,7 +228,7 @@ export default function PaymentsManagement() {
             <CardTitle className="text-sm font-medium">عمليات الاسترجاع</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">450 ر.س</div>
+            <div className="text-2xl font-bold">450 د.إ</div>
             <p className="text-xs text-muted-foreground mt-1">هذا الشهر</p>
           </CardContent>
         </Card>
@@ -299,7 +299,7 @@ export default function PaymentsManagement() {
                       <TableHead>العميل</TableHead>
                       <TableHead>الصالون</TableHead>
                       <TableHead>التاريخ</TableHead>
-                      <TableHead>المبلغ</TableHead>
+                      <TableHead>التكلفة</TableHead>
                       <TableHead>طريقة الدفع</TableHead>
                       <TableHead>العمولة</TableHead>
                       <TableHead>الحالة</TableHead>
@@ -363,7 +363,7 @@ export default function PaymentsManagement() {
                                 <DropdownMenuItem className="text-green-600">تأكيد الدفع</DropdownMenuItem>
                               )}
                               {payment.status === "مكتمل" && (
-                                <DropdownMenuItem className="text-red-600">استرجاع المبلغ</DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600">استرجاع التكلفة</DropdownMenuItem>
                               )}
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -407,7 +407,7 @@ export default function PaymentsManagement() {
                       <TableHead>العميل</TableHead>
                       <TableHead>الصالون</TableHead>
                       <TableHead>تاريخ الطلب</TableHead>
-                      <TableHead>المبلغ</TableHead>
+                      <TableHead>التكلفة</TableHead>
                       <TableHead>سبب الاسترجاع</TableHead>
                       <TableHead>الحالة</TableHead>
                       <TableHead></TableHead>

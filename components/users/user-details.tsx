@@ -25,7 +25,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     joinDate: "12 يناير 2023",
     lastLogin: "منذ 2 ساعة",
     bookingsCount: 24,
-    totalSpent: "4,250 ر.س",
+    totalSpent: "4,250 د.إ",
     bio: "عميلة منتظمة تفضل خدمات العناية بالشعر والمكياج.",
   }
 
@@ -38,7 +38,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
       date: "2024-04-03",
       time: "10:30 صباحاً",
       status: "مكتمل",
-      price: "450 ر.س",
+      price: "450 د.إ",
     },
     {
       id: "2",
@@ -48,7 +48,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
       date: "2024-03-25",
       time: "2:15 مساءً",
       status: "مكتمل",
-      price: "350 ر.س",
+      price: "350 د.إ",
     },
     {
       id: "3",
@@ -58,7 +58,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
       date: "2024-04-10",
       time: "4:45 مساءً",
       status: "مؤكد",
-      price: "800 ر.س",
+      price: "800 د.إ",
     },
   ]
 
@@ -66,7 +66,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     {
       id: "1",
       date: "2024-04-03",
-      amount: "450 ر.س",
+      amount: "450 د.إ",
       method: "بطاقة ائتمان",
       status: "مكتمل",
       bookingId: "1",
@@ -74,7 +74,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     {
       id: "2",
       date: "2024-03-25",
-      amount: "350 ر.س",
+      amount: "350 د.إ",
       method: "Apple Pay",
       status: "مكتمل",
       bookingId: "2",
@@ -82,7 +82,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     {
       id: "3",
       date: "2024-04-10",
-      amount: "800 ر.س",
+      amount: "800 د.إ",
       method: "بطاقة ائتمان",
       status: "معلق",
       bookingId: "3",
@@ -283,7 +283,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                       <TableRow>
                         <TableHead>رقم العملية</TableHead>
                         <TableHead>التاريخ</TableHead>
-                        <TableHead>المبلغ</TableHead>
+                        <TableHead>التكلفة</TableHead>
                         <TableHead>طريقة الدفع</TableHead>
                         <TableHead>الحالة</TableHead>
                       </TableRow>

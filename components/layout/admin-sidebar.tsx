@@ -63,12 +63,12 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       icon: ShoppingBag,
       active: pathname.startsWith("/advertisements"),
     },
-    {
-      name: "العروض والمحتوى",
-      href: "/offers",
-      icon: FileText,
-      active: pathname.startsWith("/offers"),
-    },
+    // {
+    //   name: "العروض والمحتوى",
+    //   href: "/offers",
+    //   icon: FileText,
+    //   active: pathname.startsWith("/offers"),
+    // },
     {
       name: "التقييمات",
       href: "/reviews",

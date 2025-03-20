@@ -32,7 +32,7 @@ const users = [
     joinDate: "12 يناير 2023",
     lastLogin: "منذ 2 ساعة",
     bookingsCount: 24,
-    totalSpent: "4,250 ر.س",
+    totalSpent: "4,250 د.إ",
   },
   {
     id: "2",
@@ -45,7 +45,7 @@ const users = [
     joinDate: "23 فبراير 2023",
     lastLogin: "منذ 5 أيام",
     bookingsCount: 18,
-    totalSpent: "3,120 ر.س",
+    totalSpent: "3,120 د.إ",
   },
   {
     id: "3",
@@ -58,7 +58,7 @@ const users = [
     joinDate: "5 مارس 2023",
     lastLogin: "منذ 1 يوم",
     bookingsCount: 32,
-    totalSpent: "5,680 ر.س",
+    totalSpent: "5,680 د.إ",
   },
   {
     id: "4",
@@ -71,7 +71,7 @@ const users = [
     joinDate: "17 أبريل 2023",
     lastLogin: "منذ 30 يوم",
     bookingsCount: 7,
-    totalSpent: "1,150 ر.س",
+    totalSpent: "1,150 د.إ",
   },
   {
     id: "5",
@@ -84,7 +84,7 @@ const users = [
     joinDate: "30 مايو 2023",
     lastLogin: "منذ 12 ساعة",
     bookingsCount: 15,
-    totalSpent: "2,600 ر.س",
+    totalSpent: "2,600 د.إ",
   },
 ]
 
@@ -170,7 +170,7 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">متوسط الإنفاق</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">320 ر.س</div>
+            <div className="text-2xl font-bold">320 د.إ</div>
             <p className="text-xs text-muted-foreground mt-1">لكل مستخدم شهرياً</p>
           </CardContent>
         </Card>

@@ -1,34 +1,47 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Upload } from "lucide-react"
-import Link from "next/link"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DatePicker } from "@/components/ui/date-picker"
-import { Separator } from "@/components/ui/separator"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Upload } from "lucide-react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Separator } from "@/components/ui/separator";
 
 export default function AddAdvertisement() {
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,7 +51,9 @@ export default function AddAdvertisement() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إضافة إعلان جديد</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          إضافة إعلان جديد
+        </h1>
       </div>
 
       <Card>
@@ -71,7 +86,11 @@ export default function AddAdvertisement() {
 
           <div className="space-y-2">
             <Label htmlFor="description">وصف الإعلان</Label>
-            <Textarea id="description" placeholder="أدخل وصف الإعلان" rows={4} />
+            <Textarea
+              id="description"
+              placeholder="أدخل وصف الإعلان"
+              rows={4}
+            />
           </div>
 
           <Separator />
@@ -98,11 +117,19 @@ export default function AddAdvertisement() {
               ) : (
                 <div className="flex flex-col items-center">
                   <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 mb-1">اسحب وأفلت الصورة هنا أو انقر للتصفح</p>
+                  <p className="text-sm text-gray-600 mb-1">
+                    اسحب وأفلت الصورة هنا أو انقر للتصفح
+                  </p>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF حتى 5MB</p>
                 </div>
               )}
-              <Input id="image" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
               {!imagePreview && (
                 <Label htmlFor="image" className="mt-4">
                   <Button type="button" variant="outline">
@@ -120,16 +147,24 @@ export default function AddAdvertisement() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>تاريخ البداية</Label>
-                <DatePicker selected={startDate} onSelect={setStartDate} placeholder="اختر تاريخ البداية" />
+                <DatePicker
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  placeholder="اختر تاريخ البداية"
+                />
               </div>
               <div className="space-y-2">
                 <Label>تاريخ الانتهاء</Label>
-                <DatePicker selected={endDate} onSelect={setEndDate} placeholder="اختر تاريخ الانتهاء" />
+                <DatePicker
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  placeholder="اختر تاريخ الانتهاء"
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="position">موقع الإعلان</Label>
                 <Select>
                   <SelectTrigger id="position">
@@ -142,10 +177,22 @@ export default function AddAdvertisement() {
                     <SelectItem value="offers">صفحة العروض</SelectItem>
                   </SelectContent>
                 </Select>
+              </div> */}
+              <div className="space-y-2">
+                <Label htmlFor="amount">التكلفة</Label>
+                <Input
+                  id="amount"
+                  placeholder="أدخل تكلفة الإعلان"
+                  type="number"
+                />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="amount">المبلغ</Label>
-                <Input id="amount" placeholder="أدخل مبلغ الإعلان" type="number" />
+                <Label htmlFor="link">رابط الإعلان</Label>
+                <Input
+                  id="link"
+                  placeholder="أدخل رابط الإعلان"
+                  type="text"
+                />
               </div>
             </div>
           </div>
@@ -158,6 +205,5 @@ export default function AddAdvertisement() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

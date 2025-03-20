@@ -93,11 +93,11 @@ export default function AddRefund() {
                   <SelectValue placeholder="اختر عملية الدفع" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">دفعة #1 - 450 ر.س - 03/04/2024</SelectItem>
-                  <SelectItem value="2">دفعة #2 - 350 ر.س - 03/04/2024</SelectItem>
-                  <SelectItem value="3">دفعة #3 - 800 ر.س - 03/04/2024</SelectItem>
-                  <SelectItem value="4">دفعة #4 - 200 ر.س - 03/04/2024</SelectItem>
-                  <SelectItem value="5">دفعة #5 - 300 ر.س - 03/04/2024</SelectItem>
+                  <SelectItem value="1">دفعة #1 - 450 د.إ - 03/04/2024</SelectItem>
+                  <SelectItem value="2">دفعة #2 - 350 د.إ - 03/04/2024</SelectItem>
+                  <SelectItem value="3">دفعة #3 - 800 د.إ - 03/04/2024</SelectItem>
+                  <SelectItem value="4">دفعة #4 - 200 د.إ - 03/04/2024</SelectItem>
+                  <SelectItem value="5">دفعة #5 - 300 د.إ - 03/04/2024</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -109,9 +109,9 @@ export default function AddRefund() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="amount">
-                  المبلغ المسترجع (ر.س) <span className="text-red-500">*</span>
+                  التكلفة المسترجع (د.إ) <span className="text-red-500">*</span>
                 </Label>
-                <Input id="amount" type="number" placeholder="أدخل المبلغ المسترجع" required />
+                <Input id="amount" type="number" placeholder="أدخل التكلفة المسترجع" required />
               </div>
               <div className="space-y-2">
                 <Label>

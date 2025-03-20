@@ -32,7 +32,7 @@ const advertisements = [
     status: "نشط",
     views: 1245,
     clicks: 320,
-    amount: "1,200 ر.س",
+    amount: "1,200 د.إ",
     position: "الصفحة الرئيسية",
   },
   {
@@ -46,7 +46,7 @@ const advertisements = [
     status: "نشط",
     views: 980,
     clicks: 210,
-    amount: "800 ر.س",
+    amount: "800 د.إ",
     position: "صفحة الصالونات",
   },
   {
@@ -60,7 +60,7 @@ const advertisements = [
     status: "منتهي",
     views: 750,
     clicks: 180,
-    amount: "600 ر.س",
+    amount: "600 د.إ",
     position: "الصفحة الرئيسية",
   },
   {
@@ -74,7 +74,7 @@ const advertisements = [
     status: "قيد المراجعة",
     views: 0,
     clicks: 0,
-    amount: "900 ر.س",
+    amount: "900 د.إ",
     position: "صفحة الصالونات",
   },
   {
@@ -88,7 +88,7 @@ const advertisements = [
     status: "مرفوض",
     views: 0,
     clicks: 0,
-    amount: "750 ر.س",
+    amount: "750 د.إ",
     position: "الصفحة الرئيسية",
   },
 ]
@@ -183,7 +183,7 @@ export default function AdvertisementsManagement() {
             <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15,600 ر.س</div>
+            <div className="text-2xl font-bold">15,600 د.إ</div>
             <p className="text-xs text-muted-foreground mt-1">من الإعلانات</p>
           </CardContent>
         </Card>
@@ -247,7 +247,7 @@ export default function AdvertisementsManagement() {
                     <TableHead>الموقع</TableHead>
                     <TableHead>المشاهدات</TableHead>
                     <TableHead>النقرات</TableHead>
-                    <TableHead>المبلغ</TableHead>
+                    <TableHead>التكلفة</TableHead>
                     <TableHead>الحالة</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
