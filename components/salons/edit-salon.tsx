@@ -629,7 +629,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="font-medium">{service.price} ر.س</p>
+                      <p className="font-medium">{service.price} د.إ</p>
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <svg
@@ -693,7 +693,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="service-price">السعر (ر.س)</Label>
+                    <Label htmlFor="service-price">السعر (د.إ)</Label>
                     <Input
                       id="service-price"
                       placeholder="السعر"

@@ -378,7 +378,7 @@ export default function ServicesManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="price">السعر (ر.س)</Label>
+                  <Label htmlFor="price">السعر (د.إ)</Label>
                   <Input
                     id="price"
                     name="price"
@@ -460,7 +460,7 @@ export default function ServicesManagement() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-price">السعر (ر.س)</Label>
+                    <Label htmlFor="edit-price">السعر (د.إ)</Label>
                     <Input
                       id="edit-price"
                       name="price"
@@ -580,7 +580,7 @@ function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Badge variant="outline">{service.duration} دقيقة</Badge>
-            <span className="font-medium">{service.price} ر.س</span>
+            <span className="font-medium">{service.price} د.إ</span>
           </div>
         </div>
       </CardContent>
