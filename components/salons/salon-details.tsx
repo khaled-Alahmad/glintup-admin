@@ -272,11 +272,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     owner: "منيرة السعيد",
     email: "princess@salon.com",
     phone: "+966 50 123 4567",
-    address: "حي الورود، شارع الأمير سلطان، الرياض",
-    city: "الرياض",
-    district: "حي الورود",
-    postalCode: "12345",
-    location: "الرياض، السعودية",
+    address: "منطقة السالمية، شارع الخليج العربي، مدينة الكويت",
+    city: "مدينة الكويت",
+    district: "السالمية",
+    postalCode: "20001",
+    location: "مدينة الكويت، الكويت",
+
     workingHours: {
       الأحد: { from: "09:00", to: "21:00" },
       الاثنين: { from: "09:00", to: "21:00" },

@@ -437,15 +437,24 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="category">فئة الصالون</Label>
-                    <Select defaultValue="women">
+                    <Label htmlFor="category">
+                      نوع الصالون <span className="text-red-500">*</span>
+                    </Label>
+                    <Select required>
                       <SelectTrigger id="category">
-                        <SelectValue placeholder="اختر فئة الصالون" />
+                        <SelectValue placeholder="اختر نوع الصالون" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="women">صالون نسائي</SelectItem>
-                        <SelectItem value="men">صالون رجالي</SelectItem>
-                        <SelectItem value="both">صالون مشترك</SelectItem>
+                        {/* <SelectItem value="women">صالون نسائي</SelectItem>
+                                     <SelectItem value="men">صالون رجالي</SelectItem>
+                                     <SelectItem value="both">صالون مشترك</SelectItem> */}
+                        <SelectItem value="home-service">
+                          صالونات الخدمات المنزلية
+                        </SelectItem>
+                        <SelectItem value="beauty-expert">
+                          خبيرات التجميل
+                        </SelectItem>
+                        <SelectItem value="clinic">العيادات</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -476,7 +485,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           عرض الصالون في قسم الصالونات المميزة
                         </p>
                       </div>
-                      <Switch id="featured" defaultChecked />
+                      <Switch id="featured" defaultChecked className="switch-custom " />
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -485,7 +494,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           إضافة علامة التوثيق إلى الصالون
                         </p>
                       </div>
-                      <Switch id="verified" defaultChecked />
+                      <Switch id="verified" defaultChecked className="switch-custom " />
                     </div>
                   </div>
                 </div>
@@ -861,7 +870,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                             <SelectContent>
                               {availableServices.map((service) => (
                                 <SelectItem key={service.id} value={service.id}>
-                                  {service.name} 
+                                  {service.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>

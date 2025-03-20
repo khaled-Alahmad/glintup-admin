@@ -133,16 +133,23 @@ export default function AddSalon() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="category">
-                  فئة الصالون <span className="text-red-500">*</span>
+                  نوع الصالون <span className="text-red-500">*</span>
                 </Label>
                 <Select required>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="اختر فئة الصالون" />
+                    <SelectValue placeholder="اختر نوع الصالون" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="women">صالون نسائي</SelectItem>
+                    {/* <SelectItem value="women">صالون نسائي</SelectItem>
                     <SelectItem value="men">صالون رجالي</SelectItem>
-                    <SelectItem value="both">صالون مشترك</SelectItem>
+                    <SelectItem value="both">صالون مشترك</SelectItem> */}
+                    <SelectItem value="home-service">
+                      صالونات الخدمات المنزلية
+                    </SelectItem>
+                    <SelectItem value="beauty-expert">
+                      خبيرات التجميل
+                    </SelectItem>
+                    <SelectItem value="clinic">العيادات</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -398,7 +405,7 @@ export default function AddSalon() {
                     عرض الصالون في قسم الصالونات المميزة
                   </p>
                 </div>
-                <Switch id="featured" />
+                <Switch id="featured" className="switch-custom " />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
@@ -407,7 +414,7 @@ export default function AddSalon() {
                     إضافة علامة التوثيق إلى الصالون
                   </p>
                 </div>
-                <Switch id="verified" />
+                <Switch id="verified" className="switch-custom " />
               </div>
             </div>
           </CardContent>

@@ -20,7 +20,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     avatar: "/placeholder.svg?height=128&width=128",
     email: "sarah@example.com",
     phone: "+966 50 123 4567",
-    location: "الرياض، السعودية",
+    location: "مدينة الكويت، الكويت",
     status: "نشط",
     joinDate: "12 يناير 2023",
     lastLogin: "منذ 2 ساعة",

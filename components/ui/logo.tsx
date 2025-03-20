@@ -20,13 +20,7 @@ export function Logo({
   return (
     <Link href="/" className={`flex items-center ${className}`}>
       <div className="relative flex items-center">
-        <span
-          className={`font-bold ${sizeClasses[size]} ${
-            variant === "light" ? "text-white" : "text-white"
-          }`}
-        >
-          GLINT<span className="text-white">UP</span>
-        </span>
+        <img src="/Asset 1.svg" alt=""  className="object-cover w-30 h-10"/>
       </div>
     </Link>
   );

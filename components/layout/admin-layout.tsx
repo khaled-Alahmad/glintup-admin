@@ -66,15 +66,85 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div> */}
 
           <div className="flex items-center mr-auto gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative rounded-full"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
-              <span className="sr-only">الإشعارات</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative rounded-full"
+                >
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
+                  <span className="sr-only">الإشعارات</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 mt-1">
+                <DropdownMenuLabel className="flex items-center justify-between">
+                  <span>الإشعارات</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-1 text-xs text-primary"
+                  >
+                    تعيين الكل كمقروء
+                  </Button>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                {/* إشعار جديد */}
+                <DropdownMenuItem className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent">
+                  <div className="flex w-full items-start gap-2">
+                    <div className="h-2 w-2 mt-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">حجز جديد</p>
+                      <p className="text-xs text-muted-foreground">
+                        تم حجز موعد جديد في صالون الأناقة
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        منذ 5 دقائق
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+
+                {/* إشعار مقروء */}
+                <DropdownMenuItem className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent">
+                  <div className="flex w-full items-start gap-2">
+                    <div className="h-2 w-2 mt-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">تقييم جديد</p>
+                      <p className="text-xs text-muted-foreground">
+                        قام مستخدم بتقييم صالون الجمال
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        منذ ساعتين
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+
+                {/* إشعار مقروء */}
+                <DropdownMenuItem className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent">
+                  <div className="flex w-full items-start gap-2">
+                    <div className="h-2 w-2 mt-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">دفع جديد</p>
+                      <p className="text-xs text-muted-foreground">
+                        تم استلام دفعة جديدة بقيمة 150 ريال
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        أمس، 14:30
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="justify-center text-primary cursor-pointer">
+                  عرض جميع الإشعارات
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -94,12 +164,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <DropdownMenuLabel>حسابي</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer">
-                  <Link href={"/profile"} >
+                  <Link href={"/profile"}>
                     <span className="mr-2">👤</span> الملف الشخصي
                   </Link>{" "}
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
-                  <Link href={"/profile/edit"} >
+                  <Link href={"/profile/edit"}>
                     <span className="mr-2">⚙️</span> إعدادات الحساب
                   </Link>{" "}
                 </DropdownMenuItem>
