@@ -1,10 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +25,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Check, Clock, Filter, MoreHorizontal, Search, X } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DatePicker } from "@/components/ui/date-picker"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Calendar,
+  Check,
+  Clock,
+  Filter,
+  MoreHorizontal,
+  Search,
+  X,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DatePicker } from "@/components/ui/date-picker";
+import Link from "next/link";
 
 const appointments = [
   {
@@ -29,7 +56,7 @@ const appointments = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     time: "10:30 صباحاً",
     date: "2024-04-03",
-    service: "قص شعر وصبغة",
+    service: ["قص شعر", "صبغة"],
     duration: "120 دقيقة",
     price: "450 د.إ",
     status: "مؤكد",
@@ -42,7 +69,7 @@ const appointments = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     time: "2:15 مساءً",
     date: "2024-04-03",
-    service: "مكياج",
+    service: ["مكياج", "تسريحة شعر"],
     duration: "60 دقيقة",
     price: "350 د.إ",
     status: "معلق",
@@ -55,7 +82,7 @@ const appointments = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     time: "4:45 مساءً",
     date: "2024-04-03",
-    service: "علاج بالكيراتين",
+    service: ["علاج بالكيراتين"],
     duration: "180 دقيقة",
     price: "800 د.إ",
     status: "مؤكد",
@@ -68,7 +95,7 @@ const appointments = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     time: "11:00 صباحاً",
     date: "2024-04-03",
-    service: "مانيكير وباديكير",
+    service: ["مانيكير", "باديكير"],
     duration: "90 دقيقة",
     price: "200 د.إ",
     status: "ملغي",
@@ -81,84 +108,108 @@ const appointments = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     time: "3:30 مساءً",
     date: "2024-04-03",
-    service: "حمام مغربي",
+    service: ["حمام مغربي", "تدليك"],
     duration: "120 دقيقة",
     price: "300 د.إ",
     status: "مكتمل",
   },
-]
+];
+const serviceColors = [
+  "bg-blue-500",
+  "bg-green-500",
+  "bg-yellow-500",
+  "bg-purple-500",
+  "bg-pink-500",
+  "bg-orange-500",
+  "bg-teal-500",
+];
 
 export default function AppointmentsManagement() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
 
   const filteredAppointments = appointments.filter((appointment) => {
     const matchesSearch =
-      appointment.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appointment.customerName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       appointment.salonName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      appointment.service.toLowerCase().includes(searchQuery.toLowerCase())
+      appointment.service[0].toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || appointment.status === statusFilter
+    const matchesStatus =
+      statusFilter === "all" || appointment.status === statusFilter;
 
-    let matchesDate = true
+    let matchesDate = true;
     if (dateFilter) {
-      const appointmentDate = new Date(appointment.date)
-      const filterDate = new Date(dateFilter)
+      const appointmentDate = new Date(appointment.date);
+      const filterDate = new Date(dateFilter);
       matchesDate =
         appointmentDate.getDate() === filterDate.getDate() &&
         appointmentDate.getMonth() === filterDate.getMonth() &&
-        appointmentDate.getFullYear() === filterDate.getFullYear()
+        appointmentDate.getFullYear() === filterDate.getFullYear();
     }
 
-    return matchesSearch && matchesStatus && matchesDate
-  })
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "مؤكد":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             مؤكد
           </Badge>
-        )
+        );
       case "معلق":
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
             معلق
           </Badge>
-        )
+        );
       case "ملغي":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
             ملغي
           </Badge>
-        )
+        );
       case "مكتمل":
         return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Badge
+            variant="outline"
+            className="bg-blue-50 text-blue-700 border-blue-200"
+          >
             مكتمل
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "مؤكد":
-        return <Check className="h-4 w-4 text-green-500" />
+        return <Check className="h-4 w-4 text-green-500" />;
       case "معلق":
-        return <Clock className="h-4 w-4 text-amber-500" />
+        return <Clock className="h-4 w-4 text-amber-500" />;
       case "ملغي":
-        return <X className="h-4 w-4 text-red-500" />
+        return <X className="h-4 w-4 text-red-500" />;
       case "مكتمل":
-        return <Check className="h-4 w-4 text-blue-500" />
+        return <Check className="h-4 w-4 text-blue-500" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -187,7 +238,11 @@ export default function AppointmentsManagement() {
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
-                <DatePicker selected={dateFilter} onSelect={setDateFilter} placeholder="تاريخ الحجز" />
+                <DatePicker
+                  selected={dateFilter}
+                  onSelect={setDateFilter}
+                  placeholder="تاريخ الحجز"
+                />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[180px]">
                     <div className="flex items-center gap-2">
@@ -225,8 +280,13 @@ export default function AppointmentsManagement() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={appointment.customerAvatar} alt={appointment.customerName} />
-                            <AvatarFallback>{appointment.customerName.charAt(0)}</AvatarFallback>
+                            <AvatarImage
+                              src={appointment.customerAvatar}
+                              alt={appointment.customerName}
+                            />
+                            <AvatarFallback>
+                              {appointment.customerName.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
                           <span>{appointment.customerName}</span>
                         </div>
@@ -234,18 +294,41 @@ export default function AppointmentsManagement() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8 border">
-                            <AvatarImage src={appointment.salonLogo} alt={appointment.salonName} />
-                            <AvatarFallback>{appointment.salonName.charAt(0)}</AvatarFallback>
+                            <AvatarImage
+                              src={appointment.salonLogo}
+                              alt={appointment.salonName}
+                            />
+                            <AvatarFallback>
+                              {appointment.salonName.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
                           <span>{appointment.salonName}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{appointment.service}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {appointment.service.map((service, index) => (
+                            <Badge
+                              key={index}
+                              className={`${
+                                serviceColors[index % serviceColors.length]
+                              } text-white`}
+                            >
+                              {service}
+                            </Badge>
+                          ))}
+                        </div>
+                        {/* {appointment.service} */}
+                      </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-sm">{new Date(appointment.date).toLocaleDateString("ar-SA")}</span>
+                            <span className="text-sm">
+                              {new Date(appointment.date).toLocaleDateString(
+                                "ar-SA"
+                              )}
+                            </span>
                           </div>
                           <div className="flex items-center">
                             <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
@@ -255,8 +338,12 @@ export default function AppointmentsManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-sm">{appointment.duration}</span>
-                          <span className="text-sm font-medium">{appointment.price}</span>
+                          <span className="text-sm">
+                            {appointment.duration}
+                          </span>
+                          <span className="text-sm font-medium">
+                            {appointment.price}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -276,20 +363,31 @@ export default function AppointmentsManagement() {
                             <DropdownMenuLabel>خيارات</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                              <Link href={`/appointments/${appointment.id}`} className="cursor-pointer w-full">
+                              <Link
+                                href={`/appointments/${appointment.id}`}
+                                className="cursor-pointer w-full"
+                              >
                                 عرض التفاصيل
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                              <Link href={`/appointments/${appointment.id}/edit`} className="cursor-pointer w-full">
+                              <Link
+                                href={`/appointments/${appointment.id}/edit`}
+                                className="cursor-pointer w-full"
+                              >
                                 تعديل الحجز
                               </Link>
                             </DropdownMenuItem>
                             {appointment.status === "معلق" && (
-                              <DropdownMenuItem className="text-green-600">تأكيد الحجز</DropdownMenuItem>
+                              <DropdownMenuItem className="text-green-600">
+                                تأكيد الحجز
+                              </DropdownMenuItem>
                             )}
-                            {(appointment.status === "معلق" || appointment.status === "مؤكد") && (
-                              <DropdownMenuItem className="text-red-600">إلغاء الحجز</DropdownMenuItem>
+                            {(appointment.status === "معلق" ||
+                              appointment.status === "مؤكد") && (
+                              <DropdownMenuItem className="text-red-600">
+                                إلغاء الحجز
+                              </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -303,6 +401,5 @@ export default function AppointmentsManagement() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
