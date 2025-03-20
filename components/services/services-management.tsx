@@ -366,7 +366,7 @@ export default function ServicesManagement() {
                 <Label htmlFor="description">وصف الخدمة</Label>
                 <Textarea id="description" name="description" required />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="duration">المدة (بالدقائق)</Label>
                   <Input
@@ -403,7 +403,7 @@ export default function ServicesManagement() {
                     <SelectItem value="other">خدمات أخرى</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
             <DialogFooter>
               <Button
@@ -447,7 +447,7 @@ export default function ServicesManagement() {
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                {/* <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="edit-duration">المدة (بالدقائق)</Label>
                     <Input
@@ -471,8 +471,8 @@ export default function ServicesManagement() {
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
+                </div> */}
+                {/* <div className="space-y-2">
                   <Label htmlFor="edit-category">فئة الخدمة</Label>
                   <Select
                     name="category"
@@ -501,7 +501,7 @@ export default function ServicesManagement() {
                       <SelectItem value="inactive">غير نشط</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
+                </div> */}
               </div>
               <DialogFooter>
                 <Button
@@ -573,7 +573,7 @@ function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
         </div>
         <CardDescription>{getCategoryName(service.category)}</CardDescription>
       </CardHeader>
-      <CardContent>
+      {/* <CardContent>
         <p className="text-sm text-muted-foreground mb-4">
           {service.description}
         </p>
@@ -583,7 +583,7 @@ function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
             <span className="font-medium">{service.price} د.إ</span>
           </div>
         </div>
-      </CardContent>
+      </CardContent> */}
       <CardFooter className="flex justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={onEdit}>
           <Edit className="h-4 w-4 ml-1" />
