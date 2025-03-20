@@ -15,7 +15,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload, MapPin, Phone, Mail, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Upload,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Plus,
+  X,
+  Edit,
+} from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -28,15 +38,181 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface EditSalonProps {
   salonId: string;
+}
+
+// تعريف نوع البيانات للخدمة
+interface Service {
+  id: string;
+  name: string;
+  duration: number;
+  price: number;
+  description: string;
+  category: string;
+}
+
+// تعريف نوع البيانات للخدمة في الصالون
+interface SalonService {
+  id: string;
+  serviceId: string;
+  name: string;
+  duration: number;
+  price: number;
+  description: string;
+  category: string;
+}
+
+// تعريف نوع البيانات للمجموعة
+interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  services: string[];
+  price: number;
+  discount: number;
 }
 
 export default function EditSalon({ salonId }: EditSalonProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+
+  // خدمات الصالون المحددة
+  const [salonServices, setSalonServices] = useState<SalonService[]>([]);
+
+  // المجموعات المحددة
+  const [selectedCollections, setSelectedCollections] = useState<Collection[]>(
+    []
+  );
+
+  // قائمة الخدمات المتاحة
+  const [availableServices, setAvailableServices] = useState<Service[]>([
+    {
+      id: "1",
+      name: "قص الشعر",
+      duration: 60,
+      price: 150,
+      description: "قص الشعر بأحدث التقنيات والموضات",
+      category: "hair",
+    },
+    {
+      id: "2",
+      name: "صبغة شعر",
+      duration: 120,
+      price: 300,
+      description: "صبغة شعر بألوان عالمية وتقنيات حديثة",
+      category: "hair",
+    },
+    {
+      id: "3",
+      name: "تسريحة شعر",
+      duration: 90,
+      price: 200,
+      description: "تسريحات متنوعة للمناسبات والحفلات",
+      category: "hair",
+    },
+    {
+      id: "4",
+      name: "مكياج",
+      duration: 60,
+      price: 250,
+      description: "مكياج احترافي للمناسبات والسهرات",
+      category: "makeup",
+    },
+    {
+      id: "5",
+      name: "مانيكير",
+      duration: 45,
+      price: 100,
+      description: "عناية كاملة بالأظافر",
+      category: "nails",
+    },
+    {
+      id: "6",
+      name: "باديكير",
+      duration: 45,
+      price: 120,
+      description: "عناية كاملة بأظافر القدم",
+      category: "nails",
+    },
+    {
+      id: "7",
+      name: "تنظيف بشرة",
+      duration: 60,
+      price: 200,
+      description: "تنظيف عميق للبشرة",
+      category: "skin",
+    },
+    {
+      id: "8",
+      name: "ماسك للوجه",
+      duration: 30,
+      price: 100,
+      description: "ماسكات طبيعية للوجه",
+      category: "skin",
+    },
+  ]);
+
+  // قائمة المجموعات المتاحة
+  const [availableCollections, setAvailableCollections] = useState<
+    Collection[]
+  >([
+    {
+      id: "1",
+      name: "باقة العروس",
+      description: "باقة متكاملة لتجهيز العروس",
+      services: ["1", "3", "4"],
+      price: 550,
+      discount: 50,
+    },
+    {
+      id: "2",
+      name: "باقة العناية الكاملة",
+      description: "باقة للعناية الكاملة بالجسم",
+      services: ["5", "6", "7", "8"],
+      price: 450,
+      discount: 70,
+    },
+  ]);
+
+  // حالة مربع حوار إضافة خدمة
+  const [isAddServiceDialogOpen, setIsAddServiceDialogOpen] = useState(false);
+
+  // حالة مربع حوار تعديل خدمة
+  const [isEditServiceDialogOpen, setIsEditServiceDialogOpen] = useState(false);
+
+  // الخدمة الحالية للتعديل
+  const [currentService, setCurrentService] = useState<SalonService | null>(
+    null
+  );
+
+  // الخدمة المختارة للإضافة
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+
+  // السعر المخصص للخدمة المختارة
+  const [customPrice, setCustomPrice] = useState<number>(0);
+
+  // المدة المخصصة للخدمة المختارة
+  const [customDuration, setCustomDuration] = useState<number>(0);
 
   // In a real app, you would fetch salon data based on salonId
   useEffect(() => {
@@ -48,6 +224,31 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       "/placeholder.svg?height=200&width=300",
       "/placeholder.svg?height=200&width=300",
     ]);
+
+    // تحميل الخدمات المحددة مسبقاً للصالون
+    setSalonServices([
+      {
+        id: "salon-service-1",
+        serviceId: "1",
+        name: "قص الشعر",
+        duration: 60,
+        price: 180,
+        description: "قص الشعر بأحدث التقنيات والموضات",
+        category: "hair",
+      },
+      {
+        id: "salon-service-2",
+        serviceId: "4",
+        name: "مكياج",
+        duration: 75,
+        price: 300,
+        description: "مكياج احترافي للمناسبات والسهرات",
+        category: "makeup",
+      },
+    ]);
+
+    // تحميل المجموعات المحددة مسبقاً للصالون
+    setSelectedCollections([availableCollections[0]]);
   }, [salonId]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +294,85 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
   };
 
+  // إضافة خدمة إلى الصالون
+  const addServiceToSalon = () => {
+    if (!selectedServiceId) return;
+
+    const service = availableServices.find((s) => s.id === selectedServiceId);
+    if (!service) return;
+
+    // التحقق من عدم وجود الخدمة مسبقاً في الصالون
+    if (salonServices.some((s) => s.serviceId === selectedServiceId)) {
+      alert("هذه الخدمة موجودة بالفعل في الصالون");
+      return;
+    }
+
+    const price = customPrice > 0 ? customPrice : service.price;
+    const duration = customDuration > 0 ? customDuration : service.duration;
+
+    const newSalonService: SalonService = {
+      id: `salon-service-${Date.now()}`,
+      serviceId: service.id,
+      name: service.name,
+      duration: duration,
+      price: price,
+      description: service.description,
+      category: service.category,
+    };
+
+    setSalonServices([...salonServices, newSalonService]);
+    setIsAddServiceDialogOpen(false);
+    setSelectedServiceId("");
+    setCustomPrice(0);
+    setCustomDuration(0);
+  };
+
+  // تعديل خدمة في الصالون
+  const editSalonService = () => {
+    if (!currentService) return;
+
+    setSalonServices(
+      salonServices.map((service) =>
+        service.id === currentService.id ? currentService : service
+      )
+    );
+
+    setIsEditServiceDialogOpen(false);
+    setCurrentService(null);
+  };
+
+  // حذف خدمة من الصالون
+  const removeSalonService = (serviceId: string) => {
+    setSalonServices(
+      salonServices.filter((service) => service.id !== serviceId)
+    );
+  };
+
+  // إضافة مجموعة إلى الصالون
+  const addCollection = (collectionId: string) => {
+    const collection = availableCollections.find((c) => c.id === collectionId);
+    if (collection && !selectedCollections.some((c) => c.id === collectionId)) {
+      setSelectedCollections([...selectedCollections, collection]);
+    }
+  };
+
+  // إزالة مجموعة من الصالون
+  const removeCollection = (collectionId: string) => {
+    setSelectedCollections(
+      selectedCollections.filter((c) => c.id !== collectionId)
+    );
+  };
+
+  // تحديث الخدمة المختارة للإضافة
+  const handleServiceSelection = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    const service = availableServices.find((s) => s.id === serviceId);
+    if (service) {
+      setCustomPrice(service.price);
+      setCustomDuration(service.duration);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -107,11 +387,12 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       </div>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="basic">معلومات أساسية</TabsTrigger>
           <TabsTrigger value="contact">معلومات الاتصال</TabsTrigger>
           <TabsTrigger value="media">الصور والوسائط</TabsTrigger>
-          <TabsTrigger value="services">الخدمات والأسعار</TabsTrigger>
+          <TabsTrigger value="services">الخدمات</TabsTrigger>
+          <TabsTrigger value="collections">المجموعات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic" className="mt-4">
@@ -520,18 +801,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           onClick={() => removeGalleryImage(index)}
                         >
                           <span className="sr-only">حذف</span>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4"
-                          >
-                            <path d="M18 6L6 18M6 6l12 12" />
-                          </svg>
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
@@ -549,182 +819,357 @@ export default function EditSalon({ salonId }: EditSalonProps) {
               <CardDescription>تعديل خدمات الصالون وأسعارها</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">قائمة الخدمات</h3>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    document
-                      .getElementById("service-form")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 ml-2"
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">خدمات الصالون</h3>
+                  <Dialog
+                    open={isAddServiceDialogOpen}
+                    onOpenChange={setIsAddServiceDialogOpen}
                   >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  إضافة خدمة
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  {
-                    id: 1,
-                    name: "قص الشعر",
-                    duration: "60",
-                    price: "150",
-                    description: "قص الشعر بأحدث التقنيات والموضات",
-                  },
-                  {
-                    id: 2,
-                    name: "صبغة شعر",
-                    duration: "120",
-                    price: "300",
-                    description: "صبغة شعر بألوان عالمية وتقنيات حديثة",
-                  },
-                  {
-                    id: 3,
-                    name: "تسريحة شعر",
-                    duration: "90",
-                    price: "200",
-                    description: "تسريحات متنوعة للمناسبات والحفلات",
-                  },
-                  {
-                    id: 4,
-                    name: "مكياج",
-                    duration: "60",
-                    price: "250",
-                    description: "مكياج احترافي للمناسبات والسهرات",
-                  },
-                  {
-                    id: 5,
-                    name: "مانيكير وباديكير",
-                    duration: "90",
-                    price: "180",
-                    description: "عناية كاملة بالأظافر",
-                  },
-                ].map((service) => (
-                  <div
-                    key={service.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{service.name}</p>
-                        <Badge variant="outline">
-                          {service.duration} دقيقة
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {service.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className="font-medium">{service.price} د.إ</p>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4"
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 ml-2" />
+                        إضافة خدمة
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle>إضافة خدمة للصالون</DialogTitle>
+                        <DialogDescription>
+                          اختر خدمة من القائمة وحدد السعر والمدة المناسبة
+                          للصالون
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label
+                            htmlFor="service-select"
+                            className="text-right"
                           >
-                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                            <path d="m15 5 4 4" />
-                          </svg>
+                            الخدمة
+                          </Label>
+                          <Select
+                            value={selectedServiceId}
+                            onValueChange={handleServiceSelection}
+                          >
+                            <SelectTrigger
+                              id="service-select"
+                              className="col-span-3"
+                            >
+                              <SelectValue placeholder="اختر خدمة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableServices.map((service) => (
+                                <SelectItem key={service.id} value={service.id}>
+                                  {service.name} 
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="service-price" className="text-right">
+                            السعر (د.إ)
+                          </Label>
+                          <Input
+                            id="service-price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            className="col-span-3"
+                            value={customPrice}
+                            onChange={(e) =>
+                              setCustomPrice(Number(e.target.value))
+                            }
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label
+                            htmlFor="service-duration"
+                            className="text-right"
+                          >
+                            المدة (دقيقة)
+                          </Label>
+                          <Input
+                            id="service-duration"
+                            type="number"
+                            min="1"
+                            className="col-span-3"
+                            value={customDuration}
+                            onChange={(e) =>
+                              setCustomDuration(Number(e.target.value))
+                            }
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsAddServiceDialogOpen(false)}
+                        >
+                          إلغاء
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500"
+                          onClick={addServiceToSalon}
+                          disabled={!selectedServiceId}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4"
-                          >
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                            <line x1="10" x2="10" y1="11" y2="17" />
-                            <line x1="14" x2="14" y1="11" y2="17" />
-                          </svg>
+                          إضافة الخدمة
                         </Button>
-                      </div>
-                    </div>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {salonServices.length > 0 ? (
+                  <div className="border rounded-md">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>الخدمة</TableHead>
+                          <TableHead>الفئة</TableHead>
+                          <TableHead>المدة</TableHead>
+                          <TableHead>السعر</TableHead>
+                          <TableHead>الإجراءات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {salonServices.map((service) => (
+                          <TableRow key={service.id}>
+                            <TableCell className="font-medium">
+                              <div>
+                                <div>{service.name}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {service.description}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {service.category === "hair" && "خدمات الشعر"}
+                                {service.category === "skin" && "خدمات البشرة"}
+                                {service.category === "nails" &&
+                                  "خدمات الأظافر"}
+                                {service.category === "makeup" &&
+                                  "خدمات المكياج"}
+                                {service.category === "other" && "خدمات أخرى"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{service.duration} دقيقة</TableCell>
+                            <TableCell>{service.price} د.إ</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    setCurrentService(service);
+                                    setIsEditServiceDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-red-500"
+                                  onClick={() => removeSalonService(service.id)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
-                ))}
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-md">
+                    <p className="text-muted-foreground">
+                      لم يتم إضافة أي خدمات بعد
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      اضغط على زر "إضافة خدمة" لإضافة خدمات للصالون
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <Separator />
+              {/* مربع حوار تعديل الخدمة */}
+              <Dialog
+                open={isEditServiceDialogOpen}
+                onOpenChange={setIsEditServiceDialogOpen}
+              >
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>تعديل خدمة الصالون</DialogTitle>
+                    <DialogDescription>
+                      قم بتعديل تفاصيل الخدمة في الصالون
+                    </DialogDescription>
+                  </DialogHeader>
+                  {currentService && (
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label
+                          htmlFor="edit-service-name"
+                          className="text-right"
+                        >
+                          الخدمة
+                        </Label>
+                        <Input
+                          id="edit-service-name"
+                          className="col-span-3"
+                          value={currentService.name}
+                          disabled
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label
+                          htmlFor="edit-service-price"
+                          className="text-right"
+                        >
+                          السعر (د.إ)
+                        </Label>
+                        <Input
+                          id="edit-service-price"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className="col-span-3"
+                          value={currentService.price}
+                          onChange={(e) =>
+                            setCurrentService({
+                              ...currentService,
+                              price: Number(e.target.value),
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label
+                          htmlFor="edit-service-duration"
+                          className="text-right"
+                        >
+                          المدة (دقيقة)
+                        </Label>
+                        <Input
+                          id="edit-service-duration"
+                          type="number"
+                          min="1"
+                          className="col-span-3"
+                          value={currentService.duration}
+                          onChange={(e) =>
+                            setCurrentService({
+                              ...currentService,
+                              duration: Number(e.target.value),
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditServiceDialogOpen(false)}
+                    >
+                      إلغاء
+                    </Button>
+                    <Button onClick={editSalonService}>حفظ التغييرات</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-              <div id="service-form" className="space-y-4">
-                <h3 className="text-lg font-medium">إضافة خدمة جديدة</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="service-name">اسم الخدمة</Label>
-                    <Input id="service-name" placeholder="اسم الخدمة" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="service-duration">المدة (بالدقائق)</Label>
-                    <Input
-                      id="service-duration"
-                      placeholder="المدة"
-                      type="number"
-                      min="1"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="service-price">السعر (د.إ)</Label>
-                    <Input
-                      id="service-price"
-                      placeholder="السعر"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="service-description">وصف الخدمة</Label>
-                  <Textarea id="service-description" placeholder="وصف الخدمة" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="service-category">فئة الخدمة</Label>
-                  <Select>
-                    <SelectTrigger id="service-category">
-                      <SelectValue placeholder="اختر فئة الخدمة" />
+        <TabsContent value="collections" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>المجموعات</CardTitle>
+              <CardDescription>إدارة مجموعات الخدمات للصالون</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">اختيار المجموعات</h3>
+                  <Select onValueChange={(value) => addCollection(value)}>
+                    <SelectTrigger className="w-[250px]">
+                      <SelectValue placeholder="اختر مجموعة لإضافتها" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hair">خدمات الشعر</SelectItem>
-                      <SelectItem value="skin">خدمات البشرة</SelectItem>
-                      <SelectItem value="nails">خدمات الأظافر</SelectItem>
-                      <SelectItem value="makeup">خدمات المكياج</SelectItem>
-                      <SelectItem value="other">خدمات أخرى</SelectItem>
+                      {availableCollections.map((collection) => (
+                        <SelectItem key={collection.id} value={collection.id}>
+                          {collection.name} - {collection.price} د.إ
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex justify-end">
-                  <Button>إضافة الخدمة</Button>
-                </div>
+
+                {selectedCollections.length > 0 ? (
+                  <div className="border rounded-md">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>المجموعة</TableHead>
+                          <TableHead>الخدمات</TableHead>
+                          <TableHead>السعر</TableHead>
+                          <TableHead>الخصم</TableHead>
+                          <TableHead>الإجراءات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedCollections.map((collection) => (
+                          <TableRow key={collection.id}>
+                            <TableCell className="font-medium">
+                              {collection.name}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {collection.services.map((serviceId) => {
+                                  const service = availableServices.find(
+                                    (s) => s.id === serviceId
+                                  );
+                                  return service ? (
+                                    <Badge
+                                      key={serviceId}
+                                      variant="outline"
+                                      className="mr-1"
+                                    >
+                                      {service.name}
+                                    </Badge>
+                                  ) : null;
+                                })}
+                              </div>
+                            </TableCell>
+                            <TableCell>{collection.price} د.إ</TableCell>
+                            <TableCell>{collection.discount} د.إ</TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-500"
+                                onClick={() => removeCollection(collection.id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-md">
+                    <p className="text-muted-foreground">
+                      لم يتم إضافة أي مجموعات بعد
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      اختر مجموعة من القائمة المنسدلة لإضافتها
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

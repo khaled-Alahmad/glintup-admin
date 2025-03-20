@@ -209,13 +209,18 @@ export default function AddSalon() {
                     <SelectValue placeholder="اختر المدينة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="riyadh">الرياض</SelectItem>
-                    <SelectItem value="jeddah">جدة</SelectItem>
-                    <SelectItem value="dammam">الدمام</SelectItem>
-                    <SelectItem value="makkah">مكة المكرمة</SelectItem>
+                    <SelectItem value="kuwait-city">مدينة الكويت</SelectItem>
+                    <SelectItem value="hawalli">حولي</SelectItem>
+                    <SelectItem value="farwaniya">الفروانية</SelectItem>
+                    <SelectItem value="ahmadi">الأحمدي</SelectItem>
+                    <SelectItem value="jahra">الجهراء</SelectItem>
+                    <SelectItem value="mubarak-al-kabeer">
+                      مبارك الكبير
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="district">الحي</Label>
                 <Input id="district" placeholder="الحي" />

@@ -1,11 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Calendar,
@@ -19,11 +25,20 @@ import {
   AlertTriangle,
   Ban,
   Bell,
-} from "lucide-react"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Separator } from "@/components/ui/separator"
-import { Progress } from "@/components/ui/progress"
+  Plus,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -32,20 +47,215 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SalonDetailsProps {
-  salonId: string
+  salonId: string;
 }
-
+interface SalonService {
+  id: string;
+  serviceId: string;
+  name: string;
+  duration: number;
+  price: number;
+  description: string;
+  category: string;
+}
+interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  services: string[];
+  price: number;
+  discount: number;
+}
 export default function SalonDetails({ salonId }: SalonDetailsProps) {
-  const [showSendNotificationDialog, setShowSendNotificationDialog] = useState(false)
-  const [showSuspendDialog, setShowSuspendDialog] = useState(false)
-  const [showBanDialog, setShowBanDialog] = useState(false)
+  const [showSendNotificationDialog, setShowSendNotificationDialog] =
+    useState(false);
+  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+  const [showBanDialog, setShowBanDialog] = useState(false);
+  // إضافة خدمة إلى الصالون
+  interface Service {
+    id: string;
+    name: string;
+    duration: number;
+    price: number;
+    description: string;
+    category: string;
+  }
+
+  const [availableServices, setAvailableServices] = useState<Service[]>([
+    {
+      id: "1",
+      name: "قص الشعر",
+      duration: 60,
+      price: 150,
+      description: "قص الشعر بأحدث التقنيات والموضات",
+      category: "hair",
+    },
+    {
+      id: "2",
+      name: "صبغة شعر",
+      duration: 120,
+      price: 300,
+      description: "صبغة شعر بألوان عالمية وتقنيات حديثة",
+      category: "hair",
+    },
+    {
+      id: "3",
+      name: "تسريحة شعر",
+      duration: 90,
+      price: 200,
+      description: "تسريحات متنوعة للمناسبات والحفلات",
+      category: "hair",
+    },
+    {
+      id: "4",
+      name: "مكياج",
+      duration: 60,
+      price: 250,
+      description: "مكياج احترافي للمناسبات والسهرات",
+      category: "makeup",
+    },
+    {
+      id: "5",
+      name: "مانيكير",
+      duration: 45,
+      price: 100,
+      description: "عناية كاملة بالأظافر",
+      category: "nails",
+    },
+    {
+      id: "6",
+      name: "باديكير",
+      duration: 45,
+      price: 120,
+      description: "عناية كاملة بأظافر القدم",
+      category: "nails",
+    },
+    {
+      id: "7",
+      name: "تنظيف بشرة",
+      duration: 60,
+      price: 200,
+      description: "تنظيف عميق للبشرة",
+      category: "skin",
+    },
+    {
+      id: "8",
+      name: "ماسك للوجه",
+      duration: 30,
+      price: 100,
+      description: "ماسكات طبيعية للوجه",
+      category: "skin",
+    },
+  ]);
+
+  // قائمة المجموعات المتاحة
+  const [availableCollections, setAvailableCollections] = useState<
+    Collection[]
+  >([
+    {
+      id: "1",
+      name: "باقة العروس",
+      description: "باقة متكاملة لتجهيز العروس",
+      services: ["1", "3", "4"],
+      price: 550,
+      discount: 50,
+    },
+    {
+      id: "2",
+      name: "باقة العناية الكاملة",
+      description: "باقة للعناية الكاملة بالجسم",
+      services: ["5", "6", "7", "8"],
+      price: 450,
+      discount: 70,
+    },
+  ]);
+
+  // حالة مربع حوار إضافة خدمة
+  const [isAddServiceDialogOpen, setIsAddServiceDialogOpen] = useState(false);
+
+  // حالة مربع حوار تعديل خدمة
+  const [isEditServiceDialogOpen, setIsEditServiceDialogOpen] = useState(false);
+
+  // الخدمة الحالية للتعديل
+  const [currentService, setCurrentService] = useState<SalonService | null>(
+    null
+  );
+
+  // الخدمة المختارة للإضافة
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+
+  // السعر المخصص للخدمة المختارة
+  const [customPrice, setCustomPrice] = useState<number>(0);
+  const [salonServices, setSalonServices] = useState<SalonService[]>([]);
+
+  // المدة المخصصة للخدمة المختارة
+  const [customDuration, setCustomDuration] = useState<number>(0);
+
+  const addServiceToSalon = () => {
+    if (!selectedServiceId) return;
+
+    const service = availableServices.find((s) => s.id === selectedServiceId);
+    if (!service) return;
+
+    // التحقق من عدم وجود الخدمة مسبقاً في الصالون
+    if (salonServices.some((s) => s.serviceId === selectedServiceId)) {
+      alert("هذه الخدمة موجودة بالفعل في الصالون");
+      return;
+    }
+
+    const price = customPrice > 0 ? customPrice : service.price;
+    const duration = customDuration > 0 ? customDuration : service.duration;
+
+    const newSalonService: SalonService = {
+      id: `salon-service-${Date.now()}`,
+      serviceId: service.id,
+      name: service.name,
+      duration: duration,
+      price: price,
+      description: service.description,
+      category: service.category,
+    };
+
+    setSalonServices([...salonServices, newSalonService]);
+    setIsAddServiceDialogOpen(false);
+    setSelectedServiceId("");
+    setCustomPrice(0);
+    setCustomDuration(0);
+  };
+
+  // تعديل خدمة في الصالون
+  const editSalonService = () => {
+    if (!currentService) return;
+
+    setSalonServices(
+      salonServices.map((service) =>
+        service.id === currentService.id ? currentService : service
+      )
+    );
+
+    setIsEditServiceDialogOpen(false);
+    setCurrentService(null);
+  };
+
+  // حذف خدمة من الصالون
+  const removeSalonService = (serviceId: string) => {
+    setSalonServices(
+      salonServices.filter((service) => service.id !== serviceId)
+    );
+  };
 
   // In a real app, you would fetch salon data based on salonId
   const salon = {
@@ -87,15 +297,45 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     totalBookings: 1245,
     revenue: "52,450 د.إ",
     joinDate: "12 يناير 2023",
-  }
+  };
 
   const services = [
-    { id: "1", name: "قص شعر", duration: "60 دقيقة", price: "150 د.إ", bookings: 320 },
-    { id: "2", name: "صبغة شعر", duration: "120 دقيقة", price: "300 د.إ", bookings: 180 },
-    { id: "3", name: "تسريحة شعر", duration: "90 دقيقة", price: "200 د.إ", bookings: 210 },
-    { id: "4", name: "مكياج", duration: "60 دقيقة", price: "250 د.إ", bookings: 150 },
-    { id: "5", name: "مانيكير وباديكير", duration: "90 دقيقة", price: "180 د.إ", bookings: 95 },
-  ]
+    {
+      id: "1",
+      name: "قص شعر",
+      duration: "60 دقيقة",
+      price: "150 د.إ",
+      bookings: 320,
+    },
+    {
+      id: "2",
+      name: "صبغة شعر",
+      duration: "120 دقيقة",
+      price: "300 د.إ",
+      bookings: 180,
+    },
+    {
+      id: "3",
+      name: "تسريحة شعر",
+      duration: "90 دقيقة",
+      price: "200 د.إ",
+      bookings: 210,
+    },
+    {
+      id: "4",
+      name: "مكياج",
+      duration: "60 دقيقة",
+      price: "250 د.إ",
+      bookings: 150,
+    },
+    {
+      id: "5",
+      name: "مانيكير وباديكير",
+      duration: "90 دقيقة",
+      price: "180 د.إ",
+      bookings: 95,
+    },
+  ];
 
   const reviews = [
     {
@@ -122,7 +362,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       comment: "من أفضل الصالونات التي زرتها",
       date: "2024-03-20",
     },
-  ]
+  ];
 
   const appointments = [
     {
@@ -152,38 +392,50 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       time: "4:45 مساءً",
       status: "مؤكد",
     },
-  ]
+  ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "نشط":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             نشط
           </Badge>
-        )
+        );
       case "معلق":
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
             معلق
           </Badge>
-        )
+        );
       case "محظور":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
             محظور
           </Badge>
-        )
+        );
       case "مؤكد":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             مؤكد
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   const renderStars = (rating: number) => {
     return (
@@ -191,13 +443,24 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${i < rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300 fill-gray-300"}`}
+            className={`h-4 w-4 ${
+              i < rating
+                ? "text-yellow-500 fill-yellow-500"
+                : "text-gray-300 fill-gray-300"
+            }`}
           />
         ))}
       </div>
-    )
-  }
-
+    );
+  };
+  const handleServiceSelection = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    const service = availableServices.find((s) => s.id === serviceId);
+    if (service) {
+      setCustomPrice(service.price);
+      setCustomDuration(service.duration);
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -206,7 +469,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">تفاصيل الصالون</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          تفاصيل الصالون
+        </h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 w-full">
@@ -221,12 +486,18 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               <div className="flex items-center gap-2 mt-2">
                 {getStatusBadge(salon.status)}
                 {salon.verified && (
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
                     موثق
                   </Badge>
                 )}
                 {salon.featured && (
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Badge
+                    variant="outline"
+                    className="bg-purple-50 text-purple-700 border-purple-200"
+                  >
                     مميز
                   </Badge>
                 )}
@@ -234,9 +505,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               <div className="flex items-center gap-1 mt-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 <span className="font-medium">{salon.rating}</span>
-                <span className="text-sm text-muted-foreground">({salon.totalReviews} تقييم)</span>
+                <span className="text-sm text-muted-foreground">
+                  ({salon.totalReviews} تقييم)
+                </span>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">عضو منذ {salon.joinDate}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                عضو منذ {salon.joinDate}
+              </p>
               <div className="flex gap-2 mt-4 w-full">
                 <Button variant="outline" className="flex-1" asChild>
                   <Link href={`/salons/${salonId}/edit`}>
@@ -244,7 +519,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     تعديل
                   </Link>
                 </Button>
-                <Dialog open={showSendNotificationDialog} onOpenChange={setShowSendNotificationDialog}>
+                <Dialog
+                  open={showSendNotificationDialog}
+                  onOpenChange={setShowSendNotificationDialog}
+                >
                   <DialogTrigger asChild>
                     <Button variant="outline" className="flex-1">
                       <Bell className="h-4 w-4 ml-2" />
@@ -254,31 +532,55 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>إرسال إشعار للصالون</DialogTitle>
-                      <DialogDescription>سيتم إرسال هذا الإشعار إلى صالون {salon.name}</DialogDescription>
+                      <DialogDescription>
+                        سيتم إرسال هذا الإشعار إلى صالون {salon.name}
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="notification-title">عنوان الإشعار</Label>
-                        <Input id="notification-title" placeholder="أدخل عنوان الإشعار" />
+                        <Label htmlFor="notification-title">
+                          عنوان الإشعار
+                        </Label>
+                        <Input
+                          id="notification-title"
+                          placeholder="أدخل عنوان الإشعار"
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="notification-message">نص الإشعار</Label>
-                        <Textarea id="notification-message" placeholder="أدخل نص الإشعار" rows={4} />
+                        <Textarea
+                          id="notification-message"
+                          placeholder="أدخل نص الإشعار"
+                          rows={4}
+                        />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowSendNotificationDialog(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowSendNotificationDialog(false)}
+                      >
                         إلغاء
                       </Button>
-                      <Button onClick={() => setShowSendNotificationDialog(false)}>إرسال الإشعار</Button>
+                      <Button
+                        onClick={() => setShowSendNotificationDialog(false)}
+                      >
+                        إرسال الإشعار
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
               <div className="flex gap-2 mt-2 w-full">
-                <Dialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
+                <Dialog
+                  open={showSuspendDialog}
+                  onOpenChange={setShowSuspendDialog}
+                >
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="flex-1 text-amber-600 border-amber-200 hover:bg-amber-50">
+                    <Button
+                      variant="outline"
+                      className="flex-1 text-amber-600 border-amber-200 hover:bg-amber-50"
+                    >
                       <AlertTriangle className="h-4 w-4 ml-2" />
                       تعليق
                     </Button>
@@ -286,12 +588,18 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>تعليق الصالون</DialogTitle>
-                      <DialogDescription>هل أنت متأكد من رغبتك في تعليق صالون {salon.name}؟</DialogDescription>
+                      <DialogDescription>
+                        هل أنت متأكد من رغبتك في تعليق صالون {salon.name}؟
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
                         <Label htmlFor="suspend-reason">سبب التعليق</Label>
-                        <Textarea id="suspend-reason" placeholder="أدخل سبب تعليق الصالون" rows={4} />
+                        <Textarea
+                          id="suspend-reason"
+                          placeholder="أدخل سبب تعليق الصالون"
+                          rows={4}
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="suspend-duration">مدة التعليق</Label>
@@ -310,10 +618,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowSuspendDialog(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowSuspendDialog(false)}
+                      >
                         إلغاء
                       </Button>
-                      <Button variant="destructive" onClick={() => setShowSuspendDialog(false)}>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowSuspendDialog(false)}
+                      >
                         تعليق الصالون
                       </Button>
                     </DialogFooter>
@@ -321,7 +635,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </Dialog>
                 <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="flex-1 text-red-600 border-red-200 hover:bg-red-50">
+                    <Button
+                      variant="outline"
+                      className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                    >
                       <Ban className="h-4 w-4 ml-2" />
                       حظر
                     </Button>
@@ -329,19 +646,32 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>حظر الصالون</DialogTitle>
-                      <DialogDescription>هل أنت متأكد من رغبتك في حظر صالون {salon.name} بشكل دائم؟</DialogDescription>
+                      <DialogDescription>
+                        هل أنت متأكد من رغبتك في حظر صالون {salon.name} بشكل
+                        دائم؟
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
                         <Label htmlFor="ban-reason">سبب الحظر</Label>
-                        <Textarea id="ban-reason" placeholder="أدخل سبب حظر الصالون" rows={4} />
+                        <Textarea
+                          id="ban-reason"
+                          placeholder="أدخل سبب حظر الصالون"
+                          rows={4}
+                        />
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowBanDialog(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowBanDialog(false)}
+                      >
                         إلغاء
                       </Button>
-                      <Button variant="destructive" onClick={() => setShowBanDialog(false)}>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowBanDialog(false)}
+                      >
                         حظر الصالون
                       </Button>
                     </DialogFooter>
@@ -378,7 +708,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">العنوان</p>
-                  <p className="text-sm text-muted-foreground">{salon.address}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {salon.address}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -458,14 +790,21 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <h3 className="text-lg font-medium">الخدمات الأكثر حجزاً</h3>
                   <div className="space-y-3">
                     {services.slice(0, 3).map((service) => (
-                      <div key={service.id} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div
+                        key={service.id}
+                        className="flex justify-between items-center p-3 border rounded-lg"
+                      >
                         <div>
                           <p className="font-medium">{service.name}</p>
-                          <p className="text-sm text-muted-foreground">{service.duration}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {service.duration}
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">{service.price}</p>
-                          <p className="text-sm text-muted-foreground">{service.bookings} حجز</p>
+                          <p className="text-sm text-muted-foreground">
+                            {service.bookings} حجز
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -482,15 +821,24 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={review.customerAvatar} alt={review.customerName} />
-                              <AvatarFallback>{review.customerName.charAt(0)}</AvatarFallback>
+                              <AvatarImage
+                                src={review.customerAvatar}
+                                alt={review.customerName}
+                              />
+                              <AvatarFallback>
+                                {review.customerName.charAt(0)}
+                              </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{review.customerName}</p>
+                              <p className="font-medium">
+                                {review.customerName}
+                              </p>
                               <div className="flex items-center gap-2 mt-1">
                                 {renderStars(review.rating)}
                                 <span className="text-xs text-muted-foreground">
-                                  {new Date(review.date).toLocaleDateString("ar-SA")}
+                                  {new Date(review.date).toLocaleDateString(
+                                    "ar-SA"
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -504,89 +852,291 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               </TabsContent>
 
               <TabsContent value="services" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">قائمة الخدمات</h3>
-                  <Button size="sm" asChild>
-                    <Link href={`/salons/${salonId}/services/add`}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4 ml-2"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                      إضافة خدمة
-                    </Link>
-                  </Button>
-                </div>
-
-                <div className="rounded-md border w-full overflow-x-auto">
-                  <Table className="min-w-full">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>اسم الخدمة</TableHead>
-                        <TableHead>المدة</TableHead>
-                        <TableHead>السعر</TableHead>
-                        <TableHead>عدد الحجوزات</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {services.map((service) => (
-                        <TableRow key={service.id}>
-                          <TableCell className="font-medium">{service.name}</TableCell>
-                          <TableCell>{service.duration}</TableCell>
-                          <TableCell>{service.price}</TableCell>
-                          <TableCell>{service.bookings}</TableCell>
-                          <TableCell>
-                            <div className="flex justify-end gap-2">
-                              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                                <Link href={`/salons/${salonId}/services/${service.id}/edit`}>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="h-4 w-4"
-                                  >
-                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                    <path d="m15 5 4 4" />
-                                  </svg>
-                                </Link>
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="h-4 w-4"
+                <Card>
+                  <CardHeader>
+                    <CardTitle>الخدمات والأسعار</CardTitle>
+                    <CardDescription>
+                      تعديل خدمات الصالون وأسعارها
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium">خدمات الصالون</h3>
+                        <Dialog
+                          open={isAddServiceDialogOpen}
+                          onOpenChange={setIsAddServiceDialogOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <Button>
+                              <Plus className="h-4 w-4 ml-2" />
+                              إضافة خدمة
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                              <DialogTitle>إضافة خدمة للصالون</DialogTitle>
+                              <DialogDescription>
+                                اختر خدمة من القائمة وحدد السعر والمدة المناسبة
+                                للصالون
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label
+                                  htmlFor="service-select"
+                                  className="text-right"
                                 >
-                                  <path d="M3 6h18" />
-                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                  <line x1="10" x2="10" y1="11" y2="17" />
-                                  <line x1="14" x2="14" y1="11" y2="17" />
-                                </svg>
-                              </Button>
+                                  الخدمة
+                                </Label>
+                                <Select
+                                  value={selectedServiceId}
+                                  onValueChange={handleServiceSelection}
+                                >
+                                  <SelectTrigger
+                                    id="service-select"
+                                    className="col-span-3"
+                                  >
+                                    <SelectValue placeholder="اختر خدمة" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {availableServices.map((service) => (
+                                      <SelectItem
+                                        key={service.id}
+                                        value={service.id}
+                                      >
+                                        {service.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label
+                                  htmlFor="service-price"
+                                  className="text-right"
+                                >
+                                  السعر (د.إ)
+                                </Label>
+                                <Input
+                                  id="service-price"
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  className="col-span-3"
+                                  value={customPrice}
+                                  onChange={(e) =>
+                                    setCustomPrice(Number(e.target.value))
+                                  }
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label
+                                  htmlFor="service-duration"
+                                  className="text-right"
+                                >
+                                  المدة (دقيقة)
+                                </Label>
+                                <Input
+                                  id="service-duration"
+                                  type="number"
+                                  min="1"
+                                  className="col-span-3"
+                                  value={customDuration}
+                                  onChange={(e) =>
+                                    setCustomDuration(Number(e.target.value))
+                                  }
+                                />
+                              </div>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                            <DialogFooter>
+                              <Button
+                                variant="outline"
+                                onClick={() => setIsAddServiceDialogOpen(false)}
+                              >
+                                إلغاء
+                              </Button>
+                              <Button
+                                onClick={addServiceToSalon}
+                                disabled={!selectedServiceId}
+                              >
+                                إضافة الخدمة
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+
+                      {salonServices.length > 0 ? (
+                        <div className="border rounded-md">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>الخدمة</TableHead>
+                                <TableHead>الفئة</TableHead>
+                                <TableHead>المدة</TableHead>
+                                <TableHead>السعر</TableHead>
+                                <TableHead>الإجراءات</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {salonServices.map((service) => (
+                                <TableRow key={service.id}>
+                                  <TableCell className="font-medium">
+                                    <div>
+                                      <div>{service.name}</div>
+                                      <div className="text-sm text-muted-foreground">
+                                        {service.description}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline">
+                                      {service.category === "hair" &&
+                                        "خدمات الشعر"}
+                                      {service.category === "skin" &&
+                                        "خدمات البشرة"}
+                                      {service.category === "nails" &&
+                                        "خدمات الأظافر"}
+                                      {service.category === "makeup" &&
+                                        "خدمات المكياج"}
+                                      {service.category === "other" &&
+                                        "خدمات أخرى"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {service.duration} دقيقة
+                                  </TableCell>
+                                  <TableCell>{service.price} د.إ</TableCell>
+                                  <TableCell>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => {
+                                          setCurrentService(service);
+                                          setIsEditServiceDialogOpen(true);
+                                        }}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-red-500"
+                                        onClick={() =>
+                                          removeSalonService(service.id)
+                                        }
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-8 border border-dashed rounded-md">
+                          <p className="text-muted-foreground">
+                            لم يتم إضافة أي خدمات بعد
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            اضغط على زر "إضافة خدمة" لإضافة خدمات للصالون
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* مربع حوار تعديل الخدمة */}
+                    <Dialog
+                      open={isEditServiceDialogOpen}
+                      onOpenChange={setIsEditServiceDialogOpen}
+                    >
+                      <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                          <DialogTitle>تعديل خدمة الصالون</DialogTitle>
+                          <DialogDescription>
+                            قم بتعديل تفاصيل الخدمة في الصالون
+                          </DialogDescription>
+                        </DialogHeader>
+                        {currentService && (
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label
+                                htmlFor="edit-service-name"
+                                className="text-right"
+                              >
+                                الخدمة
+                              </Label>
+                              <Input
+                                id="edit-service-name"
+                                className="col-span-3"
+                                value={currentService.name}
+                                disabled
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label
+                                htmlFor="edit-service-price"
+                                className="text-right"
+                              >
+                                السعر (د.إ)
+                              </Label>
+                              <Input
+                                id="edit-service-price"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                className="col-span-3"
+                                value={currentService.price}
+                                onChange={(e) =>
+                                  setCurrentService({
+                                    ...currentService,
+                                    price: Number(e.target.value),
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label
+                                htmlFor="edit-service-duration"
+                                className="text-right"
+                              >
+                                المدة (دقيقة)
+                              </Label>
+                              <Input
+                                id="edit-service-duration"
+                                type="number"
+                                min="1"
+                                className="col-span-3"
+                                value={currentService.duration}
+                                onChange={(e) =>
+                                  setCurrentService({
+                                    ...currentService,
+                                    duration: Number(e.target.value),
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsEditServiceDialogOpen(false)}
+                          >
+                            إلغاء
+                          </Button>
+                          <Button onClick={editSalonService}>
+                            حفظ التغييرات
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="reviews" className="space-y-6">
@@ -595,9 +1145,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <div className="flex items-center gap-2">
                     <div className="flex items-center">
                       <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                      <span className="font-medium text-lg ml-1">{salon.rating}</span>
+                      <span className="font-medium text-lg ml-1">
+                        {salon.rating}
+                      </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">({salon.totalReviews} تقييم)</span>
+                    <span className="text-sm text-muted-foreground">
+                      ({salon.totalReviews} تقييم)
+                    </span>
                   </div>
                 </div>
 
@@ -609,11 +1163,30 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-1" />
                       </div>
                       <Progress
-                        value={rating === 5 ? 65 : rating === 4 ? 25 : rating === 3 ? 7 : rating === 2 ? 2 : 1}
+                        value={
+                          rating === 5
+                            ? 65
+                            : rating === 4
+                            ? 25
+                            : rating === 3
+                            ? 7
+                            : rating === 2
+                            ? 2
+                            : 1
+                        }
                         className="h-2 w-full mt-2"
                       />
                       <span className="text-xs text-muted-foreground mt-1">
-                        {rating === 5 ? 65 : rating === 4 ? 25 : rating === 3 ? 7 : rating === 2 ? 2 : 1}%
+                        {rating === 5
+                          ? 65
+                          : rating === 4
+                          ? 25
+                          : rating === 3
+                          ? 7
+                          : rating === 2
+                          ? 2
+                          : 1}
+                        %
                       </span>
                     </div>
                   ))}
@@ -627,15 +1200,22 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={review.customerAvatar} alt={review.customerName} />
-                            <AvatarFallback>{review.customerName.charAt(0)}</AvatarFallback>
+                            <AvatarImage
+                              src={review.customerAvatar}
+                              alt={review.customerName}
+                            />
+                            <AvatarFallback>
+                              {review.customerName.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-medium">{review.customerName}</p>
                             <div className="flex items-center gap-2 mt-1">
                               {renderStars(review.rating)}
                               <span className="text-xs text-muted-foreground">
-                                {new Date(review.date).toLocaleDateString("ar-SA")}
+                                {new Date(review.date).toLocaleDateString(
+                                  "ar-SA"
+                                )}
                               </span>
                             </div>
                           </div>
@@ -654,7 +1234,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-medium">الحجوزات</h3>
                   <Button size="sm" asChild>
-                    <Link href={`/appointments?salon=${salonId}`}>عرض جميع الحجوزات</Link>
+                    <Link href={`/appointments?salon=${salonId}`}>
+                      عرض جميع الحجوزات
+                    </Link>
                   </Button>
                 </div>
 
@@ -675,8 +1257,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={appointment.customerAvatar} alt={appointment.customerName} />
-                                <AvatarFallback>{appointment.customerName.charAt(0)}</AvatarFallback>
+                                <AvatarImage
+                                  src={appointment.customerAvatar}
+                                  alt={appointment.customerName}
+                                />
+                                <AvatarFallback>
+                                  {appointment.customerName.charAt(0)}
+                                </AvatarFallback>
                               </Avatar>
                               <span>{appointment.customerName}</span>
                             </div>
@@ -687,20 +1274,28 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               <div className="flex items-center">
                                 <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
                                 <span className="text-sm">
-                                  {new Date(appointment.date).toLocaleDateString("ar-SA")}
+                                  {new Date(
+                                    appointment.date
+                                  ).toLocaleDateString("ar-SA")}
                                 </span>
                               </div>
                               <div className="flex items-center">
                                 <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="text-sm">{appointment.time}</span>
+                                <span className="text-sm">
+                                  {appointment.time}
+                                </span>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>{getStatusBadge(appointment.status)}</TableCell>
+                          <TableCell>
+                            {getStatusBadge(appointment.status)}
+                          </TableCell>
                           <TableCell>
                             <div className="flex justify-end">
                               <Button variant="ghost" size="sm" asChild>
-                                <Link href={`/appointments/${appointment.id}`}>عرض التفاصيل</Link>
+                                <Link href={`/appointments/${appointment.id}`}>
+                                  عرض التفاصيل
+                                </Link>
                               </Button>
                             </div>
                           </TableCell>
@@ -715,6 +1310,5 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-
