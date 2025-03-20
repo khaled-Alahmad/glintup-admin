@@ -62,12 +62,12 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       icon: Gift,
       active: pathname.startsWith("/gift-cards"),
     },
-    {
-      name: "الأحداث",
-      href: "/events",
-      icon: CalendarClock,
-      active: pathname.startsWith("/events"),
-    },
+    // {
+    //   name: "الأحداث",
+    //   href: "/events",
+    //   icon: CalendarClock,
+    //   active: pathname.startsWith("/events"),
+    // },
     {
       name: "الحجوزات",
       href: "/appointments",

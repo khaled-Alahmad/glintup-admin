@@ -43,6 +43,8 @@ import { Plus, Search, Trash2, Copy, Eye } from "lucide-react";
 interface GiftCard {
   id: string;
   code: string;
+  name: string;
+
   amount: number;
   status: "active" | "used" | "expired";
   expiryDate: string;
@@ -66,6 +68,7 @@ export default function GiftCardsManagement() {
   const [giftCards, setGiftCards] = useState<GiftCard[]>([
     {
       id: "1",
+      name: "شهر رمضان",
       code: "GIFT-1234-5678",
       amount: 200,
       status: "active",
@@ -80,6 +83,8 @@ export default function GiftCardsManagement() {
     {
       id: "2",
       code: "GIFT-8765-4321",
+      name: "عيد الفطر",
+
       amount: 500,
       status: "used",
       expiryDate: "2023-10-15",
@@ -95,6 +100,8 @@ export default function GiftCardsManagement() {
       id: "3",
       code: "GIFT-9876-5432",
       amount: 300,
+      name: "عيد الاضحى",
+
       status: "expired",
       expiryDate: "2023-06-30",
       createdAt: "2023-01-25",
@@ -211,6 +218,8 @@ export default function GiftCardsManagement() {
                 addGiftCard({
                   amount: Number.parseFloat(formData.get("amount") as string),
                   expiryDate: formData.get("expiryDate") as string,
+                  name: formData.get("name") as string,
+
                   recipientName: formData.get("recipientName") as string,
                   recipientEmail: formData.get("recipientEmail") as string,
                   senderName: formData.get("senderName") as string,
@@ -220,6 +229,12 @@ export default function GiftCardsManagement() {
               }}
             >
               <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="recipientName" className="text-right">
+                    اسم المناسبة
+                  </Label>
+                  <Input id="name" name="name" className="col-span-3" />
+                </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="amount" className="text-right">
                     المبلغ (د.إ)
@@ -347,6 +362,8 @@ export default function GiftCardsManagement() {
               <TableHeader>
                 <TableRow>
                   <TableHead>كود البطاقة</TableHead>
+                  <TableHead>اسم المناسبة</TableHead>
+
                   <TableHead>المبلغ</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead>تاريخ الانتهاء</TableHead>
@@ -371,6 +388,8 @@ export default function GiftCardsManagement() {
                           </Button>
                         </div>
                       </TableCell>
+                      <TableCell>{card.name} </TableCell>
+
                       <TableCell>{card.amount} د.إ</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(card.status)}>
@@ -440,6 +459,22 @@ export default function GiftCardsManagement() {
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    اسم المناسبة
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{currentGiftCard.name}</p>
+                    {/* <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      //   onClick={() => copyGiftCardCode(currentGiftCard.code)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button> */}
                   </div>
                 </div>
                 <div>
