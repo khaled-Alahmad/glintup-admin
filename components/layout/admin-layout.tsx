@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { addData, handleLogout } from "@/lib/apiHelper";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -25,7 +28,29 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  const router = useRouter();
+  const { toast } = useToast();
+  const handleLogoutClick = async () => {
+    try {
+      // Call the handleLogout function from apiHelper
+      const response = await addData("admin/auth/logout", {});
+      // Handle the response as needed
+      console.log('Logout response:', response);
+      if (response.success) {
+        toast({
+          title: 'تم تسجيل الخروج بنجاح',
+          description: 'شكرًا لك على استخدام خدمتنا. نتمنى لك يوماً رائعًا!',
+          variant: 'default',
+        });
+        // Redirect to the login page or perform any other action
+        router.push('/auth/login');
+      }
+      handleLogout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+  // ... in the dropdown menu section, replace the logout item with:
   return (
     <div className="flex min-h-screen bg-background w-full">
       {/* Desktop Sidebar */}
@@ -174,7 +199,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   </Link>{" "}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-red-500">
+
+                <DropdownMenuItem
+                  className="cursor-pointer text-red-500"
+                  onClick={handleLogoutClick}
+                >
                   <span className="mr-2">🚪</span> تسجيل الخروج
                 </DropdownMenuItem>
               </DropdownMenuContent>

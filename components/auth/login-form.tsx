@@ -19,12 +19,14 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { addData } from "@/lib/apiHelper";
+import { setCookie } from "cookies-next";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    phone: "",
     password: "",
   });
   const [rememberMe, setRememberMe] = useState(false);
@@ -33,8 +35,8 @@ export function LoginForm() {
 
   // بيانات الدخول المؤقتة
   const demoCredentials = {
-    email: "admin@glintup.com",
-    password: "Admin123!",
+    phone: "+9711234567890",
+    password: "password",
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,29 +53,30 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      // التحقق من البيانات المؤقتة
-      if (
-        formData.email === demoCredentials.email &&
-        formData.password === demoCredentials.password
-      ) {
-        // محاكاة تأخير الاتصال بالخادم
-        await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // console.log("dda");
+
+      const response = await addData("admin/auth/login", formData);
+      console.log(response);
+      if ((await response).success) {
+        const demoToken = btoa(JSON.stringify({ token: response.data?.access_token, exp: Date.now() + 24 * 60 * 60 * 1000 }));
+        setCookie('token', demoToken, {
+          maxAge: 60 * 60 * 24, // 24 hours
+          path: '/',
+        });
         toast({
           title: "تم تسجيل الدخول بنجاح",
           description: "مرحباً بك في لوحة تحكم Glint Up",
           variant: "default",
         });
-
-        // التوجيه إلى لوحة التحكم
         router.push("/");
-      } else {
-        throw new Error("بيانات الدخول غير صحيحة");
       }
+
+
     } catch (error) {
       toast({
         title: "فشل تسجيل الدخول",
-        description: "يرجى التحقق من بريدك الإلكتروني وكلمة المرور",
+        description: (error as { response: { message: string } })?.response?.message || 'An error occurred',
         variant: "destructive",
       });
     } finally {
@@ -95,18 +98,18 @@ export function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-right block">
-              البريد الإلكتروني
+              الرقم الشخصي
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="email"
-                name="email"
-                type="email"
-                dir="ltr"
-                placeholder="admin@glintup.com"
+                id="phote"
+                name="phote"
+                type="phote"
+                dir="rtl"
+                placeholder="+971 xxx xxxxxx"
                 className="pl-10"
-                value={formData.email}
+                value={formData.phone}
                 onChange={handleChange}
                 required
               />
@@ -126,12 +129,12 @@ export function LoginForm() {
               </Label>
             </div>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              {/* <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /> */}
               <Input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                dir="ltr"
+                dir="rtl"
                 placeholder="••••••••"
                 className="pl-10"
                 value={formData.password}
@@ -142,7 +145,7 @@ export function LoginForm() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
+                className="absolute left-0 top-0 h-full px-3 py-2 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -206,7 +209,7 @@ export function LoginForm() {
             بيانات الدخول المؤقتة:
           </p>
           <div className="text-xs bg-muted p-2 rounded-md text-left mb-2 font-mono">
-            <div>البريد الإلكتروني: {demoCredentials.email}</div>
+            <div>البريد الإلكتروني: {demoCredentials.phone}</div>
             <div>كلمة المرور: {demoCredentials.password}</div>
           </div>
           <Button
