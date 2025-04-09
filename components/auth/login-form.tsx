@@ -60,7 +60,7 @@ export function LoginForm() {
       console.log(response);
       if ((await response).success) {
         const demoToken = btoa(JSON.stringify({ token: response.data?.access_token, exp: Date.now() + 24 * 60 * 60 * 1000 }));
-        setCookie('token', demoToken, {
+        setCookie('token', response.access_token, {
           maxAge: 60 * 60 * 24, // 24 hours
           path: '/',
         });
