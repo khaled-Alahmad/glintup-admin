@@ -98,16 +98,16 @@ export function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-right block">
-              الرقم الشخصي
+              رقم الهاتف
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="phote"
-                name="phote"
-                type="phote"
+                id="phone"
+                name="phone"
+                type="phone"
                 dir="rtl"
-                placeholder="+971 xxx xxxxxx"
+                placeholder="ادخل رقم هاتفك "
                 className="pl-10"
                 value={formData.phone}
                 onChange={handleChange}
@@ -117,6 +117,9 @@ export function LoginForm() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
+              <Label htmlFor="password" className="text-right block">
+                كلمة المرور
+              </Label>
               <Button
                 variant="link"
                 className="px-0 font-normal text-xs text-primary"
@@ -124,19 +127,16 @@ export function LoginForm() {
               >
                 نسيت كلمة المرور؟
               </Button>
-              <Label htmlFor="password" className="text-right block">
-                كلمة المرور
-              </Label>
             </div>
             <div className="relative">
-              {/* <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /> */}
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
                 name="password"
                 type={showPassword ? "text" : "password"}
                 dir="rtl"
                 placeholder="••••••••"
-                className="pl-10"
+                className="pr-10"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -145,7 +145,7 @@ export function LoginForm() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute left-0 top-0 h-full px-3 py-2 text-muted-foreground"
+                className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -175,7 +175,7 @@ export function LoginForm() {
             {isLoading ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  className="animate-spin -mr-1 ml-2 h-4 w-4 text-white"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -198,7 +198,7 @@ export function LoginForm() {
               </>
             ) : (
               <>
-                <LogIn className="mr-2 h-4 w-4" /> تسجيل الدخول
+                <LogIn className="ml-2 h-4 w-4" /> تسجيل الدخول
               </>
             )}
           </Button>
