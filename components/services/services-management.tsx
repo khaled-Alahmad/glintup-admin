@@ -63,6 +63,14 @@ interface Service {
   is_active: number;
   salon_id: number;
 }
+interface ServiceGroup {
+  id: number;
+  name: {
+    en: string;
+    ar: string;
+  };
+  salon_id: number;
+}
 
 // تحويل فئة الخدمة إلى نص عربي
 const getCategoryName = (category: string): string => {
@@ -90,13 +98,125 @@ export default function ServicesManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("both");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-
+  const [activeTab, setActiveTab] = useState("all");
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // Add new state for salons
   const [salons, setSalons] = useState<{ id: number; name: string }[]>([]);
+  const [groups, setGroups] = useState<ServiceGroup[]>([]);
+  const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
+  const [isEditGroupDialogOpen, setIsEditGroupDialogOpen] = useState(false);
+  const [isDeleteGroupDialogOpen, setIsDeleteGroupDialogOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<ServiceGroup | null>(null);
+  const [groupCurrentPage, setGroupCurrentPage] = useState(1);
+  const [groupTotalPages, setGroupTotalPages] = useState(1);
+  const [groupTotalItems, setGroupTotalItems] = useState(0);
+
+
+  // Add this function to fetch groups
+  const fetchGroups = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetchData(`admin/groups?page=${groupCurrentPage}&limit=${perPage}&search=${searchTerm}`);
+      if (response.success) {
+        setGroups(response.data || []);
+        setGroupTotalPages(response.meta.last_page);
+        setGroupCurrentPage(response.meta.current_page);
+        setGroupTotalItems(response.meta.total);
+      }
+    } catch (error) {
+      console.error("Failed to fetch groups:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add group management functions
+  const handleAddGroup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newGroup = {
+      // salon_id: Number(formData.get("salon_id")),
+      salon_id: '',
+      name: {
+        en: formData.get("name_en") as string,
+        ar: formData.get("name_ar") as string,
+      },
+    };
+
+    try {
+      const response = await addData("admin/groups", newGroup);
+      if (response.success) {
+        await fetchGroups();
+        setIsAddGroupDialogOpen(false);
+        toast({
+          title: "تمت الإضافة بنجاح",
+          description: "تمت إضافة المجموعة بنجاح",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to add group:", error);
+    }
+  };
+
+  const handleEditGroup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingGroup) return;
+
+    const formData = new FormData(e.currentTarget);
+    const updatedGroup = {
+      // salon_id: Number(formData.get("salon_id")),
+      salon_id: '',
+      name: {
+        en: formData.get("name_en") as string,
+        ar: formData.get("name_ar") as string,
+      },
+    };
+
+    try {
+      const response = await updateData(`admin/groups/${editingGroup.id}`, updatedGroup);
+      if (response.success) {
+        await fetchGroups();
+        setIsEditGroupDialogOpen(false);
+        setEditingGroup(null);
+        toast({
+          title: "تم التعديل بنجاح",
+          description: "تم تعديل المجموعة بنجاح",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update group:", error);
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!editingGroup) return;
+
+    try {
+      const response = await deleteData(`admin/groups/${editingGroup.id}`);
+      if (response.success) {
+        await fetchGroups();
+        setIsDeleteGroupDialogOpen(false);
+        setEditingGroup(null);
+        toast({
+          title: "تم الحذف بنجاح",
+          description: "تم حذف المجموعة بنجاح",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete group:", error);
+    }
+  };
+
+  // Update the useEffect to fetch groups
+  useEffect(() => {
+    fetchGroups();
+  }, [groupCurrentPage,]);
 
   // Add this function to handle image upload
   const handleIconUpload = async (file: File) => {
@@ -231,7 +351,7 @@ export default function ServicesManagement() {
       gender: formData.get("gender") as 'male' | 'female' | 'both',
       is_active: Number(formData.get("is_active")),
     };
-    console.log("updatedService",updatedService);
+    console.log("updatedService", updatedService);
 
     try {
       const response = await updateData(`admin/services/${editingService.id}`, updatedService);
@@ -288,11 +408,16 @@ export default function ServicesManagement() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          إدارة الخدمات
+          {activeTab === "groups" ? "إدارة المجموعات" : "إدارة الخدمات"}
         </h1>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
+        <Button
+          onClick={() => activeTab === "groups"
+            ? setIsAddGroupDialogOpen(true)
+            : setIsAddDialogOpen(true)
+          }
+        >
           <Plus className="h-4 w-4 ml-2" />
-          إضافة خدمة
+          {activeTab === "groups" ? "إضافة مجموعة" : "إضافة خدمة"}
         </Button>
       </div>
 
@@ -300,46 +425,52 @@ export default function ServicesManagement() {
         <div className="relative">
           <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="البحث عن خدمة..."
+            placeholder={activeTab === "groups" ? "بحث في المجموعات" : "بحث في الخدمات"}
             className="pr-9"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="تصفية حسب الفئة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="both"> كلاهما</SelectItem>
-              <SelectItem value="male">الرجال</SelectItem>
-              <SelectItem value="female">النساء </SelectItem>
+        {activeTab === "all" && (
+          <>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="تصفية حسب الفئة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="both"> كلاهما</SelectItem>
+                  <SelectItem value="male">الرجال</SelectItem>
+                  <SelectItem value="female">النساء </SelectItem>
 
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger>
-              <SelectValue placeholder="تصفية حسب الحالة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">جميع الحالات</SelectItem>
-              <SelectItem value="active">نشط</SelectItem>
-              <SelectItem value="inactive">غير نشط</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="تصفية حسب الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="active">نشط</SelectItem>
+                  <SelectItem value="inactive">غير نشط</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )
+        }
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-1">
+      <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="all">
             الخدمات ({services.length})
           </TabsTrigger>
+          <TabsTrigger value="groups">المجموعات ({groups.length})</TabsTrigger>
           {/* <TabsTrigger value="active">
             الخدمات النشطة 
             (
@@ -401,7 +532,62 @@ export default function ServicesManagement() {
             </div>
           )}
         </TabsContent>
+        <TabsContent value="groups" className="mt-4">
+          {/* <div className="flex justify-end mb-4">
+            <Button onClick={() => setIsAddGroupDialogOpen(true)}>
+              <Plus className="h-4 w-4 ml-2" />
+              إضافة مجموعة
+            </Button>
+          </div> */}
 
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-muted-foreground">جاري تحميل المجموعات...</p>
+            </div>
+          ) : groups.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">لا توجد مجموعات متاحة</p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => setIsAddGroupDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 ml-2" />
+                إضافة مجموعة جديدة
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {groups.map((group) => (
+                <GroupCard
+                  key={group.id}
+                  group={group}
+                  onEdit={() => {
+                    setEditingGroup(group);
+                    setIsEditGroupDialogOpen(true);
+                  }}
+                  onDelete={() => {
+                    setEditingGroup(group);
+                    setIsDeleteGroupDialogOpen(true);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && groups.length > 0 && groupTotalPages > 1 && (
+            <div className="mt-4">
+              <PaginationWithInfo
+                currentPage={groupCurrentPage}
+                totalPages={groupTotalPages}
+                totalItems={groupTotalItems}
+                itemsPerPage={perPage}
+                onPageChange={setGroupCurrentPage}
+              />
+            </div>
+          )}
+        </TabsContent>
         {/* <TabsContent value="active" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredServices
@@ -460,7 +646,146 @@ export default function ServicesManagement() {
             )}
         </TabsContent> */}
       </Tabs>
+      {/* Add Group Dialog */}
+      <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>إضافة مجموعة جديدة</DialogTitle>
+            <DialogDescription>أدخل تفاصيل المجموعة الجديدة</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddGroup}>
+            <div className="grid gap-4 py-4">
+              {/* <div className="space-y-2">
+                <Label htmlFor="salon_id">الصالون</Label>
+                <Select name="salon_id" defaultValue="5">
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر الصالون" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {salons.map((salon) => (
+                        <SelectItem key={salon.id} value={salon.id.toString()}>
+                          {salon.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div> */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name_ar">اسم المجموعة (عربي)</Label>
+                  <Input id="name_ar" name="name_ar" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name_en">Group Name (English)</Label>
+                  <Input id="name_en" name="name_en" required />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAddGroupDialogOpen(false)}>
+                إلغاء
+              </Button>
+              <Button type="submit">إضافة المجموعة</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
+      {/* Edit Group Dialog */}
+      <Dialog open={isEditGroupDialogOpen} onOpenChange={setIsEditGroupDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>تعديل المجموعة</DialogTitle>
+            <DialogDescription>تعديل تفاصيل المجموعة</DialogDescription>
+          </DialogHeader>
+          {editingGroup && (
+            <form onSubmit={handleEditGroup}>
+              <div className="grid gap-4 py-4">
+                {/* <div className="space-y-2">
+                  <Label htmlFor="salon_id">الصالون</Label>
+                  <Select name="salon_id" defaultValue={editingGroup.salon_id.toString()}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="اختر الصالون" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {salons.map((salon) => (
+                          <SelectItem key={salon.id} value={salon.id.toString()}>
+                            {salon.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div> */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name_ar">اسم المجموعة (عربي)</Label>
+                    <Input
+                      id="name_ar"
+                      name="name_ar"
+                      defaultValue={editingGroup.name.ar}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="name_en">Group Name (English)</Label>
+                    <Input
+                      id="name_en"
+                      name="name_en"
+                      defaultValue={editingGroup.name.en}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditGroupDialogOpen(false)}
+                >
+                  إلغاء
+                </Button>
+                <Button type="submit">حفظ التغييرات</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Group Dialog */}
+      <Dialog open={isDeleteGroupDialogOpen} onOpenChange={setIsDeleteGroupDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>حذف المجموعة</DialogTitle>
+            <DialogDescription>
+              هل أنت متأكد من رغبتك في حذف هذه المجموعة؟
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {editingGroup && (
+              <p className="text-center">
+                أنت على وشك حذف مجموعة &quot;{editingGroup.name.ar}&quot;. هذا
+                الإجراء لا يمكن التراجع عنه.
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteGroupDialogOpen(false)}
+            >
+              إلغاء
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteGroup}>
+              حذف
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {/* مربع حوار إضافة خدمة جديدة */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -927,4 +1252,41 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
       </CardFooter>
     </Card>
   )
+}
+interface GroupCardProps {
+  group: ServiceGroup;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
+  return (
+    <Card className="h-full flex flex-col">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg">{group.name.ar}</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground mt-1">
+              {group.name.en}
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardFooter className="flex justify-end gap-2 pt-2 border-t mt-auto">
+        <Button variant="ghost" size="sm" onClick={onEdit}>
+          <Edit className="h-4 w-4 ml-1" />
+          تعديل
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+          onClick={onDelete}
+        >
+          <Trash2 className="h-4 w-4 ml-1" />
+          حذف
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 }
