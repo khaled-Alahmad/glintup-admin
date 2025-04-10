@@ -58,6 +58,7 @@ interface Service {
   icon: string;
   duration_minutes: number;
   price: number;
+  icon_url: string;
   gender: 'male' | 'female' | 'both';
   is_active: number;
   salon_id: number;
@@ -78,7 +79,8 @@ export default function ServicesManagement() {
   // بيانات نموذجية للخدمات
   const [services, setServices] = useState<Service[]>([]);
   const [salonSearchTerm, setSalonSearchTerm] = useState("");
-
+  const [uploadedIcon, setUploadedIcon] = useState<string>("");
+  const [iconPreview, setIconPreview] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
@@ -96,6 +98,23 @@ export default function ServicesManagement() {
   // Add new state for salons
   const [salons, setSalons] = useState<{ id: number; name: string }[]>([]);
 
+  // Add this function to handle image upload
+  const handleIconUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('folder', 'services');
+    try {
+      const response = await addData('general/upload-image', formData);
+      // const data = await response.json();
+      if (response.success) {
+        console.log(response);
+        setUploadedIcon(response.data.image_name);
+        setIconPreview(URL.createObjectURL(file));
+      }
+    } catch (error) {
+      console.error('Failed to upload image:', error);
+    }
+  };
   // Add salon fetch function
   const fetchSalons = async (search: string = "") => {
     try {
@@ -164,7 +183,7 @@ export default function ServicesManagement() {
         en: formData.get("description_en") as string,
         ar: formData.get("description_ar") as string,
       },
-      icon: formData.get("icon") as string,
+      icon: uploadedIcon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
       gender: formData.get("gender") as 'male' | 'female' | 'both',
@@ -183,6 +202,8 @@ export default function ServicesManagement() {
           description: "تمت إضافة الخدمة بنجاح",
           variant: "default",
         });
+        setUploadedIcon('');
+        setIconPreview('');
       }
     } catch (error) {
       console.error("Failed to add service:", error);
@@ -204,13 +225,13 @@ export default function ServicesManagement() {
         en: formData.get("description_en") as string,
         ar: formData.get("description_ar") as string,
       },
-      icon: formData.get("icon") as string,
+      icon: uploadedIcon || editingService.icon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
       gender: formData.get("gender") as 'male' | 'female' | 'both',
       is_active: Number(formData.get("is_active")),
     };
-    // console.log(updatedService);
+    console.log("updatedService",updatedService);
 
     try {
       const response = await updateData(`admin/services/${editingService.id}`, updatedService);
@@ -223,12 +244,20 @@ export default function ServicesManagement() {
           description: "تم تعديل الخدمة بنجاح",
           variant: "default",
         });
+        setUploadedIcon('');
+        setIconPreview('');
       }
     } catch (error) {
       console.error("Failed to update service:", error);
     }
   };
-
+  useEffect(() => {
+    return () => {
+      if (iconPreview) {
+        URL.revokeObjectURL(iconPreview);
+      }
+    };
+  }, [iconPreview]);
   // حذف خدمة
   const handleDeleteService = async () => {
     if (!editingService) return;
@@ -495,10 +524,10 @@ export default function ServicesManagement() {
                   <Textarea id="description_en" name="description_en" required />
                 </div>
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="icon">أيقونة الخدمة</Label>
                 <Input id="icon" name="icon" required />
-              </div>
+              </div> */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="duration_minutes">المدة (بالدقائق)</Label>
@@ -534,6 +563,36 @@ export default function ServicesManagement() {
                     <SelectItem value="both">الجميع</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="icon">أيقونة الخدمة</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    id="icon"
+                    name="icon"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleIconUpload(file);
+                    }}
+                    className="flex-1"
+                  />
+                  {iconPreview && (
+                    <div className="relative w-12 h-12">
+                      <img
+                        src={iconPreview}
+                        alt="Icon preview"
+                        className="w-full h-full object-cover rounded-md"
+                      />
+                    </div>
+                  )}
+                </div>
+                <Input
+                  type="hidden"
+                  name="icon"
+                  value={uploadedIcon}
+                />
               </div>
             </div>
             <DialogFooter>
@@ -625,7 +684,7 @@ export default function ServicesManagement() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="icon">أيقونة الخدمة</Label>
                   <Input
                     id="icon"
@@ -633,7 +692,7 @@ export default function ServicesManagement() {
                     defaultValue={editingService.icon}
                     required
                   />
-                </div>
+                </div> */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="duration_minutes">المدة (بالدقائق)</Label>
@@ -686,6 +745,37 @@ export default function ServicesManagement() {
                     </Select>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="icon">أيقونة الخدمة</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="icon"
+                      name="icon_file"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleIconUpload(file);
+                      }}
+                      className="flex-1"
+                    />
+                    {(iconPreview || editingService.icon_url) && (
+                      <div className="relative w-12 h-12">
+                        <img
+                          src={iconPreview || editingService.icon_url}
+                          alt="Icon preview"
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <Input
+                    type="hidden"
+                    name="icon"
+                    value={uploadedIcon || editingService.icon}
+                  />
+                </div>
+
               </div>
               <DialogFooter>
                 <Button
@@ -747,17 +837,20 @@ interface ServiceCardProps {
 
 function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: ServiceCardProps) {
   const renderIcon = () => {
-    try {
-      // هذا مجرد مثال - يمكن تعديله حسب كيفية تخزين الأيقونات في نظامك
-      return (
-        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
-          {service.icon}
-        </div>
-      )
-    } catch (error) {
-      return null
-    }
-  }
+    return (
+      <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary overflow-hidden">
+        {service.icon_url ? (
+          <img
+            src={service.icon_url}
+            alt={service.name.ar}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          service.icon
+        )}
+      </div>
+    );
+  };
 
   // تحويل قيمة الجنس إلى نص عربي
   const getGenderText = (gender: "male" | "female" | "both") => {
