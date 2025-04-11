@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,6 +32,9 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+import { deleteData, fetchData } from "@/lib/apiHelper";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdvertisementDetailsProps {
   advertisementId: string;
@@ -41,43 +44,79 @@ export default function AdvertisementDetails({
   advertisementId,
 }: AdvertisementDetailsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [advertisement, setAdvertisement] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const router = useRouter();
 
-  // بيانات نموذجية للإعلان
-  const advertisement = {
-    id: advertisementId,
-    title: "عروض الصيف المميزة",
-    description:
-      "استمتعي بعروض الصيف المميزة في صالونات Glintup. خصومات تصل إلى 50% على جميع الخدمات. العرض ساري حتى نهاية الشهر.",
-    image: "/placeholder.svg?height=400&width=800",
-    status: "active",
-    type: "banner",
-    position: "home_page",
-    startDate: "2023-06-01",
-    endDate: "2023-06-30",
-    clicks: 1245,
-    impressions: 5678,
-    ctr: "21.9%",
-    target: {
-      url: "https://glintup.com/summer-offers",
-      salon: "جميع الصالونات",
-      audience: "جميع المستخدمين",
-      locations: ["دبي", "أبو ظبي", "الشارقة"],
-    },
-    createdAt: "2023-05-25",
-    updatedAt: "2023-05-28",
+  const fetchAdvertisement = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetchData(`admin/promotion-ads/${advertisementId}`);
+      if (response.success) {
+        setAdvertisement(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch advertisement:', error);
+      toast({
+        title: "خطأ في جلب البيانات",
+        description: "حدث خطأ أثناء جلب بيانات الإعلان",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // حساب الأيام المتبقية للإعلان
-  const calculateRemainingDays = () => {
-    const endDate = new Date(advertisement.endDate);
+  const handleDelete = async () => {
+    try {
+      const response = await deleteData(`admin/promotion-ads/${advertisementId}`);
+      if (response.success) {
+        toast({
+          title: "تم الحذف بنجاح",
+          description: "تم حذف الإعلان بنجاح",
+          variant: "default",
+        });
+        router.push('/advertisements');
+      }
+    } catch (error) {
+      console.error('Failed to delete advertisement:', error);
+      toast({
+        title: "خطأ في الحذف",
+        description: "حدث خطأ أثناء حذف الإعلان",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdvertisement();
+  }, [advertisementId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!advertisement) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-lg text-muted-foreground">لا يوجد بيانات للإعلان</p>
+      </div>
+    );
+  }
+  const calculateRemainingDays = (endDate: string) => {
+    const end = new Date(endDate);
     const today = new Date();
-    const diffTime = endDate.getTime() - today.getTime();
+    const diffTime = end.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
   };
-
-  const remainingDays = calculateRemainingDays();
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -115,121 +154,72 @@ export default function AdvertisementDetails({
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-xl">
-                    {advertisement.title}
+                    {advertisement.title.ar}
                   </CardTitle>
                   <CardDescription>
-                    تم الإنشاء في {advertisement.createdAt} | آخر تحديث{" "}
-                    {advertisement.updatedAt}
+                    تم الإنشاء في {advertisement.created_at} | آخر تحديث{" "}
+                    {advertisement.updated_at}
                   </CardDescription>
+
                 </div>
-                <Badge
-                  variant={
-                    advertisement.status === "active" ? "default" : "secondary"
-                  }
-                >
-                  {advertisement.status === "active" ? "نشط" : "غير نشط"}
+                <Badge variant={advertisement.is_active ? "default" : "secondary"}>
+                  {advertisement.is_active ? "نشط" : "غير نشط"}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+
               <div className="rounded-md overflow-hidden">
                 <img
-                  src={advertisement.image || "/placeholder.svg"}
-                  alt={advertisement.title}
+                  src={advertisement.image_url || "/placeholder.svg"}
+                  alt={advertisement.title.ar}
                   className="w-full h-auto object-cover"
                 />
               </div>
-
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">وصف الإعلان</h3>
-                <p>{advertisement.description}</p>
-              </div>
-
-              <Separator />
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">معلومات الإعلان</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        نوع الإعلان:
-                      </span>
-                      <span>
-                        {advertisement.type === "banner"
-                          ? "بانر"
-                          : "إعلان جانبي"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        موقع الظهور:
-                      </span>
-                      <span>
-                        {advertisement.position === "home_page"
-                          ? "الصفحة الرئيسية"
-                          : "صفحة البحث"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        الرابط المستهدف:
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <LinkIcon className="h-4 w-4" />
-                        <a
-                          href={advertisement.target.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary"
-                        >
-                          فتح الرابط
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">وصف الإعلان</h3>
+                  <p>{advertisement.description.ar}</p>
+                  <p className="text-muted-foreground">{advertisement.description.en}</p>
+                </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">فترة العرض</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        تاريخ البداية:
-                      </span>
+                      <span className="text-muted-foreground">تاريخ البداية:</span>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{advertisement.startDate}</span>
+                        <span>{advertisement.valid_from}</span>
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        تاريخ الانتهاء:
-                      </span>
+                      <span className="text-muted-foreground">تاريخ الانتهاء:</span>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{advertisement.endDate}</span>
+                        <span>{advertisement.valid_to}</span>
                       </div>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        الأيام المتبقية:
-                      </span>
+                      <span className="text-muted-foreground">الأيام المتبقية:</span>
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        <span>{remainingDays} يوم</span>
+                        <span>{calculateRemainingDays(advertisement.valid_to)} يوم</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              {/* <Separator /> */}
 
-              <Separator />
 
-              <div className="space-y-2">
+
+              {/* <Separator /> */}
+
+              {/* <div className="space-y-2">
                 <h3 className="text-lg font-medium">الاستهداف</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-3 border rounded-md">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> */}
+              {/* <div className="p-3 border rounded-md">
                     <p className="text-sm text-muted-foreground">
                       الصالون المستهدف
                     </p>
@@ -242,17 +232,17 @@ export default function AdvertisementDetails({
                     <p className="font-medium">
                       {advertisement.target.audience}
                     </p>
-                  </div>
-                  <div className="p-3 border rounded-md">
+                  </div> */}
+              {/* <div className="p-3 border rounded-md">
                     <p className="text-sm text-muted-foreground">
                       المناطق المستهدفة
                     </p>
                     <p className="font-medium">
                       {advertisement.target.locations.join(", ")}
                     </p>
-                  </div>
-                </div>
-              </div>
+                  </div> */}
+              {/* </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>
@@ -270,7 +260,7 @@ export default function AdvertisementDetails({
                     <Eye className="h-4 w-4 text-muted-foreground" />
                     <span>المشاهدات</span>
                   </div>
-                  <span className="font-bold">{advertisement.impressions}</span>
+                  <span className="font-bold">{advertisement.views}</span>
                 </div>
               </div>
               <div className="p-4 border rounded-md">
@@ -282,7 +272,7 @@ export default function AdvertisementDetails({
                   <span className="font-bold">{advertisement.clicks}</span>
                 </div>
               </div>
-              <div className="p-4 border rounded-md">
+              {/* <div className="p-4 border rounded-md">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -290,17 +280,17 @@ export default function AdvertisementDetails({
                   </div>
                   <span className="font-bold">{advertisement.ctr}</span>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
-            <CardFooter>
+            {/* <CardFooter>
               <Button variant="outline" className="w-full">
                 <BarChart3 className="h-4 w-4 ml-2" />
                 عرض التقرير الكامل
               </Button>
-            </CardFooter>
+            </CardFooter> */}
           </Card>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>إجراءات سريعة</CardTitle>
             </CardHeader>
@@ -325,13 +315,13 @@ export default function AdvertisementDetails({
                 </Button>
               )}
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
 
       {/* مربع حوار حذف الإعلان */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>حذف الإعلان</DialogTitle>
             <DialogDescription>
@@ -340,21 +330,15 @@ export default function AdvertisementDetails({
           </DialogHeader>
           <div className="py-4">
             <p className="text-center">
-              أنت على وشك حذف إعلان &quot;{advertisement.title}&quot;. هذا
+              أنت على وشك حذف إعلان &quot;{advertisement.title.ar}&quot;. هذا
               الإجراء لا يمكن التراجع عنه.
             </p>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               إلغاء
             </Button>
-            <Button
-              variant="destructive"
-              onClick={() => console.log("تم حذف الإعلان")}
-            >
+            <Button variant="destructive" onClick={handleDelete}>
               حذف
             </Button>
           </DialogFooter>
