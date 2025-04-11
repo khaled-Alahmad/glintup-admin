@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,6 +19,35 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import { fetchData, updateData } from "@/lib/apiHelper"
+import { useToast } from "@/hooks/use-toast"
+import { PaginationWithInfo } from "../ui/pagination-with-info"
+interface Advertisement {
+  id: number;
+  salon_id: number | null;
+  title: {
+    en: string;
+    ar: string;
+  };
+  description: {
+    en: string;
+    ar: string;
+  };
+  image: string;
+  image_url: string;
+  valid_from: string;
+  valid_to: string;
+  is_active: boolean;
+  views: number;
+  clicks: number;
+  salon: {
+    id: number;
+    name: string;
+    logo_url: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const advertisements = [
   {
@@ -95,46 +124,83 @@ const advertisements = [
 
 export default function AdvertisementsManagement() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const { toast } = useToast()
+  const [statusFilter, setStatusFilter] = useState("")
+  const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [perPage, setPerPage] = useState(10);
 
-  const filteredAds = advertisements.filter((ad) => {
-    const matchesSearch =
-      ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ad.salonName.toLowerCase().includes(searchQuery.toLowerCase())
+  // Add fetch function
+  const fetchAdvertisements = async () => {
+    try {
+      setIsLoading(true);
+      const searchParam = searchQuery ? `&search=${searchQuery}` : '';
+      const statusParam = statusFilter != "all" ? `&is_active=${statusFilter}` : '';
 
-    const matchesStatus = statusFilter === "all" || ad.status === statusFilter
+      const response = await fetchData(`admin/promotion-ads?page=${currentPage}&limit=${perPage}${searchParam}${statusParam}`);
+      if (response.success) {
+        setAdvertisements(response.data);
+        setTotalPages(response.meta.last_page);
+        setCurrentPage(response.meta.current_page);
+        setTotalItems(response.meta.total);
+      }
+    } catch (error) {
+      console.error("Failed to fetch advertisements:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return matchesSearch && matchesStatus
-  })
+  // Add useEffect for fetching data
+  useEffect(() => {
+    fetchAdvertisements();
+  }, [currentPage, searchQuery, statusFilter]);
 
-  const getStatusBadge = (status: string) => {
+  const handleStatusUpdate = async (adId: number, action: 'approve' | 'reject' | 'stop') => {
+    try {
+      const response = await updateData(`admin/promotion-ads/${adId}/status`, { status: action });
+      if (response.success) {
+        await fetchAdvertisements();
+        toast({
+          title: "تم تحديث الحالة بنجاح",
+          description: "تم تحديث حالة الإعلان بنجاح",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+  // const filteredAds = advertisements.filter((ad) => {
+  //   const matchesSearch =
+  //     ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     ad.salonName.toLowerCase().includes(searchQuery.toLowerCase())
+
+  //   const matchesStatus = statusFilter === "all" || ad.status === statusFilter
+
+  //   return matchesSearch && matchesStatus
+  // })
+
+  const getStatusBadge = (status: Boolean) => {
     switch (status) {
-      case "نشط":
+      case true:
         return (
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             نشط
           </Badge>
         )
-      case "منتهي":
-        return (
-          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-            منتهي
-          </Badge>
-        )
-      case "قيد المراجعة":
-        return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            قيد المراجعة
-          </Badge>
-        )
-      case "مرفوض":
+
+      case false:
         return (
           <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            مرفوض
+            غير نشط
           </Badge>
         )
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status === true ? "نشط " : "غير نشط"}</Badge>
     }
   }
 
@@ -197,12 +263,12 @@ export default function AdvertisementsManagement() {
                 <CardTitle>الإعلانات</CardTitle>
                 <CardDescription>إدارة الإعلانات المدفوعة في التطبيق</CardDescription>
               </div>
-              <TabsList>
+              {/* <TabsList>
                 <TabsTrigger value="all">الكل</TabsTrigger>
                 <TabsTrigger value="active">نشط</TabsTrigger>
                 <TabsTrigger value="pending">قيد المراجعة</TabsTrigger>
                 <TabsTrigger value="expired">منتهي</TabsTrigger>
-              </TabsList>
+              </TabsList> */}
             </div>
           </Tabs>
         </CardHeader>
@@ -228,10 +294,8 @@ export default function AdvertisementsManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="نشط">نشط</SelectItem>
-                    <SelectItem value="قيد المراجعة">قيد المراجعة</SelectItem>
-                    <SelectItem value="منتهي">منتهي</SelectItem>
-                    <SelectItem value="مرفوض">مرفوض</SelectItem>
+                    <SelectItem value="1">نشط</SelectItem>
+                    <SelectItem value="0">غير نشط</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -244,55 +308,75 @@ export default function AdvertisementsManagement() {
                     <TableHead>الإعلان</TableHead>
                     <TableHead>الصالون</TableHead>
                     <TableHead>الفترة</TableHead>
-                    <TableHead>الموقع</TableHead>
                     <TableHead>المشاهدات</TableHead>
                     <TableHead>النقرات</TableHead>
-                    <TableHead>التكلفة</TableHead>
                     <TableHead>الحالة</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAds.map((ad) => (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                          <p className="text-muted-foreground">جاري تحميل البيانات...</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : advertisements.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <p className="text-muted-foreground">لا توجد إعلانات متاحة</p>
+                          <Button variant="outline" asChild className="mt-2">
+                            <Link href="/advertisements/add">إضافة إعلان جديد</Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : advertisements.map((ad) => (
                     <TableRow key={ad.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="h-16 w-24 rounded-md overflow-hidden bg-muted">
                             <img
-                              src={ad.image || "/placeholder.svg"}
-                              alt={ad.title}
+                              src={ad.image_url}
+                              alt={ad.title.ar}
                               className="h-full w-full object-cover"
                             />
                           </div>
-                          <span className="font-medium">{ad.title}</span>
+                          <span className="font-medium">{ad.title.ar}</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8 border">
-                            <AvatarImage src={ad.salonLogo} alt={ad.salonName} />
-                            <AvatarFallback>{ad.salonName.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span>{ad.salonName}</span>
-                        </div>
+                        {ad.salon && (
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8 border">
+                              <AvatarImage src={ad.salon.logo_url} alt={ad.salon.name} />
+                              <AvatarFallback>{ad.salon.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{ad.salon.name}</span>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col text-sm">
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{new Date(ad.startDate).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(ad.valid_from).toLocaleDateString("ar-SA")}</span>
                           </div>
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{new Date(ad.endDate).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(ad.valid_to).toLocaleDateString("ar-SA")}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{ad.position}</TableCell>
                       <TableCell>{ad.views}</TableCell>
                       <TableCell>{ad.clicks}</TableCell>
-                      <TableCell>{ad.amount}</TableCell>
-                      <TableCell>{getStatusBadge(ad.status)}</TableCell>
+                      <TableCell>
+                        {getStatusBadge(ad.is_active)}
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -304,29 +388,41 @@ export default function AdvertisementsManagement() {
                             <DropdownMenuLabel>خيارات</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                              <Link href={`/advertisements/${ad.id}`} className="cursor-pointer w-full">
-                                عرض التفاصيل
-                              </Link>
+                              <Link href={`/advertisements/${ad.id}`}>عرض التفاصيل</Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                              <Link href={`/advertisements/${ad.id}/edit`} className="cursor-pointer w-full">
-                                تعديل الإعلان
-                              </Link>
+                              <Link href={`/advertisements/${ad.id}/edit`}>تعديل الإعلان</Link>
                             </DropdownMenuItem>
-                            {ad.status === "قيد المراجعة" && (
-                              <>
-                                <DropdownMenuItem className="text-green-600">قبول الإعلان</DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600">رفض الإعلان</DropdownMenuItem>
-                              </>
+                            {!ad.is_active && (
+                              <DropdownMenuItem onClick={() => handleStatusUpdate(ad.id, 'approve')}>
+                                تفعيل الإعلان
+                              </DropdownMenuItem>
                             )}
-                            {ad.status === "نشط" && (
-                              <DropdownMenuItem className="text-red-600">إيقاف الإعلان</DropdownMenuItem>
+                            {ad.is_active && (
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => handleStatusUpdate(ad.id, 'stop')}
+                              >
+                                إيقاف الإعلان
+                              </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
+
                   ))}
+                  <div className="mt-4">
+                    {!isLoading && advertisements.length > 0 && totalPages > 1 && (
+                      <PaginationWithInfo
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        itemsPerPage={perPage}
+                        onPageChange={setCurrentPage}
+                      />
+                    )}
+                  </div>
                 </TableBody>
               </Table>
             </div>
