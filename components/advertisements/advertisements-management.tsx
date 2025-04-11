@@ -364,11 +364,11 @@ export default function AdvertisementsManagement() {
                         <div className="flex flex-col text-sm">
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{new Date(ad.valid_from).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(ad.valid_from).toLocaleDateString("en-US")}</span>
                           </div>
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{new Date(ad.valid_to).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(ad.valid_to).toLocaleDateString("en-US")}</span>
                           </div>
                         </div>
                       </TableCell>
