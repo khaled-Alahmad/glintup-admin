@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Filter, MoreHorizontal, Search, Star } from "lucide-react"
+import { Filter, Loader2, MoreHorizontal, Search, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
@@ -28,121 +28,188 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { fetchData, updateData } from "@/lib/apiHelper"
+import { useToast } from "../ui/use-toast"
+import { PaginationWithInfo } from "../ui/pagination-with-info"
 
-const salons = [
-  {
-    id: "1",
-    name: "صالون الأميرة",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "مدينة الكويت، الكويت",
-    owner: "منيرة السعيد",
-    phone: "+966 50 123 4567",
-    email: "princess@salon.com",
-    status: "نشط",
-    totalBookings: 1245,
-    revenue: "52,450 د.إ",
-    joinDate: "12 يناير 2023",
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    name: "صالون إليت",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "جدة، السعودية",
-    owner: "سارة الأحمد",
-    phone: "+966 55 987 6543",
-    email: "elite@salon.com",
-    status: "نشط",
-    totalBookings: 968,
-    revenue: "41,250 د.إ",
-    joinDate: "23 فبراير 2023",
-    rating: 4.5,
-  },
-  {
-    id: "3",
-    name: "صالون جلام",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "الدمام، السعودية",
-    owner: "نورة المطيري",
-    phone: "+966 54 456 7890",
-    email: "glam@salon.com",
-    status: "نشط",
-    totalBookings: 756,
-    revenue: "32,800 د.إ",
-    joinDate: "5 مارس 2023",
-    rating: 4.7,
-  },
-  {
-    id: "4",
-    name: "صالون مس بيوتي",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "مدينة الكويت، الكويت",
-    owner: "لمياء القحطاني",
-    phone: "+966 56 234 5678",
-    email: "missbeauty@salon.com",
-    status: "معلق",
-    totalBookings: 532,
-    revenue: "22,150 د.إ",
-    joinDate: "17 أبريل 2023",
-    rating: 4.2,
-  },
-  {
-    id: "5",
-    name: "صالون روز",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "جدة، السعودية",
-    owner: "دانة الشهري",
-    phone: "+966 58 345 6789",
-    email: "rose@salon.com",
-    status: "نشط",
-    totalBookings: 425,
-    revenue: "18,600 د.إ",
-    joinDate: "30 مايو 2023",
-    rating: 4.6,
-  },
-]
+// const salons = [
+//   {
+//     id: "1",
+//     name: "صالون الأميرة",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "مدينة الكويت، الكويت",
+//     owner: "منيرة السعيد",
+//     phone: "+966 50 123 4567",
+//     email: "princess@salon.com",
+//     status: "نشط",
+//     totalBookings: 1245,
+//     revenue: "52,450 د.إ",
+//     joinDate: "12 يناير 2023",
+//     rating: 4.8,
+//   },
+//   {
+//     id: "2",
+//     name: "صالون إليت",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "جدة، السعودية",
+//     owner: "سارة الأحمد",
+//     phone: "+966 55 987 6543",
+//     email: "elite@salon.com",
+//     status: "نشط",
+//     totalBookings: 968,
+//     revenue: "41,250 د.إ",
+//     joinDate: "23 فبراير 2023",
+//     rating: 4.5,
+//   },
+//   {
+//     id: "3",
+//     name: "صالون جلام",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "الدمام، السعودية",
+//     owner: "نورة المطيري",
+//     phone: "+966 54 456 7890",
+//     email: "glam@salon.com",
+//     status: "نشط",
+//     totalBookings: 756,
+//     revenue: "32,800 د.إ",
+//     joinDate: "5 مارس 2023",
+//     rating: 4.7,
+//   },
+//   {
+//     id: "4",
+//     name: "صالون مس بيوتي",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "مدينة الكويت، الكويت",
+//     owner: "لمياء القحطاني",
+//     phone: "+966 56 234 5678",
+//     email: "missbeauty@salon.com",
+//     status: "معلق",
+//     totalBookings: 532,
+//     revenue: "22,150 د.إ",
+//     joinDate: "17 أبريل 2023",
+//     rating: 4.2,
+//   },
+//   {
+//     id: "5",
+//     name: "صالون روز",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "جدة، السعودية",
+//     owner: "دانة الشهري",
+//     phone: "+966 58 345 6789",
+//     email: "rose@salon.com",
+//     status: "نشط",
+//     totalBookings: 425,
+//     revenue: "18,600 د.إ",
+//     joinDate: "30 مايو 2023",
+//     rating: 4.6,
+//   },
+// ]
 
 export default function SalonsManagement() {
+  const [salons, setSalons] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
   const [selectedSalon, setSelectedSalon] = useState<any>(null)
   const [showNotificationDialog, setShowNotificationDialog] = useState(false)
   const [showSuspendDialog, setShowSuspendDialog] = useState(false)
   const [showBanDialog, setShowBanDialog] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [perPage, setPerPage] = useState(10)
 
-  const filteredSalons = salons.filter((salon) => {
-    const matchesSearch =
-      salon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      salon.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      salon.owner.toLowerCase().includes(searchQuery.toLowerCase())
+  const [statusFilter, setStatusFilter] = useState("all")
+  // Add fetch function
+  const fetchSalons = async (pageNumber = 1, search = searchQuery, status = statusFilter) => {
+    try {
+      setIsLoading(true)
+      const response = await fetchData(`admin/salons?limit=${perPage}&page=${pageNumber}&search=${search}&status=${status}`)
+      if (response.success) {
+        setSalons(response.data)
+        setTotalItems(response.data.total)
+        setPerPage(response.data.per_page)
+        setTotalPages(Math.ceil(response.data.total / response.data.per_page))
+        setCurrentPage(pageNumber)
+      }
+    } catch (error) {
+      console.error('Failed to fetch salons:', error)
+      toast({
+        title: "خطأ في جلب البيانات",
+        description: "حدث خطأ أثناء جلب بيانات الصالونات",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-    const matchesStatus = statusFilter === "all" || salon.status === statusFilter
+  // Add status update function
+  const updateSalonStatus = async (salonId: number, status: string, reason?: string) => {
+    try {
+      const response = await updateData(`admin/salons/${salonId}/status`, {
+        status,
+        reason,
+      })
+      if (response.success) {
+        toast({
+          title: "تم تحديث الحالة",
+          description: "تم تحديث حالة الصالون بنجاح",
+        })
+        fetchSalons(page)
+      }
+    } catch (error) {
+      console.error('Failed to update salon status:', error)
+      toast({
+        title: "خطأ في تحديث الحالة",
+        description: "حدث خطأ أثناء تحديث حالة الصالون",
+        variant: "destructive",
+      })
+    }
+  }
 
-    return matchesSearch && matchesStatus
-  })
+  useEffect(() => {
+    fetchSalons(page)
+  }, [page])
 
-  const getStatusBadge = (status: string) => {
+  // Update search and filter handlers
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchSalons(1, searchQuery, statusFilter)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery, statusFilter])
+
+
+  // const filteredSalons = salons.filter((salon) => {
+  //   const matchesSearch =
+  //     salon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     salon.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     salon.owner.toLowerCase().includes(searchQuery.toLowerCase())
+
+  //   const matchesStatus = statusFilter === "all" || salon.status === statusFilter
+
+  //   return matchesSearch && matchesStatus
+  // })
+
+  const getStatusBadge = (status: Number) => {
     switch (status) {
-      case "نشط":
+      case 1:
         return (
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             نشط
           </Badge>
         )
-      case "معلق":
+      case 0:
         return (
           <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            معلق
+            غير نشطس
           </Badge>
         )
-      case "محظور":
-        return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            محظور
-          </Badge>
-        )
+
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status ? "نشط" : "غير نشط"}</Badge>
     }
   }
 
@@ -150,9 +217,9 @@ export default function SalonsManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">إدارة الصالونات</h1>
-        <Button asChild>
+        {/* <Button asChild>
           <Link href="/salons/add">إضافة صالون جديد</Link>
-        </Button>
+        </Button> */}
       </div>
 
       <Card>
@@ -205,7 +272,28 @@ export default function SalonsManagement() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSalons.map((salon) => (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8">
+                        <div className="flex justify-center items-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : salons && salons.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8">
+                        <div className="flex flex-col items-center gap-2">
+                          <p className="text-muted-foreground">لا توجد صالونات مسجلة</p>
+                          <Button asChild variant="link" className="gap-1">
+                            <Link href="/salons/add">
+                              إضافة صالون جديد
+                            </Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : salons.map((salon) => (
                     <TableRow key={salon.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -222,7 +310,7 @@ export default function SalonsManagement() {
                       <TableCell>{salon.location}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-xs">{salon.phone}</span>
+                          <span className="text-xs text-right" style={{ unicodeBidi: 'plaintext' }}>{salon.phone_code}{salon.phone}</span>
                           <span className="text-xs text-muted-foreground">{salon.email}</span>
                         </div>
                       </TableCell>
@@ -230,9 +318,9 @@ export default function SalonsManagement() {
                       <TableCell>{salon.totalBookings}</TableCell>
                       <TableCell>{salon.revenue}</TableCell>
                       <TableCell>
-                        <div className="flex items-center">
+                        <div className="flex items-center align-items-center ">
                           <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-1" />
-                          <span>{salon.rating}</span>
+                          <span>{salon.average_rating || 0}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -294,6 +382,17 @@ export default function SalonsManagement() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {!isLoading && salons.length > 0 && totalPages > 1 && (
+                    <div className="mt-4">
+                      <PaginationWithInfo
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        itemsPerPage={perPage}
+                        onPageChange={setCurrentPage}
+                      />
+                    </div>
+                  )}
                 </TableBody>
               </Table>
             </div>

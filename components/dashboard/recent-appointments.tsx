@@ -3,78 +3,48 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CalendarCheck2, CalendarX2, Clock } from "lucide-react"
 
-const appointments = [
-  {
-    id: "1",
-    customerName: "سارة أحمد",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون الأميرة",
-    time: "10:30 صباحاً",
-    date: "03/04/2024",
-    service: "قص شعر وصبغة",
-    status: "مؤكد",
-  },
-  {
-    id: "2",
-    customerName: "نورة محمد",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون إليت",
-    time: "2:15 مساءً",
-    date: "03/04/2024",
-    service: "مكياج",
-    status: "معلق",
-  },
-  {
-    id: "3",
-    customerName: "عبير علي",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون جلام",
-    time: "4:45 مساءً",
-    date: "03/04/2024",
-    service: "علاج بالكيراتين",
-    status: "مؤكد",
-  },
-  {
-    id: "4",
-    customerName: "هند خالد",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون مس بيوتي",
-    time: "11:00 صباحاً",
-    date: "03/04/2024",
-    service: "مانيكير وباديكير",
-    status: "ملغي",
-  },
-  {
-    id: "5",
-    customerName: "ليلى عبدالله",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون روز",
-    time: "3:30 مساءً",
-    date: "03/04/2024",
-    service: "حمام مغربي",
-    status: "مؤكد",
-  },
-]
+interface Salon {
+  id: number;
+  name: string;
+  icon: string;
+}
 
-export function RecentAppointments() {
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  avatar: string | null;
+}
+
+interface Appointment {
+  id: number;
+  code: string;
+  status: string;
+  date: string;
+  time: string;
+  salon: Salon;
+  user: User;
+}
+
+export function RecentAppointments({ appointments }: { appointments: Appointment[] }) {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "مؤكد":
+      case "confirmed":
         return (
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            مؤكد
+            Confirmed
           </Badge>
         )
-      case "معلق":
+      case "pending":
         return (
           <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            معلق
+            Pending
           </Badge>
         )
-      case "ملغي":
+      case "cancelled":
         return (
           <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            ملغي
+            Cancelled
           </Badge>
         )
       default:
@@ -90,23 +60,25 @@ export function RecentAppointments() {
           className="flex items-center gap-4 rounded-lg border p-3 transition-all duration-200 hover:shadow-md hover:bg-muted/20"
         >
           <Avatar className="h-9 w-9 ring-2 ring-primary/10">
-            <AvatarImage src={appointment.customerAvatar} alt={appointment.customerName} />
-            <AvatarFallback>{appointment.customerName.charAt(0)}</AvatarFallback>
+            <AvatarImage src={appointment.user.avatar || ''} alt={`${appointment.user.first_name} ${appointment.user.last_name}`} />
+            <AvatarFallback>{appointment.user.first_name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium leading-none">{appointment.customerName}</p>
+              <p className="text-sm font-medium leading-none">
+                {`${appointment.user.first_name} ${appointment.user.last_name}`}
+              </p>
               {getStatusBadge(appointment.status)}
             </div>
             <div className="flex gap-4">
-              <p className="text-xs text-muted-foreground">{appointment.salonName}</p>
+              <p className="text-xs text-muted-foreground">{appointment.salon.name}</p>
               <p className="text-xs text-muted-foreground flex items-center">
-                <Clock className="mr-1 h-3 w-3" /> {appointment.time}
+                <Clock className="mr-1 h-3 w-3" /> {`${appointment.date.split('T')[0]} ${appointment.time}`}
               </p>
             </div>
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-            {appointment.status === "ملغي" ? (
+            {appointment.status === "cancelled" ? (
               <CalendarX2 className="h-4 w-4 text-red-500" />
             ) : (
               <CalendarCheck2 className="h-4 w-4 text-green-500" />
@@ -117,4 +89,3 @@ export function RecentAppointments() {
     </div>
   )
 }
-

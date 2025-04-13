@@ -2,65 +2,77 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Star } from "lucide-react"
 
-const salons = [
-  {
-    id: "1",
-    name: "صالون الأميرة",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "مدينة الكويت، الكويت",
-    bookingsCount: 124,
-    rating: 4.8,
-    maxBookings: 150,
-    percentage: 82,
-    color: "#4f46e5",
-  },
-  {
-    id: "2",
-    name: "صالون إليت",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "جدة، السعودية",
-    bookingsCount: 96,
-    rating: 4.5,
-    maxBookings: 150,
-    percentage: 64,
-    color: "#0ea5e9",
-  },
-  {
-    id: "3",
-    name: "صالون جلام",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "الدمام، السعودية",
-    bookingsCount: 81,
-    rating: 4.7,
-    maxBookings: 150,
-    percentage: 54,
-    color: "#8b5cf6",
-  },
-  {
-    id: "4",
-    name: "صالون مس بيوتي",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "مدينة الكويت، الكويت",
-    bookingsCount: 75,
-    rating: 4.2,
-    maxBookings: 150,
-    percentage: 50,
-    color: "#ec4899",
-  },
-  {
-    id: "5",
-    name: "صالون روز",
-    logo: "/placeholder.svg?height=40&width=40",
-    location: "جدة، السعودية",
-    bookingsCount: 68,
-    rating: 4.6,
-    maxBookings: 150,
-    percentage: 45,
-    color: "#f43f5e",
-  },
-]
+// const salons = [
+//   {
+//     id: "1",
+//     name: "صالون الأميرة",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "مدينة الكويت، الكويت",
+//     bookingsCount: 124,
+//     rating: 4.8,
+//     maxBookings: 150,
+//     percentage: 82,
+//     color: "#4f46e5",
+//   },
+//   {
+//     id: "2",
+//     name: "صالون إليت",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "جدة، السعودية",
+//     bookingsCount: 96,
+//     rating: 4.5,
+//     maxBookings: 150,
+//     percentage: 64,
+//     color: "#0ea5e9",
+//   },
+//   {
+//     id: "3",
+//     name: "صالون جلام",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "الدمام، السعودية",
+//     bookingsCount: 81,
+//     rating: 4.7,
+//     maxBookings: 150,
+//     percentage: 54,
+//     color: "#8b5cf6",
+//   },
+//   {
+//     id: "4",
+//     name: "صالون مس بيوتي",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "مدينة الكويت، الكويت",
+//     bookingsCount: 75,
+//     rating: 4.2,
+//     maxBookings: 150,
+//     percentage: 50,
+//     color: "#ec4899",
+//   },
+//   {
+//     id: "5",
+//     name: "صالون روز",
+//     logo: "/placeholder.svg?height=40&width=40",
+//     location: "جدة، السعودية",
+//     bookingsCount: 68,
+//     rating: 4.6,
+//     maxBookings: 150,
+//     percentage: 45,
+//     color: "#f43f5e",
+//   },
+// ]
 
-export function TopSalons() {
+export function TopSalons({ salons }: {
+  salons: Array<{
+    id: string;
+    name: string;
+    logo: string;
+    location: string;
+    bookingsCount: number;
+    rating: number;
+    maxBookings: number;
+    percentage: number;
+    color: string;
+  }>
+}) {
   return (
     <div className="space-y-4">
       {salons.map((salon) => (
