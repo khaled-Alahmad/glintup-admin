@@ -79,11 +79,11 @@ const monthlySalonsRevenue = [
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [dateFilter, setDateFilter] = useState("daily");
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetchData('admin/dashboard');
+      const response = await fetchData(`admin/dashboard?date=${dateFilter}`);
       if (response.success) {
         setDashboardData(response.data);
       }
@@ -96,8 +96,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
-
+  }, [dateFilter]); // Add dateFilter as dependency
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -118,11 +117,16 @@ export default function AdminDashboard() {
           لوحة المعلومات
         </h1>
         <div className="flex items-center gap-2">
-          <Tabs defaultValue="daily" className="w-fit">
+          <Tabs
+            value={dateFilter}
+            onValueChange={setDateFilter}
+            className="w-fit"
+          >
             <TabsList className="bg-secondary/50">
               <TabsTrigger value="daily">يومي</TabsTrigger>
               <TabsTrigger value="weekly">أسبوعي</TabsTrigger>
               <TabsTrigger value="monthly">شهري</TabsTrigger>
+              <TabsTrigger value="yearly">سنوي</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -155,7 +159,7 @@ export default function AdminDashboard() {
         <Card className="stats-card card-hover overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-1 bg-purple-500"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">حجوزات اليوم</CardTitle>
+            <CardTitle className="text-sm font-medium">حجوزات </CardTitle>
             <CalendarCheck2 className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
@@ -260,7 +264,36 @@ export default function AdminDashboard() {
                 ></div>
               </div>
             </div>
+            <div className="bg-muted/30 p-4 rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <Badge className="bg-green-500 text-white border-0">شكاوى العملاء</Badge>
+                  <h4 className="font-medium mt-2">الرد على{dashboardData.fast_tasks.complaints.complaints_review_count} شكاوى جديدة</h4>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {dashboardData.fast_tasks.complaints.review_percentage}%
+                </div>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${dashboardData.fast_tasks.complaints.review_percentage}%` }}
+                ></div>
+              </div>
+            </div>
 
+            <div className="bg-muted/30 p-4 rounded-lg hover:bg-muted/50 transition-colors">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <Badge className="bg-purple-500 text-white border-0">تفعيل صالونات</Badge>
+                  <h4 className="font-medium mt-2">مراجعة {dashboardData.fast_tasks.salons.salons_review_count} طلبات تفعيل جديدة</h4>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {dashboardData.fast_tasks.salons.review_percentage}%
+                </div>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${dashboardData.fast_tasks.salons.review_percentage}%` }}></div>
+              </div>
+            </div>
             {/* ... similar updates for complaints and salons tasks ... */}
           </div>
         </CardContent>
