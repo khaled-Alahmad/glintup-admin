@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { fetchData, updateData } from "@/lib/apiHelper"
 import { useToast } from "../ui/use-toast"
 import { PaginationWithInfo } from "../ui/pagination-with-info"
+import { Skeleton } from "../ui/skeleton"
 
 // const salons = [
 //   {
@@ -273,13 +274,15 @@ export default function SalonsManagement() {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="flex justify-center items-center">
-                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    Array.from({ length: perPage }).map((_, index) => (
+                      <TableRow key={index}>
+                        {Array.from({ length: 8 }).map((_, cellIndex) => (
+                          <TableCell key={cellIndex}>
+                            <Skeleton className="h-6 w-full" />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
                   ) : salons && salons.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8">

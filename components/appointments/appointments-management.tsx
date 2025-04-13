@@ -50,12 +50,26 @@ import { fetchData, updateData } from "@/lib/apiHelper";
 import { Skeleton } from "../ui/skeleton";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
+interface Service {
+  id: number;
+  name: {
+    en: string;
+    ar: string;
+  };
+  duration_minutes: number;
+
+  final_price: number;
+  currency: string;
+}
 
 interface BookingService {
   id: number;
   booking_id: number;
   service_id: number;
+  service: Service;
+
 }
 
 interface User {
@@ -97,13 +111,6 @@ export default function AppointmentsManagement() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [total, setTotal] = useState(0);
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
-    from: undefined,
-    to: undefined,
-  });
 
   useEffect(() => {
     fetchBookings();
@@ -339,14 +346,37 @@ export default function AppointmentsManagement() {
                             <span>{booking.salon.name}</span>
                           </div>
                         </TableCell>
+
                         <TableCell>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">
-                              {booking.code}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {booking.total_service_time_in_minutes} minutes
-                            </span>
+                          <div className="flex flex-col gap-1.5">
+                            {booking.booking_services.length > 0 && (
+                              <>
+                                <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary inline-flex">
+                                  {booking.booking_services[0].service.name.ar}
+                                </span>
+                                {booking.booking_services.length > 1 && (
+                                  <Popover>
+                                    <PopoverTrigger className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                                      +{booking.booking_services.length - 1} more
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-60">
+                                      <div className="flex flex-col gap-2">
+                                        {booking.booking_services.slice(1).map((service) => (
+                                          <div key={service.id} className="flex flex-col">
+                                            <span className="text-sm font-medium">
+                                              {service.service.name.ar}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {service.service.final_price} {service.service.currency} • {service.service.duration_minutes} minutes
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                )}
+                              </>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
