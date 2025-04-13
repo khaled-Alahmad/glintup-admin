@@ -47,9 +47,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DatePicker } from "@/components/ui/date-picker";
 import Link from "next/link";
 import { fetchData, updateData } from "@/lib/apiHelper";
-import { useToast } from "../ui/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
+import { useToast } from "@/hooks/use-toast";
 
 
 interface BookingService {
@@ -140,9 +140,10 @@ export default function AppointmentsManagement() {
 
   const handleStatusChange = async (bookingId: number, newStatus: string) => {
     try {
-      const response = await updateData(`admin/bookings/${bookingId}/status`, {
+      const response = await updateData(`admin/bookings/${bookingId}`, {
         status: newStatus
       });
+      console.log(response);
 
       if (response.success) {
         toast({

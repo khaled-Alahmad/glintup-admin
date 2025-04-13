@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Calendar, Clock, Edit, Printer, Trash } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Edit, Printer, Trash, XCircle } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,14 +23,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { fetchData } from "@/lib/apiHelper";
+import { Skeleton } from "../ui/skeleton";
 
 interface AppointmentDetailsProps {
   appointmentId: string;
 }
-
+interface Service {
+  id: number;
+  name: {
+    en: string;
+    ar: string;
+  };
+  duration_minutes: number;
+  price: string;
+  final_price: number;
+  currency: string;
+}
 // بيانات الحجز (في تطبيق حقيقي ستأتي من API)
 const appointmentData = {
   id: "1",
@@ -56,20 +68,90 @@ const appointmentData = {
   updatedAt: "2024-04-01",
 };
 
+interface BookingService {
+  id: number;
+  booking_id: number;
+  service: Service;
+
+  service_id: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface User {
+  id: number;
+  full_name: string;
+  avatar: string | null;
+  full_phone: string;
+  email?: string;
+}
+
+interface Salon {
+  id: number;
+  name: string;
+  icon_url: string;
+  full_phone: string;
+  email: string;
+  location: string;
+}
+
+interface Booking {
+  id: number;
+  code: string;
+  date: string;
+  time: string;
+  end_time: string;
+  total_service_time_in_minutes: number;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  payment_status: "paid" | "unpaid";
+  notes: string | null;
+  salon_notes: string | null;
+  user: User;
+  salon: Salon;
+  booking_services: BookingService[];
+  created_at: string;
+  updated_at: string;
+}
+
 export default function AppointmentDetails({
   appointmentId,
 }: AppointmentDetailsProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+
+  useEffect(() => {
+    fetchBooking();
+  }, [appointmentId]);
+
+  const fetchBooking = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetchData(`admin/bookings/${appointmentId}`);
+      if (response.success) {
+        setBooking(response.data);
+      }
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب بيانات الحجز",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // حساب إجمالي السعر والمدة
-  const totalPrice = appointmentData.services.reduce(
-    (sum, service) => sum + service.price * service.quantity,
+  const totalPrice = booking?.booking_services.reduce(
+    (sum, service) => sum + service.service.final_price,
     0
   );
-  const totalDuration = appointmentData.services.reduce(
-    (sum, service) => sum + service.duration * service.quantity,
+  const totalDuration = booking?.booking_services.reduce(
+    (sum, service) => sum + service.service.duration_minutes,
     0
   );
 
@@ -90,7 +172,7 @@ export default function AppointmentDetails({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "مؤكد":
+      case "confirmed":
         return (
           <Badge
             variant="outline"
@@ -99,7 +181,7 @@ export default function AppointmentDetails({
             مؤكد
           </Badge>
         );
-      case "معلق":
+      case "pending":
         return (
           <Badge
             variant="outline"
@@ -108,7 +190,7 @@ export default function AppointmentDetails({
             معلق
           </Badge>
         );
-      case "ملغي":
+      case "cancelled":
         return (
           <Badge
             variant="outline"
@@ -117,7 +199,7 @@ export default function AppointmentDetails({
             ملغي
           </Badge>
         );
-      case "مكتمل":
+      case "completed":
         return (
           <Badge
             variant="outline"
@@ -130,6 +212,71 @@ export default function AppointmentDetails({
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-8 w-48" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="space-y-4">
+                    <Skeleton className="h-6 w-32" />
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-16 w-16 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-32" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <XCircle className="h-12 w-12 text-muted-foreground" />
+        <h3 className="text-lg font-medium">الحجز غير موجود</h3>
+        <Button variant="outline" asChild>
+          <Link href="/appointments">العودة إلى الحجوزات</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -145,7 +292,7 @@ export default function AppointmentDetails({
           </h1>
           {getStatusBadge(appointmentData.status)}
         </div>
-        <div className="flex gap-2 print:hidden">
+        {/* <div className="flex gap-2 print:hidden">
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="h-4 w-4 ml-1" />
             طباعة
@@ -187,7 +334,7 @@ export default function AppointmentDetails({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -205,22 +352,19 @@ export default function AppointmentDetails({
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
                     <AvatarImage
-                      src={appointmentData.customerAvatar}
-                      alt={appointmentData.customerName}
+                      src={booking.user.avatar || "/placeholder.svg"}
+                      alt={booking.user.full_name}
                     />
                     <AvatarFallback>
-                      {appointmentData.customerName.charAt(0)}
+                      {booking.user.full_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium text-lg">
-                      {appointmentData.customerName}
+                      {booking.user.full_name}
                     </p>
                     <p className="text-muted-foreground">
-                      {appointmentData.customerPhone}
-                    </p>
-                    <p className="text-muted-foreground">
-                      {appointmentData.customerEmail}
+                      {booking.user.full_phone}
                     </p>
                   </div>
                 </div>
@@ -230,22 +374,22 @@ export default function AppointmentDetails({
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border">
                     <AvatarImage
-                      src={appointmentData.salonLogo}
-                      alt={appointmentData.salonName}
+                      src={booking.salon.icon_url || "/placeholder.svg"}
+                      alt={booking.salon.name}
                     />
                     <AvatarFallback>
-                      {appointmentData.salonName.charAt(0)}
+                      {booking.salon.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium text-lg">
-                      {appointmentData.salonName}
+                      {booking.salon.name}
                     </p>
                     <p className="text-muted-foreground">
-                      {appointmentData.salonAddress}
+                      {booking.salon.location}
                     </p>
                     <p className="text-muted-foreground">
-                      {appointmentData.salonPhone}
+                      {booking.salon.full_phone}
                     </p>
                   </div>
                 </div>
@@ -263,9 +407,7 @@ export default function AppointmentDetails({
                   <div>
                     <p className="font-medium">التاريخ</p>
                     <p>
-                      {new Date(appointmentData.date).toLocaleDateString(
-                        "ar-SA"
-                      )}
+                      {new Date(booking.date).toLocaleDateString("en-US")}
                     </p>
                   </div>
                 </div>
@@ -273,7 +415,7 @@ export default function AppointmentDetails({
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">الوقت</p>
-                    <p>{appointmentData.time}</p>
+                    <p>{booking.time} - {booking.end_time}</p>
                   </div>
                 </div>
               </div>
@@ -291,19 +433,19 @@ export default function AppointmentDetails({
                       <th className="text-right p-3">الخدمة</th>
                       <th className="text-center p-3">المدة (دقيقة)</th>
                       <th className="text-center p-3">السعر (د.إ)</th>
-                      <th className="text-center p-3">الكمية</th>
+                      {/* <th className="text-center p-3">الكمية</th> */}
                       <th className="text-center p-3">الإجمالي (د.إ)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {appointmentData.services.map((service) => (
-                      <tr key={service.id} className="border-t">
-                        <td className="p-3">{service.name}</td>
-                        <td className="p-3 text-center">{service.duration}</td>
-                        <td className="p-3 text-center">{service.price}</td>
-                        <td className="p-3 text-center">{service.quantity}</td>
+                    {booking.booking_services.map((bookingService) => (
+                      <tr key={bookingService.id} className="border-t">
+                        <td className="p-3">{bookingService.service.name.ar}</td>
+                        <td className="p-3 text-center">{bookingService.service.duration_minutes}</td>
+                        <td className="p-3 text-center">{bookingService.service.final_price}</td>
+                        {/* <td className="p-3 text-center">1</td> */}
                         <td className="p-3 text-center font-medium">
-                          {service.price * service.quantity}
+                          {bookingService.service.final_price}
                         </td>
                       </tr>
                     ))}
@@ -312,7 +454,7 @@ export default function AppointmentDetails({
                       <td className="p-3 text-center font-bold">
                         {totalDuration} دقيقة
                       </td>
-                      <td className="p-3"></td>
+                      {/* <td className="p-3"></td> */}
                       <td className="p-3"></td>
                       <td className="p-3 text-center font-bold">
                         {totalPrice} د.إ
@@ -324,17 +466,32 @@ export default function AppointmentDetails({
             </div>
 
             {/* ملاحظات */}
-            {appointmentData.notes && (
+            {/* Notes */}
+            {(booking.notes || booking.salon_notes) && (
               <>
                 <Separator />
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">ملاحظات</h3>
-                  <p className="p-3 bg-muted/20 rounded-md">
-                    {appointmentData.notes}
-                  </p>
+                  {booking.notes && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">ملاحظات العميل</p>
+                      <p className="p-3 bg-muted/20 rounded-md">
+                        {booking.notes}
+                      </p>
+                    </div>
+                  )}
+                  {booking.salon_notes && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">ملاحظات الصالون</p>
+                      <p className="p-3 bg-muted/20 rounded-md">
+                        {booking.salon_notes}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </>
             )}
+
           </CardContent>
         </Card>
 
@@ -347,57 +504,55 @@ export default function AppointmentDetails({
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">رقم الحجز</span>
-                <span className="font-medium">{appointmentData.id}</span>
+                <span className="font-medium">{booking.code}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">حالة الحجز</span>
-                <span>{getStatusBadge(appointmentData.status)}</span>
+                <span>{getStatusBadge(booking.status)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">حالة الدفع</span>
                 <Badge
                   variant="outline"
-                  className="bg-green-50 text-green-700 border-green-200"
+                  className={`
+                    ${booking.payment_status === "paid" ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"}
+                    `}
                 >
-                  {appointmentData.paymentStatus}
+                  {booking.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
                 </Badge>
               </div>
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">طريقة الدفع</span>
                 <span>{appointmentData.paymentMethod}</span>
-              </div>
+              </div> */}
               <Separator />
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">تاريخ الإنشاء</span>
                 <span>
-                  {new Date(appointmentData.createdAt).toLocaleDateString(
-                    "ar-SA"
-                  )}
+                  {new Date(booking.created_at).toLocaleDateString("en-US")}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">آخر تحديث</span>
                 <span>
-                  {new Date(appointmentData.updatedAt).toLocaleDateString(
-                    "ar-SA"
-                  )}
+                  {new Date(booking.updated_at).toLocaleDateString("en-US")}
                 </span>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">
-            {appointmentData.status === "معلق" && (
+            {booking.status === "pending" && (
               <Button className="w-full" variant="default">
                 تأكيد الحجز
               </Button>
             )}
-            {(appointmentData.status === "معلق" ||
-              appointmentData.status === "مؤكد") && (
-              <Button className="w-full" variant="destructive">
-                إلغاء الحجز
-              </Button>
-            )}
-            {appointmentData.status === "مؤكد" && (
+            {(booking.status === "pending" ||
+              booking.status === "confirmed") && (
+                <Button className="w-full" variant="destructive">
+                  إلغاء الحجز
+                </Button>
+              )}
+            {booking.status === "confirmed" && (
               <Button className="w-full" variant="default">
                 تحديد كمكتمل
               </Button>
