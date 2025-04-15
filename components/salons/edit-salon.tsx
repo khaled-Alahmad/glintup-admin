@@ -418,12 +418,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     </Label>
                     <Input id="name" defaultValue="صالون الأميرة" required />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="owner">
-                      اسم المالك <span className="text-red-500">*</span>
-                    </Label>
-                    <Input id="owner" defaultValue="منيرة السعيد" required />
-                  </div>
+                 
                 </div>
 
                 <div className="space-y-2">
