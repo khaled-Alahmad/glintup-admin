@@ -319,7 +319,7 @@ export default function SalonsManagement() {
                       </TableCell>
                       <TableCell>{getStatusBadge(salon.status)}</TableCell>
                       <TableCell>{salon.bookings_count}</TableCell>
-                      <TableCell style={{ unicodeBidi: 'plaintext' }} className=" text-right">{salon.total_revenue + " AED"}</TableCell>
+                      <TableCell style={{ unicodeBidi: 'plaintext' }} className=" text-right">{salon.total_revenue + " د.إ"}</TableCell>
                       <TableCell>
                         <div className="flex items-center align-items-center ">
                           <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-1" />

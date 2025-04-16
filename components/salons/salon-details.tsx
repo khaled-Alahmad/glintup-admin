@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MoreVertical, MessageSquare, Flag } from 'lucide-react';
+import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +75,21 @@ import { PaginationWithInfo } from "../ui/pagination-with-info";
 
 interface SalonDetailsProps {
   salonId: string;
+}
+interface Appointment {
+  id: number;
+  code: string;
+  date: string;
+  time: string;
+  end_time: string;
+  status: string;
+  total_price: number;
+  user: {
+    id: number;
+    full_name: string;
+    avatar: string | null;
+  };
+  booking_services: any[];
 }
 const DAYS_IN_ARABIC: Record<string, string> = {
   'sunday': 'الأحد',
@@ -250,6 +265,51 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       console.error('Error fetching reviews:', error);
     }
   };
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointmentsCurrentPage, setAppointmentsCurrentPage] = useState(1);
+  const [appointmentsTotalPages, setAppointmentsTotalPages] = useState(1);
+  const [appointmentsPerPage, setAppointmentsPerPage] = useState(10);
+  const [appointmentsTotalItems, setAppointmentsTotalItems] = useState(0);
+  const [appointmentsStats, setAppointmentsStats] = useState({
+    all_count: 0,
+    pending_count: 0,
+    confirmed_count: 0,
+    completed_count: 0,
+    cancelled_count: 0,
+  });
+  const [isLoadingAppointments, setIsLoadingAppointments] = useState(false);
+
+  // Add this function to fetch appointments
+  const fetchAppointments = async () => {
+    try {
+      setIsLoadingAppointments(true);
+      const response = await fetchData(`admin/bookings?salon_id=${salonId}&page=${appointmentsCurrentPage}&limit=${appointmentsPerPage}`);
+      if (response.success) {
+        setAppointments(response.data);
+        setAppointmentsTotalPages(response.meta.last_page);
+        setAppointmentsCurrentPage(response.meta.current_page);
+        setAppointmentsPerPage(response.meta.per_page);
+        setAppointmentsTotalItems(response.meta.total);
+        setAppointmentsStats(response.info);
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch appointments",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingAppointments(false);
+    }
+  };
+
+  // Add this useEffect
+  useEffect(() => {
+    if (activeTab === 'appointments') {
+      fetchAppointments();
+    }
+  }, [activeTab, appointmentsCurrentPage]);
 
   // Add useEffect to refetch when page changes
   useEffect(() => {
@@ -696,36 +756,65 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   //     date: "2024-03-20",
   //   },
   // ];
-
-  const appointments = [
-    {
-      id: "1",
-      customerName: "سارة أحمد",
-      customerAvatar: "/placeholder.svg?height=40&width=40",
-      service: "قص شعر",
-      date: "2024-04-03",
-      time: "10:30 صباحاً",
-      status: "مؤكد",
-    },
-    {
-      id: "2",
-      customerName: "نورة محمد",
-      customerAvatar: "/placeholder.svg?height=40&width=40",
-      service: "صبغة شعر",
-      date: "2024-04-03",
-      time: "2:15 مساءً",
-      status: "معلق",
-    },
-    {
-      id: "3",
-      customerName: "عبير علي",
-      customerAvatar: "/placeholder.svg?height=40&width=40",
-      service: "تسريحة شعر",
-      date: "2024-04-04",
-      time: "4:45 مساءً",
-      status: "مؤكد",
-    },
-  ];
+  const getAppointmentStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            قيد الانتظار
+          </Badge>
+        );
+      case "confirmed":
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            مؤكد
+          </Badge>
+        );
+      case "completed":
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            مكتمل
+          </Badge>
+        );
+      case "cancelled":
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            ملغي
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+  // const appointments = [
+  //   {
+  //     id: "1",
+  //     customerName: "سارة أحمد",
+  //     customerAvatar: "/placeholder.svg?height=40&width=40",
+  //     service: "قص شعر",
+  //     date: "2024-04-03",
+  //     time: "10:30 صباحاً",
+  //     status: "مؤكد",
+  //   },
+  //   {
+  //     id: "2",
+  //     customerName: "نورة محمد",
+  //     customerAvatar: "/placeholder.svg?height=40&width=40",
+  //     service: "صبغة شعر",
+  //     date: "2024-04-03",
+  //     time: "2:15 مساءً",
+  //     status: "معلق",
+  //   },
+  //   {
+  //     id: "3",
+  //     customerName: "عبير علي",
+  //     customerAvatar: "/placeholder.svg?height=40&width=40",
+  //     service: "تسريحة شعر",
+  //     date: "2024-04-04",
+  //     time: "4:45 مساءً",
+  //     status: "مؤكد",
+  //   },
+  // ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -1452,79 +1541,151 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               </TabsContent>
 
               <TabsContent value="appointments" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">الحجوزات</h3>
-                  <Button size="sm" asChild>
-                    <Link href={`/appointments?salon=${salonId}`}>
-                      عرض جميع الحجوزات
-                    </Link>
-                  </Button>
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">الحجوزات</h3>
+                    <Button size="sm" asChild>
+                      <Link href={`/appointments?salon=${salonId}`}>
+                        عرض جميع الحجوزات
+                      </Link>
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <Card className="stats-card">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{appointmentsStats.all_count}</div>
+                        <p className="text-xs text-muted-foreground">حجز</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="stats-card">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">قيد الانتظار</CardTitle>
+                        <Clock className="h-4 w-4 text-amber-500" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-amber-600">{appointmentsStats.pending_count}</div>
+                        <p className="text-xs text-muted-foreground">حجز</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="stats-card">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">مؤكد</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-green-600">{appointmentsStats.confirmed_count}</div>
+                        <p className="text-xs text-muted-foreground">حجز</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="stats-card">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">مكتمل</CardTitle>
+                        <CheckCheck className="h-4 w-4 text-blue-500" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-blue-600">{appointmentsStats.completed_count}</div>
+                        <p className="text-xs text-muted-foreground">حجز</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="stats-card">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium">ملغي</CardTitle>
+                        <X className="h-4 w-4 text-red-500" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold text-red-600">{appointmentsStats.cancelled_count}</div>
+                        <p className="text-xs text-muted-foreground">حجز</p>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
 
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>العميل</TableHead>
-                        <TableHead>الخدمة</TableHead>
-                        <TableHead>التاريخ والوقت</TableHead>
-                        <TableHead>الحالة</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {appointments.map((appointment) => (
-                        <TableRow key={appointment.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage
-                                  src={appointment.customerAvatar}
-                                  alt={appointment.customerName}
-                                />
-                                <AvatarFallback>
-                                  {appointment.customerName.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{appointment.customerName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{appointment.service}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <div className="flex items-center">
-                                <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="text-sm">
-                                  {new Date(
-                                    appointment.date
-                                  ).toLocaleDateString("en-US")}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="text-sm">
-                                  {appointment.time}
-                                </span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(appointment.status)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex justify-end">
-                              <Button variant="ghost" size="sm" asChild>
-                                <Link href={`/appointments/${appointment.id}`}>
-                                  عرض التفاصيل
-                                </Link>
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                {isLoadingAppointments ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">جاري تحميل الحجوزات...</p>
+                  </div>
+                ) : appointments.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">لا توجد حجوزات</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>رقم الحجز</TableHead>
+                            <TableHead>العميل</TableHead>
+                            <TableHead>التاريخ والوقت</TableHead>
+                            <TableHead>الحالة</TableHead>
+                            <TableHead>السعر</TableHead>
+                            <TableHead></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {appointments.map((appointment) => (
+                            <TableRow key={appointment.id}>
+                              <TableCell>{appointment.code}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage src={appointment.user.avatar || ""} alt={appointment.user.full_name} />
+                                    <AvatarFallback>{appointment.user.full_name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <span>{appointment.user.full_name}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center">
+                                    <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-sm">{new Date(appointment.date).toLocaleDateString("ar-SA")}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-sm">{appointment.time} - {appointment.end_time}</span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>{getAppointmentStatusBadge(appointment.status)}</TableCell>
+                              <TableCell>{appointment.total_price} د.إ</TableCell>
+                              <TableCell>
+                                <div className="flex justify-end">
+                                  <Button variant="ghost" size="sm" asChild>
+                                    <Link href={`/appointments/${appointment.id}`}>
+                                      عرض التفاصيل
+                                    </Link>
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {appointmentsTotalPages > 1 && (
+                      <div className="mt-4">
+                        <PaginationWithInfo
+                          currentPage={appointmentsCurrentPage}
+                          totalPages={appointmentsTotalPages}
+                          totalItems={appointmentsTotalItems}
+                          itemsPerPage={appointmentsPerPage}
+                          onPageChange={setAppointmentsCurrentPage}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
               </TabsContent>
             </CardContent>
           </Tabs>
@@ -1609,7 +1770,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="price">السعر (AED)</Label>
+                  <Label htmlFor="price">السعر (د.إ)</Label>
                   <Input
                     id="price"
                     name="price"
@@ -1775,7 +1936,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">السعر (AED)</Label>
+                    <Label htmlFor="price">السعر (د.إ)</Label>
                     <Input
                       id="price"
                       name="price"
@@ -1963,7 +2124,7 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
             </div>
             <div className="space-y-1">
               <p className="text-xs font-medium">السعر:</p>
-              <span className="font-medium text-sm">{service.price} AED</span>
+              <span className="font-medium text-sm">{service.price} د.إ</span>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-medium">الفئة:</p>

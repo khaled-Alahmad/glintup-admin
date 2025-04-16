@@ -292,7 +292,7 @@ export default function SettingsPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="sar">ريال سعودي (SAR)</SelectItem>
-                        <SelectItem value="aed">درهم إماراتي (AED)</SelectItem>
+                        <SelectItem value="د.إ">درهم إماراتي (د.إ)</SelectItem>
                         <SelectItem value="usd">دولار أمريكي (USD)</SelectItem>
                       </SelectContent>
                     </Select>
