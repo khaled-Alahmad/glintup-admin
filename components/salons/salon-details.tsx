@@ -232,7 +232,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setCurrentPage(response.meta.current_page);
         setPerPage(response.meta.per_page);
         setTotalItems(response.meta.total);
-        setActiveTab("services"); // Ensure we stay on services tab
+        // setActiveTab("services"); // Ensure we stay on services tab
 
       }
     } catch (error) {
@@ -1310,25 +1310,31 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">الخدمات الأكثر حجزاً</h3>
                   <div className="space-y-3">
-                    {services.slice(0, 3).map((service) => (
-                      <div
-                        key={service.id}
-                        className="flex justify-between items-center p-3 border rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium">{service.name.ar}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {service.duration_minutes}  دقيقة
-                          </p>
+                    {
+                      services.length === 0 ? (
+                        <div className="text-center py-12">
+                          <p className="text-muted-foreground">لا توجد خدمات</p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium"> {service.price + " د.إ"}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {service.duration_minutes} حجز
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      ) :
+                        services.slice(0, 3).map((service) => (
+                          <div
+                            key={service.id}
+                            className="flex justify-between items-center p-3 border rounded-lg"
+                          >
+                            <div>
+                              <p className="font-medium">{service.name.ar}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {service.duration_minutes}  دقيقة
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium"> {service.price + " د.إ"}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {service.duration_minutes} حجز
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                   </div>
                 </div>
 
@@ -1337,37 +1343,44 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">أحدث التقييمات</h3>
                   <div className="space-y-4">
-                    {reviews.slice(0, 2).map((review) => (
-                      <div key={review.id} className="p-4 border rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage
-                                src={review.user.avatar}
-                                alt={review.user.full_name}
-                              />
-                              <AvatarFallback>
-                                {review.user.first_name.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">
-                                {review.user.full_name}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                {renderStars(review.rating)}
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(review.created_at).toLocaleDateString(
-                                    "en-US"
-                                  )}
-                                </span>
+                    {
+                      reviews.length === 0 ? (
+                        <div className="text-center py-12">
+                          <p className="text-muted-foreground">لا توجد تقييمات</p>
+                        </div>
+                      ) :
+
+                        reviews.slice(0, 2).map((review) => (
+                          <div key={review.id} className="p-4 border rounded-lg">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage
+                                    src={review.user.avatar}
+                                    alt={review.user.full_name}
+                                  />
+                                  <AvatarFallback>
+                                    {review.user.first_name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">
+                                    {review.user.full_name}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    {renderStars(review.rating)}
+                                    <span className="text-xs text-muted-foreground">
+                                      {new Date(review.created_at).toLocaleDateString(
+                                        "en-US"
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
+                            <p className="mt-3 text-sm">{review.comment}</p>
                           </div>
-                        </div>
-                        <p className="mt-3 text-sm">{review.comment}</p>
-                      </div>
-                    ))}
+                        ))}
                   </div>
                 </div>
               </TabsContent>
@@ -1467,30 +1480,40 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Separator />
 
                 <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              src={review.user.avatar}
-                              alt={review.user.full_name}
-                            />
-                            <AvatarFallback>
-                              {review.user.full_name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{review.user.full_name}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="text-yellow-500">{review.stars}</div>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(review.created_at).toLocaleDateString("en-US")}
-                              </span>
+                  {isLoading
+                    ? (
+                      <div className="text-center py-12">
+                        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                        <p className="text-muted-foreground">جاري تحميل التقييمات...</p>
+                      </div>
+                    ) : reviews.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">لا توجد تقييمات</p>
+                      </div>
+                    ) : reviews.map((review) => (
+                      <div key={review.id} className="p-4 border rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src={review.user.avatar}
+                                alt={review.user.full_name}
+                              />
+                              <AvatarFallback>
+                                {review.user.full_name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{review.user.full_name}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className="text-yellow-500">{review.stars}</div>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(review.created_at).toLocaleDateString("en-US")}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        {/* <DropdownMenu>
+                          {/* <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <MoreVertical className="h-4 w-4" />
@@ -1515,16 +1538,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu> */}
-                      </div>
-                      <p className="mt-3">{review.comment}</p>
-                      {review.salon_reply && (
-                        <div className="mt-3 bg-muted/50 p-3 rounded-md">
-                          <p className="text-sm font-medium">رد الصالون:</p>
-                          <p className="text-sm mt-1">{review.salon_reply}</p>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <p className="mt-3">{review.comment}</p>
+                        {review.salon_reply && (
+                          <div className="mt-3 bg-muted/50 p-3 rounded-md">
+                            <p className="text-sm font-medium">رد الصالون:</p>
+                            <p className="text-sm mt-1">{review.salon_reply}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   {/* Add pagination component */}
                   {reviewsTotalPages > 1 && (
                     <div className="mt-4">

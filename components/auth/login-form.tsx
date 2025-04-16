@@ -68,7 +68,7 @@ export function LoginForm() {
           description: "مرحباً بك في لوحة تحكم Glint Up",
           variant: "default",
         });
-        router.push("/");
+        window.location.href = '/';
       }
 
 
