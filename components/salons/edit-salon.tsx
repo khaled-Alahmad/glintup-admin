@@ -335,23 +335,24 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
       };
 
-      const workingHoursData = workingHours.map(hour => ({
-        ...hour,
-        salon_id: Number(salonId)
-      }));
-      let hoursResponse
-      // Update salon contact info
-      const salonResponse = await updateData(`admin/salons/${salonId}`, contactData);
-      // Update working hours using Promise.all
+      const workingHoursData = workingHours.map(hour => {
+        const filteredHour = Object.fromEntries(
+          Object.entries({
+            ...hour,
+            salon_id: Number(salonId)
+          }).filter(([_, value]) => value !== "" && value !== null)
+        );
+        return filteredHour;
+      });
+
+
+
       await Promise.all(workingHoursData.map(async (hour) => {
         const hoursResponse = await updateData(`admin/working-hours/${hour.id}`, hour);
 
       }));
-      // Update working hours
-      // Update salon contact info
-      // const salonResponse = await updateData(`admin/salons/${salonId}`, contactData);
+      const salonResponse = await updateData(`admin/salons/${salonId}`, contactData);
 
-      // Update social media links
       await Promise.all(
         Object.entries(salonSocialMedia).map(([siteId, link]) => {
           if (link) {
@@ -948,11 +949,17 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                 if (!validateWorkingHour(data)) {
                                   return;
                                 }
+                                console.log("data", data);
+
+                                const filteredData = Object.fromEntries(
+                                  Object.entries(data).filter(([_, value]) => value !== "" && value !== null)
+                                );
+                                console.log("filteredData", filteredData);
 
                                 if (editingWorkingHour) {
                                   const response = await updateData(
                                     `admin/working-hours/${editingWorkingHour.id}`,
-                                    data
+                                    filteredData
                                   );
                                   if (response.success) {
                                     setWorkingHours(hours =>
@@ -968,7 +975,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                 } else {
                                   const response = await addData(
                                     `admin/working-hours`,
-                                    { ...data, salon_id: salonId }
+                                    { ...filteredData, salon_id: salonId }
                                   );
                                   if (response.success) {
                                     setWorkingHours([...workingHours, response.data]);
