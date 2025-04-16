@@ -26,7 +26,7 @@ import {
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { fetchData } from "@/lib/apiHelper";
+import { fetchData, updateData } from "@/lib/apiHelper";
 import { Skeleton } from "../ui/skeleton";
 
 interface AppointmentDetailsProps {
@@ -121,6 +121,34 @@ export default function AppointmentDetails({
   const router = useRouter();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
+
+  // Add the handleStatusChange function
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      const response = await updateData(`admin/bookings/${appointmentId}`, {
+        status: newStatus
+      });
+
+      if (response.success) {
+        toast({
+          title: "تم",
+          description: "تم تحديث حالة الحجز بنجاح",
+        });
+        fetchBooking();
+      }
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث حالة الحجز",
+        variant: "destructive",
+      });
+    } finally {
+      setIsStatusDialogOpen(false);
+      setPendingStatusChange(null);
+    }
+  };
 
 
   useEffect(() => {
@@ -541,19 +569,68 @@ export default function AppointmentDetails({
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">
+            <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>تأكيد تغيير الحالة</DialogTitle>
+                  <DialogDescription>
+                    {pendingStatusChange === 'cancelled' && 'هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟'}
+                    {pendingStatusChange === 'confirmed' && 'هل تريد تأكيد هذا الحجز؟'}
+                    {pendingStatusChange === 'completed' && 'هل تريد تحديد هذا الحجز كمكتمل؟'}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsStatusDialogOpen(false);
+                      setPendingStatusChange(null);
+                    }}
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    variant={pendingStatusChange === 'cancelled' ? 'destructive' : 'default'}
+                    onClick={() => handleStatusChange(pendingStatusChange!)}
+                  >
+                    تأكيد
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             {booking.status === "pending" && (
-              <Button className="w-full" variant="default">
+              <Button
+                className="w-full"
+                variant="default"
+                onClick={() => {
+                  setPendingStatusChange('confirmed');
+                  setIsStatusDialogOpen(true);
+                }}
+              >
                 تأكيد الحجز
               </Button>
             )}
-            {(booking.status === "pending" ||
-              booking.status === "confirmed") && (
-                <Button className="w-full" variant="destructive">
-                  إلغاء الحجز
-                </Button>
-              )}
+            {(booking.status === "pending" || booking.status === "confirmed") && (
+              <Button
+                className="w-full"
+                variant="destructive"
+                onClick={() => {
+                  setPendingStatusChange('cancelled');
+                  setIsStatusDialogOpen(true);
+                }}
+              >
+                إلغاء الحجز
+              </Button>
+            )}
             {booking.status === "confirmed" && (
-              <Button className="w-full" variant="default">
+              <Button
+                className="w-full"
+                variant="default"
+                onClick={() => {
+                  setPendingStatusChange('completed');
+                  setIsStatusDialogOpen(true);
+                }}
+              >
                 تحديد كمكتمل
               </Button>
             )}
