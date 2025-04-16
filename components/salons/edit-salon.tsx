@@ -4,6 +4,9 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { fetchData, updateData, addData } from "@/lib/apiHelper";
 import {
   Card,
   CardContent,
@@ -59,6 +62,16 @@ import {
 interface EditSalonProps {
   salonId: string;
 }
+// interface WorkingHour {
+//   id?: number;
+//   salon_id: number;
+//   day_of_week: string;
+//   opening_time: string;
+//   closing_time: string;
+//   is_closed: boolean;
+//   break_start: string | null;
+//   break_end: string | null;
+// }
 
 // تعريف نوع البيانات للخدمة
 interface Service {
@@ -90,15 +103,284 @@ interface Collection {
   price: number;
   discount: number;
 }
+// Add these types and constants
+export interface WorkingHour {
+  id: string;
+  day_of_week: string;
+  is_closed: boolean;
+  opening_time: string;
+  closing_time: string;
+  break_start?: string;
+  break_end?: string;
+}
+interface SocialMediaSite {
+  id: number;
+  name: {
+    en: string;
+    ar: string | null;
+  };
+  icon: string;
+  icon_url: string;
+}
+
+interface SocialMediaMap {
+  [key: number]: string;
+}
+const DAYS_OF_WEEK = [
+  'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
+];
+interface SalonSocialMedia {
+  id: number;
+  salon_id: number;
+  social_media_site_id: number;
+  link: string;
+}
 
 export default function EditSalon({ salonId }: EditSalonProps) {
+  const { toast } = useToast();
+  const router = useRouter();
+  // Add these after other state declarations
+  const [salonImages, setSalonImages] = useState<{ id: number; url: string }[]>([]);
+  const [imagesToRemove, setImagesToRemove] = useState<number[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [salonData, setSalonData] = useState<any>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoText, setLogoText] = useState<string | null>(null);
+
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [availableDays, setAvailableDays] = useState<string[]>(DAYS_OF_WEEK);
+  const [editingWorkingHour, setEditingWorkingHour] = useState<WorkingHour | null>(null);
+  const [isWorkingHourDialogOpen, setIsWorkingHourDialogOpen] = useState(false);
+  useEffect(() => {
+    const usedDays = workingHours.map(wh => wh.day_of_week);
+    console.log(usedDays);
+    console.log(availableDays);
+
+
+    setAvailableDays(DAYS_OF_WEEK.filter(day => !usedDays.includes(day)));
+  }, [workingHours]);
+  const [socialMediaSites, setSocialMediaSites] = useState<SocialMediaSite[]>([]);
+  const [salonSocialMedia, setSalonSocialMedia] = useState<SocialMediaMap>({});
+  const [newImagesNames, setNewImagesNames] = useState<string[]>([]);
+
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      try {
+        const files = Array.from(e.target.files);
+        setNewImages(prev => [...prev, ...files]);
+
+        // Upload each image and store their names and URLs
+        const uploadPromises = files.map(async (file) => {
+          const formData = new FormData();
+          formData.append('image', file);
+          formData.append('folder', "salons");
+
+          const response = await addData('general/upload-image', formData);
+          if (response.success) {
+            return {
+              name: response.data.image_name,
+              url: response.data.image_url
+            };
+          }
+          return null;
+        });
+
+        const imageResults = await Promise.all(uploadPromises);
+        const validResults = imageResults.filter((result): result is { name: string, url: string } => result !== null);
+
+        setSalonImages(prev => [...prev, ...validResults.map((r, index) => ({
+          id: Date.now() + index, // Convert to number
+          url: r.url
+        }))]);
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        toast({
+          title: "خطأ في رفع الصور",
+          description: "حدث خطأ أثناء رفع الصور",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleSaveMedia = async () => {
+    try {
+      setIsLoading(true);
+
+      const uploadedImages = await Promise.all(
+        newImages.map(async (file) => {
+          const imageFormData = new FormData();
+          imageFormData.append('image', file);
+          imageFormData.append('folder', "salons");
+
+          const response = await addData('general/upload-image', imageFormData);
+          return response.data.image_name;
+        })
+      );
+
+      // Prepare final update data
+      const updateDataToSend = {
+        images: uploadedImages,
+        images_remove: imagesToRemove,
+        icon: logoText
+      };
+
+      const response = await updateData(`admin/salons/${salonId}`, updateDataToSend);
+
+      if (response.success) {
+        toast({
+          title: "تم التحديث بنجاح",
+          description: "تم تحديث صور الصالون بنجاح",
+        });
+        // Reset states
+        setNewImages([]);
+        setNewImagesNames([]);
+        setImagesToRemove([]);
+        // Refresh images
+        fetchSalonImages();
+      }
+    } catch (error) {
+      console.error('Error updating media:', error);
+      toast({
+        title: "خطأ في التحديث",
+        description: "حدث خطأ أثناء تحديث الصور",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSalonImages = async () => {
+    try {
+      const response = await fetchData(`admin/salons/${salonId}`);
+      if (response.success) {
+        setSalonImages(response.data.images);
+      }
+    } catch (error) {
+      console.error('Error fetching salon images:', error);
+    }
+  };
+
+  // Add this to your existing useEffect or create a new one
+  useEffect(() => {
+    fetchSalonImages();
+  }, [salonId]);
+  // Add this effect to fetch social media sites
+  useEffect(() => {
+    const fetchSocialMediaSites = async () => {
+      try {
+        const response = await fetchData('admin/social-media-sites');
+        if (response.success) {
+          setSocialMediaSites(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch social media sites:', error);
+      }
+    };
+
+    const fetchSalonSocialMedia = async () => {
+      try {
+        const response = await fetchData(`admin/salon-social-media-sites?salon_id=${salonId}`);
+        if (response.success) {
+          const socialMediaMap: SocialMediaMap = {};
+          response.data.forEach((item: SalonSocialMedia) => {
+            socialMediaMap[item.social_media_site_id] = item.link;
+          });
+          setSalonSocialMedia(socialMediaMap);
+        }
+      } catch (error) {
+        console.error('Failed to fetch salon social media:', error);
+      }
+    };
+
+    fetchSocialMediaSites();
+    fetchSalonSocialMedia();
+  }, [salonId]);
 
   // خدمات الصالون المحددة
   const [salonServices, setSalonServices] = useState<SalonService[]>([]);
+  useEffect(() => {
+    const fetchWorkingHours = async () => {
+      try {
+        const response = await fetchData(`admin/working-hours?salon_id=${salonId}`);
+        console.log(response);
 
+        if (response.success) {
+          setWorkingHours(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch working hours:", error);
+      }
+    };
+    fetchWorkingHours();
+  }, [salonId]);
+  const handleSubmitContact = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      setIsLoading(true);
+      const contactData = {
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        phone_code: formData.get('phone_code'),
+        address: formData.get('location'),
+        city: formData.get('city'),
+        district: formData.get('country'),
+
+      };
+
+      const workingHoursData = workingHours.map(hour => ({
+        ...hour,
+        salon_id: Number(salonId)
+      }));
+      let hoursResponse
+      // Update salon contact info
+      const salonResponse = await updateData(`admin/salons/${salonId}`, contactData);
+      // Update working hours using Promise.all
+      await Promise.all(workingHoursData.map(async (hour) => {
+        const hoursResponse = await updateData(`admin/working-hours/${hour.id}`, hour);
+
+      }));
+      // Update working hours
+      // Update salon contact info
+      // const salonResponse = await updateData(`admin/salons/${salonId}`, contactData);
+
+      // Update social media links
+      await Promise.all(
+        Object.entries(salonSocialMedia).map(([siteId, link]) => {
+          if (link) {
+            return addData('admin/salon-social-media-sites', {
+              salon_id: salonId,
+              social_media_site_id: siteId,
+              link
+            });
+          }
+        })
+      );
+      if (salonResponse.success) {
+        toast({
+          title: "تم التحديث بنجاح",
+          description: salonResponse?.message,
+        });
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Failed to update contact info:", error);
+      toast({
+        title: "خطأ في التحديث",
+        description: "حدث خطأ أثناء تحديث معلومات الاتصال",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // المجموعات المحددة
   const [selectedCollections, setSelectedCollections] = useState<Collection[]>(
     []
@@ -214,84 +496,98 @@ export default function EditSalon({ salonId }: EditSalonProps) {
   // المدة المخصصة للخدمة المختارة
   const [customDuration, setCustomDuration] = useState<number>(0);
 
-  // In a real app, you would fetch salon data based on salonId
+  // جلب بيانات الصالون
   useEffect(() => {
-    // Simulating data fetching
-    setLogoPreview("/placeholder.svg?height=128&width=128");
-    setCoverPreview("/placeholder.svg?height=400&width=800");
-    setGalleryPreviews([
-      "/placeholder.svg?height=200&width=300",
-      "/placeholder.svg?height=200&width=300",
-      "/placeholder.svg?height=200&width=300",
-    ]);
+    const fetchSalonData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetchData(`admin/salons/${salonId}`);
+        if (response.success) {
+          const data = response.data;
+          setSalonData(data);
+          setLogoPreview(data.icon_url);
+          // setCoverPreview(data.cove || "/placeholder.svg?height=400&width=800");
+          setGalleryPreviews(data.images || []);
+          setSalonServices(data.services || []);
+          setLogoText(data.icon);
 
-    // تحميل الخدمات المحددة مسبقاً للصالون
-    setSalonServices([
-      {
-        id: "salon-service-1",
-        serviceId: "1",
-        name: "قص الشعر",
-        duration: 60,
-        price: 180,
-        description: "قص الشعر بأحدث التقنيات والموضات",
-        category: "hair",
-      },
-      {
-        id: "salon-service-2",
-        serviceId: "4",
-        name: "مكياج",
-        duration: 75,
-        price: 300,
-        description: "مكياج احترافي للمناسبات والسهرات",
-        category: "makeup",
-      },
-    ]);
+          setSelectedCollections(data.collections || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch salon data:", error);
+        toast({
+          title: "خطأ في جلب البيانات",
+          description: "حدث خطأ أثناء جلب بيانات الصالون",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // تحميل المجموعات المحددة مسبقاً للصالون
-    setSelectedCollections([availableCollections[0]]);
+    fetchSalonData();
   }, [salonId]);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('folder', "salons");
+
+        const response = await addData('general/upload-image', formData);
+        if (response.success) {
+          setLogoPreview(response.data.image_url);
+          setLogoText(response.data.image_name);
+        }
+      } catch (error) {
+        console.error("Failed to upload logo:", error);
+        toast({
+          title: "خطأ في رفع الصورة",
+          description: "حدث خطأ أثناء رفع شعار الصالون",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCoverPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleSubmitBasic = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newPreviews: string[] = [];
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          newPreviews.push(reader.result as string);
-          if (newPreviews.length === files.length) {
-            setGalleryPreviews([...galleryPreviews, ...newPreviews]);
-          }
-        };
-        reader.readAsDataURL(file);
+    try {
+      setIsLoading(true);
+      const updateDatatoSend = {
+        name: formData.get('name'),
+        description: formData.get('description'),
+        is_active: formData.get('is_active') === 'on' ? 1 : 0,
+        is_approved: formData.get('is_approved') === 'on' ? 1 : 0,
+        // logo_url: logoPreview,
+        // cover_url: coverPreview,
+        // gallery_urls: galleryPreviews,
+        // services: salonServices,
+        // collections: selectedCollections,
+      };
+
+      const response = await updateData(`admin/salons/${salonId}`, updateDatatoSend);
+      if (response.success) {
+        toast({
+          title: "تم التحديث بنجاح",
+          description: "تم تحديث بيانات الصالون بنجاح",
+        });
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Failed to update salon:", error);
+      toast({
+        title: "خطأ في التحديث",
+        description: "حدث خطأ أثناء تحديث بيانات الصالون",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const removeGalleryImage = (index: number) => {
-    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
   };
 
   // إضافة خدمة إلى الصالون
@@ -372,7 +668,94 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       setCustomDuration(service.duration);
     }
   };
+  if (!salonData) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 animate-pulse bg-muted rounded-md" />
+          <div className="h-8 w-48 animate-pulse bg-muted rounded-md" />
+        </div>
 
+        <div className="grid gap-6">
+          <div className="h-10 w-full animate-pulse bg-muted rounded-md" />
+          <Card>
+            <CardHeader>
+              <div className="h-6 w-32 animate-pulse bg-muted rounded" />
+              <div className="h-4 w-48 animate-pulse bg-muted/50 rounded mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="h-5 w-24 animate-pulse bg-muted rounded" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="h-10 animate-pulse bg-muted rounded" />
+                  <div className="h-10 animate-pulse bg-muted rounded" />
+                </div>
+                <div className="h-32 animate-pulse bg-muted rounded" />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="flex justify-end gap-4 w-full">
+                <div className="h-10 w-24 animate-pulse bg-muted rounded" />
+                <div className="h-10 w-32 animate-pulse bg-muted rounded" />
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+  const validateWorkingHour = (workingHour: WorkingHour): boolean => {
+    if (!workingHour.day_of_week) {
+      toast({
+        title: "خطأ",
+        description: "يرجى اختيار اليوم",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!workingHour.is_closed) {
+      if (!workingHour.opening_time || !workingHour.closing_time) {
+        toast({
+          title: "خطأ",
+          description: "يرجى تحديد وقت الفتح والإغلاق",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (workingHour.opening_time >= workingHour.closing_time) {
+        toast({
+          title: "خطأ",
+          description: "يجب أن يكون وقت الإغلاق بعد وقت الفتح",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (workingHour.break_start && !workingHour.break_end ||
+        !workingHour.break_start && workingHour.break_end) {
+        toast({
+          title: "خطأ",
+          description: "يجب تحديد وقت بداية ونهاية الراحة",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (workingHour.break_start && workingHour.break_end &&
+        workingHour.break_start >= workingHour.break_end) {
+        toast({
+          title: "خطأ",
+          description: "يجب أن يكون وقت نهاية الراحة بعد وقت البداية",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
+    return true;
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -387,22 +770,16 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       </div>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="basic">معلومات أساسية</TabsTrigger>
           <TabsTrigger value="contact">معلومات الاتصال</TabsTrigger>
           <TabsTrigger value="media">الصور والوسائط</TabsTrigger>
-          <TabsTrigger value="services">الخدمات</TabsTrigger>
-          <TabsTrigger value="collections">المجموعات</TabsTrigger>
+          {/* <TabsTrigger value="services">الخدمات</TabsTrigger>
+          <TabsTrigger value="collections">المجموعات</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="basic" className="mt-4">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              // هنا يتم معالجة إرسال البيانات
-              console.log("تم حفظ التغييرات");
-            }}
-          >
+          <form onSubmit={handleSubmitBasic}>
             <Card>
               <CardHeader>
                 <CardTitle>تعديل بيانات الصالون</CardTitle>
@@ -416,57 +793,22 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <Label htmlFor="name">
                       اسم الصالون <span className="text-red-500">*</span>
                     </Label>
-                    <Input id="name" defaultValue="صالون الأميرة" required />
+                    <Input id="name" name="name" defaultValue={salonData?.name} required />
                   </div>
-                 
+
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description">وصف الصالون</Label>
                   <Textarea
                     id="description"
-                    defaultValue="صالون الأميرة هو صالون متخصص في خدمات التجميل والعناية بالشعر والبشرة للسيدات. نقدم خدمات عالية الجودة بأيدي خبيرات متخصصات في مجال التجميل."
+                    name="description"
+                    defaultValue={salonData?.description}
                     rows={4}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">
-                      نوع الصالون <span className="text-red-500">*</span>
-                    </Label>
-                    <Select required>
-                      <SelectTrigger id="category">
-                        <SelectValue placeholder="اختر نوع الصالون" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {/* <SelectItem value="women">صالون نسائي</SelectItem>
-                                     <SelectItem value="men">صالون رجالي</SelectItem>
-                                     <SelectItem value="both">صالون مشترك</SelectItem> */}
-                        <SelectItem value="home-service">
-                          صالونات الخدمات المنزلية
-                        </SelectItem>
-                        <SelectItem value="beauty-expert">
-                          خبيرات التجميل
-                        </SelectItem>
-                        <SelectItem value="clinic">العيادات</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="status">حالة الصالون</Label>
-                    <Select defaultValue="active">
-                      <SelectTrigger id="status">
-                        <SelectValue placeholder="اختر حالة الصالون" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">نشط</SelectItem>
-                        <SelectItem value="pending">معلق</SelectItem>
-                        <SelectItem value="inactive">غير نشط</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+
 
                 <Separator />
 
@@ -475,30 +817,32 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="featured">صالون مميز</Label>
-                        <p className="text-sm text-muted-foreground">
-                          عرض الصالون في قسم الصالونات المميزة
-                        </p>
-                      </div>
-                      <Switch id="featured" defaultChecked className="switch-custom " />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="verified">صالون موثق</Label>
+                        <Label htmlFor="is_approved">صالون موثق</Label>
                         <p className="text-sm text-muted-foreground">
                           إضافة علامة التوثيق إلى الصالون
                         </p>
                       </div>
-                      <Switch id="verified" defaultChecked className="switch-custom " />
+                      <Switch name="is_approved" id="is_approved" defaultChecked={salonData?.is_approved} className="switch-custom" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="is_active">صالون نشط</Label>
+                        <p className="text-sm text-muted-foreground">
+                          تعيين الصالون نشطًا
+                        </p>
+                      </div>
+                      <Switch id="is_active" name="is_active" defaultChecked={salonData?.is_active} className="switch-custom" />
                     </div>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="outline" type="button" asChild>
-                  <Link href={`/salons/${salonId}`}>إلغاء</Link>
+                  <Link href={`/salons`}>إلغاء</Link>
                 </Button>
-                <Button type="submit">حفظ التغييرات</Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}
+                </Button>
               </CardFooter>
             </Card>
           </form>
@@ -506,159 +850,344 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
         <TabsContent value="contact" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>معلومات الاتصال</CardTitle>
-              <CardDescription>
-                تعديل معلومات الاتصال والموقع للصالون
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="email">البريد الإلكتروني</Label>
-                  <div className="relative">
-                    <Mail className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      defaultValue="princess@salon.com"
-                      className="pr-9"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">رقم الهاتف</Label>
-                  <div className="relative">
-                    <Phone className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      defaultValue="+966 50 123 4567"
-                      className="pr-9"
-                    />
-                  </div>
-                </div>
-              </div>
+            <form onSubmit={handleSubmitContact}>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">العنوان</Label>
-                <div className="relative">
-                  <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    id="address"
-                    defaultValue="حي الورود، شارع الأمير سلطان، الرياض"
-                    className="pr-9 min-h-[80px]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="city">المدينة</Label>
-                  <Select defaultValue="riyadh">
-                    <SelectTrigger id="city">
-                      <SelectValue placeholder="اختر المدينة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="riyadh">الرياض</SelectItem>
-                      <SelectItem value="jeddah">جدة</SelectItem>
-                      <SelectItem value="dammam">الدمام</SelectItem>
-                      <SelectItem value="makkah">مكة المكرمة</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="district">الحي</Label>
-                  <Input id="district" defaultValue="حي الورود" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="postal-code">الرمز البريدي</Label>
-                  <Input id="postal-code" defaultValue="12345" />
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">ساعات العمل</h3>
+              <CardHeader>
+                <CardTitle>معلومات الاتصال</CardTitle>
+                <CardDescription>
+                  تعديل معلومات الاتصال والموقع للصالون
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { day: "الأحد", from: "09:00", to: "21:00" },
-                    { day: "الاثنين", from: "09:00", to: "21:00" },
-                    { day: "الثلاثاء", from: "09:00", to: "21:00" },
-                    { day: "الأربعاء", from: "09:00", to: "21:00" },
-                    { day: "الخميس", from: "09:00", to: "21:00" },
-                    { day: "الجمعة", from: "16:00", to: "22:00" },
-                    { day: "السبت", from: "09:00", to: "21:00" },
-                  ].map((workDay) => (
-                    <div
-                      key={workDay.day}
-                      className="flex items-center justify-between gap-4 p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>{workDay.day}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Select defaultValue={workDay.from}>
-                          <SelectTrigger className="w-[110px]">
-                            <SelectValue placeholder="من" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 24 }).map((_, i) => (
-                              <SelectItem
-                                key={i}
-                                value={`${String(i).padStart(2, "0")}:00`}
-                              >
-                                {`${String(i).padStart(2, "0")}:00`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <span>-</span>
-                        <Select defaultValue={workDay.to}>
-                          <SelectTrigger className="w-[110px]">
-                            <SelectValue placeholder="إلى" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 24 }).map((_, i) => (
-                              <SelectItem
-                                key={i}
-                                value={`${String(i).padStart(2, "0")}:00`}
-                              >
-                                {`${String(i).padStart(2, "0")}:00`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">
+                      البريد الإلكتروني <span className="text-red-500">*</span>
+                    </Label>
+                    <Input id="email" name="email" defaultValue={salonData?.email} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">
+                      رقم الهاتف <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="flex">
+                      <Input
+                        id="phone"
+                        name="phone"
+                        defaultValue={salonData?.phone}
+                        className="rounded-l-none text-right"
+                        style={{ direction: "rtl", textAlign: "left" }}
+                        placeholder="555 123 4567"
+                        required
+                      />
+                      <Input
+                        id="phone_code"
+                        name="phone_code"
+
+                        defaultValue={salonData?.phone_code}
+                        className="w-[90px] rounded-r-none text-center border-r-0"
+                        style={{ direction: "ltr", unicodeBidi: "plaintext" }}
+                        required
+                      />
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">وسائل التواصل الاجتماعي</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="instagram">Instagram</Label>
-                    <Input id="instagram" defaultValue="princess_salon" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="twitter">Twitter</Label>
-                    <Input id="twitter" defaultValue="princess_salon" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="snapchat">Snapchat</Label>
-                    <Input id="snapchat" defaultValue="princess_salon" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tiktok">TikTok</Label>
-                    <Input id="tiktok" defaultValue="princess_salon" />
                   </div>
                 </div>
-              </div>
-            </CardContent>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">العنوان</Label>
+                  <div className="relative">
+                    <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Textarea
+                      id="location"
+                      name="location"
+                      defaultValue={salonData?.location}
+                      className="pr-9 min-h-[80px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">
+                      المدينة <span className="text-red-500">*</span>
+                    </Label>
+                    <Input id="city" name="city" defaultValue={salonData?.city} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country">
+                      الدولة <span className="text-red-500">*</span>
+                    </Label>
+                    <Input id="country" name="country" defaultValue={salonData?.country} required />
+                  </div>
+                </div>
+
+                <Separator />
+                <div className="space-y-4">
+
+
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">ساعات العمل</h3>
+                    {availableDays.length > 0 && (
+                      <Dialog open={isWorkingHourDialogOpen} onOpenChange={setIsWorkingHourDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="h-4 w-4 ml-2" />
+                            إضافة يوم عمل
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>
+                              {editingWorkingHour ? 'تعديل يوم عمل' : 'إضافة يوم عمل'}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <WorkingHourForm
+                            workingHour={editingWorkingHour}
+                            onSubmit={async (data) => {
+                              try {
+                                if (!validateWorkingHour(data)) {
+                                  return;
+                                }
+
+                                if (editingWorkingHour) {
+                                  const response = await updateData(
+                                    `admin/working-hours/${editingWorkingHour.id}`,
+                                    data
+                                  );
+                                  if (response.success) {
+                                    setWorkingHours(hours =>
+                                      hours.map(h => h.id === editingWorkingHour.id ? response.data : h)
+                                    );
+                                    setIsWorkingHourDialogOpen(false);
+                                    setEditingWorkingHour(null);
+                                    toast({
+                                      title: "تم بنجاح",
+                                      description: "تم تعديل يوم العمل بنجاح",
+                                    });
+                                  }
+                                } else {
+                                  const response = await addData(
+                                    `admin/working-hours`,
+                                    { ...data, salon_id: salonId }
+                                  );
+                                  if (response.success) {
+                                    setWorkingHours([...workingHours, response.data]);
+                                    setIsWorkingHourDialogOpen(false);
+                                    toast({
+                                      title: "تم بنجاح",
+                                      description: "تم إضافة يوم العمل بنجاح",
+                                    });
+                                  }
+                                }
+                              } catch (error) {
+                                console.error("Error saving working hours:", error);
+                                toast({
+                                  title: "خطأ",
+                                  description: "حدث خطأ أثناء حفظ البيانات",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            availableDays={availableDays}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    {/* <h3 className="text-lg font-medium">ساعات العمل</h3> */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {workingHours.map((workDay) => (
+                        <div
+                          key={workDay.day_of_week}
+                          className="flex flex-col gap-4 p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium">{workDay.day_of_week}</span>
+                            </div>
+                            <Switch
+                              className="switch-custom"
+                              checked={!workDay.is_closed}
+                              onCheckedChange={(checked) => {
+                                setWorkingHours(hours =>
+                                  hours.map(h =>
+                                    h.day_of_week === workDay.day_of_week
+                                      ? { ...h, is_closed: !checked }
+                                      : h
+                                  )
+                                );
+                              }}
+                            />
+                          </div>
+
+                          {!workDay.is_closed && (
+                            <>
+                              <div className="flex gap-2 items-center">
+                                <Select
+                                  value={workDay.opening_time}
+                                  onValueChange={(value) => {
+                                    setWorkingHours(hours =>
+                                      hours.map(h =>
+                                        h.day_of_week === workDay.day_of_week
+                                          ? { ...h, opening_time: value }
+                                          : h
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger className="w-[120px]">
+                                    <SelectValue placeholder="من" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 24 }).map((_, i) => (
+                                      <SelectItem
+                                        key={i}
+                                        value={`${String(i).padStart(2, "0")}:00`}
+                                      >
+                                        {`${String(i).padStart(2, "0")}:00`}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <span>إلى</span>
+                                <Select
+                                  value={workDay.closing_time}
+                                  onValueChange={(value) => {
+                                    setWorkingHours(hours =>
+                                      hours.map(h =>
+                                        h.day_of_week === workDay.day_of_week
+                                          ? { ...h, closing_time: value }
+                                          : h
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger className="w-[120px]">
+                                    <SelectValue placeholder="إلى" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 24 }).map((_, i) => (
+                                      <SelectItem
+                                        key={i}
+                                        value={`${String(i).padStart(2, "0")}:00`}
+                                      >
+                                        {`${String(i).padStart(2, "0")}:00`}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="flex flex-col gap-2">
+                                <Label>فترة الراحة</Label>
+                                <div className="flex gap-2 items-center">
+                                  <Select
+                                    value={workDay.break_start || ""}
+                                    onValueChange={(value) => {
+                                      setWorkingHours(hours =>
+                                        hours.map(h =>
+                                          h.day_of_week === workDay.day_of_week
+                                            ? { ...h, break_start: value }
+                                            : h
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-[120px]">
+                                      <SelectValue placeholder="من" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="aa">بدون راحة</SelectItem>
+                                      {Array.from({ length: 24 }).map((_, i) => (
+                                        <SelectItem
+                                          key={i}
+                                          value={`${String(i).padStart(2, "0")}:00`}
+                                        >
+                                          {`${String(i).padStart(2, "0")}:00`}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <span>إلى</span>
+                                  <Select
+                                    value={workDay.break_end || ""}
+                                    onValueChange={(value) => {
+                                      setWorkingHours(hours =>
+                                        hours.map(h =>
+                                          h.day_of_week === workDay.day_of_week
+                                            ? { ...h, break_end: value }
+                                            : h
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-[120px]">
+                                      <SelectValue placeholder="إلى" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="aa">بدون راحة</SelectItem>
+                                      {Array.from({ length: 24 }).map((_, i) => (
+                                        <SelectItem
+                                          key={i}
+                                          value={`${String(i).padStart(2, "0")}:00`}
+                                        >
+                                          {`${String(i).padStart(2, "0")}:00`}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+
+                {/* handle social-media-sites */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">مواقع التواصل الاجتماعي</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {socialMediaSites.map((site) => (
+                      <div key={site.id} className="flex items-center gap-4">
+                        <div className="w-8 h-8">
+                          <img
+                            src={site.icon_url}
+                            alt={site.name.en}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            placeholder={`${site.name.en} URL`}
+                            value={salonSocialMedia[site.id] || ''}
+                            onChange={(e) => {
+                              setSalonSocialMedia(prev => ({
+                                ...prev,
+                                [site.id]: e.target.value
+                              }));
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline" type="button" asChild>
+                  <Link href={`/salons`}>إلغاء</Link>
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}
+                </Button>
+              </CardFooter>
+            </form>
           </Card>
         </TabsContent>
 
@@ -671,7 +1200,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">شعار الصالون</h3>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
+                <Label
+                  htmlFor="logo"
+                  className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                >
                   {logoPreview ? (
                     <div className="relative w-full">
                       <img
@@ -679,14 +1211,17 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                         alt="معاينة الشعار"
                         className="mx-auto max-h-48 rounded-md object-contain"
                       />
-                      <Button
+                      {/* <Button
                         variant="destructive"
                         size="sm"
                         className="absolute top-2 right-2"
-                        onClick={() => setLogoPreview(null)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setLogoPreview(null);
+                        }}
                       >
                         حذف
-                      </Button>
+                      </Button> */}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center">
@@ -704,64 +1239,17 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     className="hidden"
                     onChange={handleLogoChange}
                   />
-                  <Label htmlFor="logo" className="mt-4">
-                    <Button type="button" variant="outline">
-                      تغيير الشعار
-                    </Button>
-                  </Label>
-                </div>
+                </Label>
               </div>
-
               <Separator />
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">صورة الغلاف</h3>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
-                  {coverPreview ? (
-                    <div className="relative w-full">
-                      <img
-                        src={coverPreview || "/placeholder.svg"}
-                        alt="معاينة صورة الغلاف"
-                        className="mx-auto max-h-48 rounded-md object-contain"
-                      />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={() => setCoverPreview(null)}
-                      >
-                        حذف
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600 mb-1">
-                        اسحب وأفلت صورة الغلاف هنا أو انقر للتصفح
-                      </p>
-                      <p className="text-xs text-gray-500">PNG, JPG حتى 5MB</p>
-                    </div>
-                  )}
-                  <Input
-                    id="cover"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleCoverChange}
-                  />
-                  <Label htmlFor="cover" className="mt-4">
-                    <Button type="button" variant="outline">
-                      تغيير صورة الغلاف
-                    </Button>
-                  </Label>
-                </div>
-              </div>
-
-              <Separator />
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">معرض الصور</h3>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
+                <h3 className="text-lg font-medium">صور الغلاف </h3>
+                <Label
+                  htmlFor="gallery"
+                  className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex flex-col items-center">
                     <Upload className="h-12 w-12 text-gray-400 mb-2" />
                     <p className="text-sm text-gray-600 mb-1">
@@ -771,6 +1259,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       PNG, JPG حتى 5MB لكل صورة
                     </p>
                   </div>
+                  <Button type="button" variant="outline" className="mt-4">
+                    إضافة صور جديدة
+                  </Button>
                   <Input
                     id="gallery"
                     type="file"
@@ -779,40 +1270,39 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     className="hidden"
                     onChange={handleGalleryChange}
                   />
-                  <Label htmlFor="gallery" className="mt-4">
-                    <Button type="button" variant="outline">
-                      إضافة صور جديدة
-                    </Button>
-                  </Label>
-                </div>
-
-                {galleryPreviews.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                    {galleryPreviews.map((preview, index) => (
-                      <div
-                        key={index}
-                        className="relative rounded-md overflow-hidden h-40"
-                      >
-                        <img
-                          src={preview || "/placeholder.svg"}
-                          alt={`صورة ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
+                </Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  {salonImages.map((image) => (
+                    <div key={image.id} className="relative group rounded-lg overflow-hidden h-40">
+                      <img
+                        src={image.url}
+                        alt="صورة الصالون"
+                        className="w-full h-full object-contain"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="destructive"
                           size="icon"
                           className="absolute top-2 right-2 h-6 w-6"
-                          onClick={() => removeGalleryImage(index)}
+                          onClick={() => {
+                            setImagesToRemove(prev => [...prev, image.id]);
+                            setSalonImages(prev => prev.filter(img => img.id !== image.id));
+                          }}
                         >
-                          <span className="sr-only">حذف</span>
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  ))}
+                </div>
               </div>
+
             </CardContent>
+            <CardFooter className="item-end justify-end">
+              <Button onClick={handleSaveMedia} disabled={isLoading}>
+                {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
 
@@ -1179,12 +1669,153 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           </Card>
         </TabsContent>
       </Tabs>
-
+      {/* 
       <div className="flex justify-between">
         <Button variant="outline" asChild>
           <Link href={`/salons/${salonId}`}>إلغاء</Link>
         </Button>
         <Button>حفظ التغييرات</Button>
+      </div> */}
+    </div>
+  );
+}
+interface WorkingHourFormProps {
+  workingHour?: WorkingHour | null;
+  onSubmit: (data: WorkingHour) => void;
+  availableDays: string[];
+}
+export function WorkingHourForm({ workingHour, onSubmit, availableDays }: WorkingHourFormProps) {
+  const [formData, setFormData] = useState<WorkingHour>({
+    id: workingHour?.id || '',
+    day_of_week: workingHour?.day_of_week || '',
+    is_closed: workingHour?.is_closed || false,
+    opening_time: workingHour?.opening_time || '',
+    closing_time: workingHour?.closing_time || '',
+    break_start: workingHour?.break_start || '',
+    break_end: workingHour?.break_end || '',
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>اليوم</Label>
+        <Select
+          value={formData.day_of_week}
+          onValueChange={(value) => setFormData({ ...formData, day_of_week: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="اختر اليوم" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableDays.map(day => (
+              <SelectItem key={day} value={day}>
+                {day === 'sunday' && 'الأحد'}
+                {day === 'monday' && 'الإثنين'}
+                {day === 'tuesday' && 'الثلاثاء'}
+                {day === 'wednesday' && 'الأربعاء'}
+                {day === 'thursday' && 'الخميس'}
+                {day === 'friday' && 'الجمعة'}
+                {day === 'saturday' && 'السبت'}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Label>مغلق</Label>
+        <Switch
+          className="switch-custom"
+          checked={formData.is_closed}
+          onCheckedChange={(checked) => setFormData({ ...formData, is_closed: checked })}
+        />
+      </div>
+
+      {!formData.is_closed && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>وقت الفتح</Label>
+              <Select
+                value={formData.opening_time}
+                onValueChange={(value) => setFormData({ ...formData, opening_time: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الوقت" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }).map((_, i) => (
+                    <SelectItem key={i} value={`${String(i).padStart(2, "0")}:00`}>
+                      {`${String(i).padStart(2, "0")}:00`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>وقت الإغلاق</Label>
+              <Select
+                value={formData.closing_time}
+                onValueChange={(value) => setFormData({ ...formData, closing_time: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الوقت" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }).map((_, i) => (
+                    <SelectItem key={i} value={`${String(i).padStart(2, "0")}:00`}>
+                      {`${String(i).padStart(2, "0")}:00`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>فترة الراحة</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                value={formData.break_start}
+                onValueChange={(value) => setFormData({ ...formData, break_start: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="من" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no_break">بدون راحة</SelectItem>
+                  {Array.from({ length: 24 }).map((_, i) => (
+                    <SelectItem key={i} value={`${String(i).padStart(2, "0")}:00`}>
+                      {`${String(i).padStart(2, "0")}:00`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={formData.break_end}
+                onValueChange={(value) => setFormData({ ...formData, break_end: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="إلى" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no_break">بدون راحة</SelectItem>
+                  {Array.from({ length: 24 }).map((_, i) => (
+                    <SelectItem key={i} value={`${String(i).padStart(2, "0")}:00`}>
+                      {`${String(i).padStart(2, "0")}:00`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={() => onSubmit(formData)}>
+          {workingHour ? 'تحديث' : 'إضافة'}
+        </Button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,8 +24,10 @@ import {
   Bell,
   CreditCard,
   Lock,
+  MoreVertical,
   Palette,
   Percent,
+  Plus,
   Save,
   Settings,
   Smartphone,
@@ -33,10 +35,111 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { addData, deleteData, fetchData } from "@/lib/apiHelper";
+import { useToast } from "../ui/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+interface SocialMediaSite {
+  id: number;
+  name: {
+    en: string;
+    ar: string | null;
+  };
+  icon: string;
+  icon_url: string;
+}
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
+  const [socialMediaSites, setSocialMediaSites] = useState<SocialMediaSite[]>([]);
+  const [isAddingSite, setIsAddingSite] = useState(false);
+  const [editingSite, setEditingSite] = useState<SocialMediaSite | null>(null);
+  const { toast } = useToast();
+  const [uploadedIcon, setUploadedIcon] = useState<string | null>(null);
+  const [iconName, setIconName] = useState<string>('');
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Create preview
 
+
+      // Upload to API
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('folder', "salons");
+
+      try {
+        const response = await addData('general/upload-image', formData);
+        // const data = await response.data;
+        if (response.success) {
+          setIconName(response.data.image_name);
+          setUploadedIcon(response.data.image_url);
+          // toast({
+          //   title: "Success",
+          //   description: "Icon uploaded successfully",
+          // });
+        }
+      } catch (error) {
+        console.error('Failed to upload icon:', error);
+        toast({
+          title: "Error",
+          description: "Failed to upload icon",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+  // Add this effect to fetch social media sites
+  useEffect(() => {
+    const fetchSocialSites = async () => {
+      try {
+        const response = await fetchData('admin/social-media-sites');
+        if (response.success) {
+          setSocialMediaSites(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch social media sites:', error);
+      }
+    };
+    fetchSocialSites();
+  }, []);
+
+  // Add these handler functions
+
+  const handleAddSite = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    try {
+
+
+      const siteData = {
+        name: {
+          en: formData.get('name_en'),
+          ar: formData.get('name_ar')
+        },
+        icon: iconName
+      };
+
+      const response = await addData('admin/social-media-sites', siteData);
+      if (response.success) {
+        setSocialMediaSites([...socialMediaSites, response.data]);
+        setIsAddingSite(false);
+        setUploadedIcon(null);
+        setIconName('');
+        toast({
+          title: "Success",
+          description: "Social media site added successfully",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to add social media site:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add social media site",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -55,9 +158,8 @@ export default function SettingsPage() {
             <nav className="flex flex-col space-y-1 px-2">
               <Button
                 variant={activeTab === "general" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "general" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "general" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("general")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -65,51 +167,17 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "appearance" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "appearance" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "appearance" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("appearance")}
               >
                 <Palette className="h-4 w-4 ml-2" />
                 المظهر
               </Button>
-              {/* <Button
-                variant={activeTab === "notifications" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "notifications" ? "" : "hover:bg-muted"}`}
-                onClick={() => setActiveTab("notifications")}
-              >
-                <Bell className="h-4 w-4 ml-2" />
-                الإشعارات
-              </Button> */}
-              {/* <Button
-                variant={activeTab === "users" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "users" ? "" : "hover:bg-muted"}`}
-                onClick={() => setActiveTab("users")}
-              >
-                <Users className="h-4 w-4 ml-2" />
-                المستخدمين
-              </Button> */}
-              {/* <Button
-                variant={activeTab === "security" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "security" ? "" : "hover:bg-muted"}`}
-                onClick={() => setActiveTab("security")}
-              >
-                <Lock className="h-4 w-4 ml-2" />
-                الأمان
-              </Button> */}
-              {/* <Button
-                variant={activeTab === "payments" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "payments" ? "" : "hover:bg-muted"}`}
-                onClick={() => setActiveTab("payments")}
-              >
-                <CreditCard className="h-4 w-4 ml-2" />
-                المدفوعات
-              </Button> */}
               <Button
                 variant={activeTab === "commissions" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "commissions" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "commissions" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("commissions")}
               >
                 <Percent className="h-4 w-4 ml-2" />
@@ -117,13 +185,21 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "app" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "app" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "app" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("app")}
               >
                 <Smartphone className="h-4 w-4 ml-2" />
                 إعدادات التطبيق
+              </Button>
+              <Button
+                variant={activeTab === "social-media" ? "default" : "ghost"}
+                className={`justify-start ${activeTab === "social-media" ? "" : "hover:bg-muted"
+                  }`}
+                onClick={() => setActiveTab("social-media")}
+              >
+                <Settings className="h-4 w-4 ml-2" />
+                مواقع التواصل الاجتماعي
               </Button>
             </nav>
           </CardContent>
@@ -1032,121 +1108,10 @@ export default function SettingsPage() {
                       type="number"
                     />
                   </div>
-                  {/* <div className="space-y-2">
-                    <Label htmlFor="new-salon-commission">نسبة العمولة للصالونات الجديدة (%)</Label>
-                    <Input id="new-salon-commission" defaultValue="5" type="number" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="min-commission">الحد الأدنى للعمولة (د.إ)</Label>
-                    <Input id="min-commission" defaultValue="5" type="number" />
-                  </div> */}
+              
                 </div>
               </div>
-              {/* 
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">طريقة حساب العمولة</h3>
-                <RadioGroup defaultValue="percentage" className="space-y-3">
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="percentage" id="commission-percentage" />
-                    <Label htmlFor="commission-percentage">نسبة مئوية من قيمة الحجز</Label>
-                  </div>
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="fixed" id="commission-fixed" />
-                    <Label htmlFor="commission-fixed">تكلفة ثابت لكل حجز</Label>
-                  </div>
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="tiered" id="commission-tiered" />
-                    <Label htmlFor="commission-tiered">نسبة متدرجة حسب قيمة الحجز</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">إعدادات الدفع للصالونات</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="payout-schedule">جدول الدفع</Label>
-                    <Select defaultValue="weekly">
-                      <SelectTrigger id="payout-schedule">
-                        <SelectValue placeholder="اختر جدول الدفع" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">يومي</SelectItem>
-                        <SelectItem value="weekly">أسبوعي</SelectItem>
-                        <SelectItem value="biweekly">كل أسبوعين</SelectItem>
-                        <SelectItem value="monthly">شهري</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="payout-day">يوم الدفع</Label>
-                    <Select defaultValue="sunday">
-                      <SelectTrigger id="payout-day">
-                        <SelectValue placeholder="اختر يوم الدفع" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sunday">الأحد</SelectItem>
-                        <SelectItem value="monday">الاثنين</SelectItem>
-                        <SelectItem value="tuesday">الثلاثاء</SelectItem>
-                        <SelectItem value="wednesday">الأربعاء</SelectItem>
-                        <SelectItem value="thursday">الخميس</SelectItem>
-                        <SelectItem value="friday">الجمعة</SelectItem>
-                        <SelectItem value="saturday">السبت</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="min-payout">الحد الأدنى للدفع (د.إ)</Label>
-                    <Input id="min-payout" defaultValue="100" type="number" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="payout-method">طريقة الدفع الافتراضية</Label>
-                    <Select defaultValue="bank">
-                      <SelectTrigger id="payout-method">
-                        <SelectValue placeholder="اختر طريقة الدفع" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bank">تحويل بنكي</SelectItem>
-                        <SelectItem value="wallet">محفظة إلكترونية</SelectItem>
-                        <SelectItem value="paypal">PayPal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              <Separator /> */}
-              {/* 
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">إعدادات متقدمة</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>تعليق الدفع للصالونات المعلقة</Label>
-                      <p className="text-sm text-muted-foreground">تعليق الدفع للصالونات التي تم تعليق حسابها</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>خصم العمولة من التكلفة المدفوع</Label>
-                      <p className="text-sm text-muted-foreground">خصم العمولة تلقائياً من التكلفة المدفوع للصالون</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>إرسال إشعار بالدفع</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار للصالون عند إتمام عملية الدفع</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-              </div> */}
+         
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button className="rounded-full">
@@ -1195,98 +1160,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
-              {/* 
-              <Separator />
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">إعدادات التحديث</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>إجبار التحديث</Label>
-                      <p className="text-sm text-muted-foreground">إجبار المستخدمين على تحديث التطبيق إلى أحدث إصدار</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>إشعارات التحديث</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعار للمستخدمين عند توفر تحديث جديد</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="update-message">رسالة التحديث</Label>
-                    <Input
-                      id="update-message"
-                      defaultValue="يرجى تحديث التطبيق للاستمتاع بأحدث الميزات وإصلاحات الأخطاء"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">إعدادات الإشعارات</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>إشعارات الحجوزات</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعارات للمستخدمين عن حالة الحجوزات</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>إشعارات العروض</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعارات للمستخدمين عن العروض الجديدة</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>إشعارات التذكير</Label>
-                      <p className="text-sm text-muted-foreground">إرسال إشعارات تذكير للمستخدمين قبل موعد الحجز</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="reminder-time">وقت التذكير (بالساعات قبل الموعد)</Label>
-                    <Input id="reminder-time" defaultValue="2" type="number" />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">إعدادات الأداء</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>تخزين مؤقت للصور</Label>
-                      <p className="text-sm text-muted-foreground">تخزين الصور مؤقتاً لتحسين الأداء</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>وضع توفير البيانات</Label>
-                      <p className="text-sm text-muted-foreground">تقليل استهلاك البيانات في التطبيق</p>
-                    </div>
-                    <Switch />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cache-duration">مدة التخزين المؤقت (بالأيام)</Label>
-                    <Input id="cache-duration" defaultValue="7" type="number" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="image-quality">جودة الصور (%)</Label>
-                    <Input id="image-quality" defaultValue="80" type="number" min="1" max="100" />
-                  </div>
-                </div>
-              </div> */}
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button className="rounded-full">
@@ -1294,6 +1168,112 @@ export default function SettingsPage() {
                 حفظ الإعدادات
               </Button>
             </CardFooter>
+          </Card>
+        )}
+        {activeTab === "social-media" && (
+          <Card className="bg-white dark:bg-gray-800 shadow-md">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>مواقع التواصل الاجتماعي</CardTitle>
+                  <CardDescription>إدارة مواقع التواصل الاجتماعي</CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingSite(true)}>
+                  <Plus className="h-4 w-4 ml-2" />
+                  إضافة موقع جديد
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {isAddingSite && (
+                <form onSubmit={handleAddSite} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name_en">الاسم (إنجليزي)</Label>
+                      <Input id="name_en" name="name_en" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name_ar">الاسم (عربي)</Label>
+                      <Input id="name_ar" name="name_ar" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="icon">الأيقونة</Label>
+                    <Input id="icon"
+
+                      onChange={handleIconUpload}
+                      name="icon" type="file" accept="image/*" required />
+                    {uploadedIcon && (
+                      <div className="mt-2">
+                        <img
+                          src={uploadedIcon}
+                          alt="Icon preview"
+                          className="w-16 h-16 rounded object-cover border"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => {
+                      setIsAddingSite(false);
+                      setUploadedIcon(null);
+                      setIconName('');
+                    }}>
+                      إلغاء
+                    </Button>
+                    <Button type="submit">حفظ</Button>
+                  </div>
+                </form>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {socialMediaSites.map((site) => (
+                  <Card key={site.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2 space-x-reverse">
+                          <img
+                            src={site.icon_url}
+                            alt={site.name.en}
+                            className="w-8 h-8 rounded"
+                          />
+                          <div>
+                            <h4 className="font-medium">{site.name.ar || site.name.en}</h4>
+                            <p className="text-sm text-muted-foreground">{site.name.en}</p>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {/* <DropdownMenuItem onClick={() => setEditingSite(site)}>
+                              تعديل
+                            </DropdownMenuItem>
+                            */}
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={async () => {
+                                if (confirm('هل أنت متأكد من حذف هذا الموقع؟')) {
+                                  await deleteData(`admin/social-media-sites/${site.id}`);
+                                  setSocialMediaSites(sites =>
+                                    sites.filter(s => s.id !== site.id)
+                                  );
+                                }
+                              }}
+                            >
+                              حذف
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
           </Card>
         )}
       </div>
