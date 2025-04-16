@@ -97,8 +97,8 @@ export default function ServicesManagement() {
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("both");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [activeTab, setActiveTab] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("groups");
+  const [activeTab, setActiveTab] = useState("groups");
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -465,24 +465,16 @@ export default function ServicesManagement() {
         }
       </div>
 
-      <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="groups" className="w-full" onValueChange={setActiveTab}>
+        {/* <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="all">
             الخدمات ({services.length})
           </TabsTrigger>
           <TabsTrigger value="groups">المجموعات ({groups.length})</TabsTrigger>
-          {/* <TabsTrigger value="active">
-            الخدمات النشطة 
-            (
-            {services.filter((s) => s.status === "active").length})
-          </TabsTrigger>
-          <TabsTrigger value="inactive">
-            الخدمات غير النشطة (
-            {services.filter((s) => s.status === "inactive").length})
-          </TabsTrigger> */}
-        </TabsList>
 
-        <TabsContent value="all" className="mt-4">
+        </TabsList> */}
+
+        {/* <TabsContent value="all" className="mt-4">
           {isLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -531,7 +523,7 @@ export default function ServicesManagement() {
               />
             </div>
           )}
-        </TabsContent>
+        </TabsContent> */}
         <TabsContent value="groups" className="mt-4">
           {/* <div className="flex justify-end mb-4">
             <Button onClick={() => setIsAddGroupDialogOpen(true)}>

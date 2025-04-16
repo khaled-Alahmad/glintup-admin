@@ -10,6 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { MoreVertical, MessageSquare, Flag } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -68,7 +76,15 @@ import { PaginationWithInfo } from "../ui/pagination-with-info";
 interface SalonDetailsProps {
   salonId: string;
 }
-
+const DAYS_IN_ARABIC: Record<string, string> = {
+  'sunday': 'الأحد',
+  'monday': 'الإثنين',
+  'tuesday': 'الثلاثاء',
+  'wednesday': 'الأربعاء',
+  'thursday': 'الخميس',
+  'friday': 'الجمعة',
+  'saturday': 'السبت'
+};
 interface SalonData {
   id: number;
   name: string;
@@ -141,6 +157,29 @@ interface Collection {
   price: number;
   discount: number;
 }
+interface Review {
+  id: number;
+  user_id: number;
+  salon_id: number;
+  rating: number;
+  stars: string;
+  comment: string;
+  salon_reply: string | null;
+  salon_reply_at: string | null;
+  salon_report: string | null;
+  reason_for_report: string | null;
+  salon_reported_at: string | null;
+  created_at: Date,
+  updated_at: Date,
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    avatar: string;
+  };
+}
+
 export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [showSendNotificationDialog, setShowSendNotificationDialog] =
     useState(false);
@@ -187,6 +226,119 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       setIsLoading(false);
     }
   };
+  // Update the state declaration with the type
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<Record<number, number>>({});
+
+  const [reviewsCurrentPage, setReviewsCurrentPage] = useState(1);
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+  const [reviewsPerPage, setReviewsPerPage] = useState(5);
+  const [reviewsTotalItems, setReviewsTotalItems] = useState(0);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetchData(`admin/reviews?salon_id=${salonId}&page=${reviewsCurrentPage}&limit=${reviewsPerPage}`);
+      if (response.success) {
+        setReviews(response.data);
+        calculateReviewStats(response.data);
+        setReviewsTotalPages(response.meta.last_page);
+        setReviewsCurrentPage(response.meta.current_page);
+        setReviewsPerPage(response.meta.per_page);
+        setReviewsTotalItems(response.meta.total);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
+
+  // Add useEffect to refetch when page changes
+  useEffect(() => {
+    fetchReviews();
+  }, [salonId, reviewsCurrentPage]);
+
+  const calculateReviewStats = (reviewsData: Review[]) => {
+    const total = reviewsData.length;
+    const stats = reviewsData.reduce((acc, review) => {
+      acc[review.rating] = (acc[review.rating] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+
+    // Convert to percentages
+    const percentages: Record<number, number> = {};
+    Object.keys(stats).forEach(rating => {
+      percentages[Number(rating)] = Math.round((stats[Number(rating)] / total) * 100);
+    });
+
+    setReviewStats(percentages);
+  };
+  const handleReplyReview = async (review: Review) => {
+    const reply = await prompt('أدخل ردك على التقييم:');
+    if (!reply) return;
+
+    try {
+      const response = await addData(`admin/reviews/${review.id}/reply`, { reply });
+      if (response.success) {
+        toast({
+          title: "تم بنجاح",
+          description: "تم إضافة الرد بنجاح",
+        });
+        fetchReviews();
+      }
+    } catch (error) {
+      console.error('Error replying to review:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء إضافة الرد",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReportReview = async (review: Review) => {
+    const reason = await prompt('أدخل سبب الإبلاغ عن التقييم:');
+    if (!reason) return;
+
+    try {
+      const response = await addData(`admin/reviews/${review.id}/report`, { reason });
+      if (response.success) {
+        toast({
+          title: "تم بنجاح",
+          description: "تم الإبلاغ عن التقييم بنجاح",
+        });
+        fetchReviews();
+      }
+    } catch (error) {
+      console.error('Error reporting review:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء الإبلاغ عن التقييم",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: Review) => {
+    if (!confirm('هل أنت متأكد من حذف هذا التقييم؟')) return;
+
+    try {
+      const response = await deleteData(`admin/reviews/${reviewId}`);
+      if (response.success) {
+        toast({
+          title: "تم بنجاح",
+          description: "تم حذف التقييم بنجاح",
+        });
+        fetchReviews();
+      }
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء حذف التقييم",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAddService = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -310,11 +462,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     }
   };
   useEffect(() => {
-    if (activeTab == "services") {
+    // if (activeTab == "services") {
 
-      fetchServices();
-    }
-  }, [activeTab]);
+    fetchServices();
+    // }
+  }, [salonId]);
   // إضافة خدمة إلى الصالون
   // interface Service {
   //   id: string;
@@ -518,32 +670,32 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   //   },
   // ];
 
-  const reviews = [
-    {
-      id: "1",
-      customerName: "سارة أحمد",
-      customerAvatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      comment: "خدمة ممتازة وموظفات محترفات",
-      date: "2024-04-01",
-    },
-    {
-      id: "2",
-      customerName: "نورة محمد",
-      customerAvatar: "/placeholder.svg?height=40&width=40",
-      rating: 4,
-      comment: "تجربة جيدة ولكن كان هناك تأخير بسيط",
-      date: "2024-03-25",
-    },
-    {
-      id: "3",
-      customerName: "عبير علي",
-      customerAvatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      comment: "من أفضل الصالونات التي زرتها",
-      date: "2024-03-20",
-    },
-  ];
+  // const reviews = [
+  //   {
+  //     id: "1",
+  //     customerName: "سارة أحمد",
+  //     customerAvatar: "/placeholder.svg?height=40&width=40",
+  //     rating: 5,
+  //     comment: "خدمة ممتازة وموظفات محترفات",
+  //     date: "2024-04-01",
+  //   },
+  //   {
+  //     id: "2",
+  //     customerName: "نورة محمد",
+  //     customerAvatar: "/placeholder.svg?height=40&width=40",
+  //     rating: 4,
+  //     comment: "تجربة جيدة ولكن كان هناك تأخير بسيط",
+  //     date: "2024-03-25",
+  //   },
+  //   {
+  //     id: "3",
+  //     customerName: "عبير علي",
+  //     customerAvatar: "/placeholder.svg?height=40&width=40",
+  //     rating: 5,
+  //     comment: "من أفضل الصالونات التي زرتها",
+  //     date: "2024-03-20",
+  //   },
+  // ];
 
   const appointments = [
     {
@@ -704,6 +856,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       </div>
     );
   }
+  // console.log(salonData);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -722,10 +876,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={salonData.icon_url} alt={salonData.name} />
+                <AvatarImage className="object-contain" src={salonData.icon_url} alt={salonData.name} />
                 <AvatarFallback>{salonData.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <h2 className="text-xl font-bold">{salon.name}</h2>
+              <h2 className="text-xl font-bold">{salonData.name}</h2>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" className={
                   salonData.is_active
@@ -768,48 +922,76 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>إرسال إشعار للصالون</DialogTitle>
-                      <DialogDescription>
-                        سيتم إرسال هذا الإشعار إلى صالون {salonData.name}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="notification-title">
-                          عنوان الإشعار
-                        </Label>
-                        <Input
-                          id="notification-title"
-                          placeholder="أدخل عنوان الإشعار"
-                        />
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+
+                      try {
+                        const response = await addData(`admin/salons/${salonId}/send-notification`, {
+                          title: formData.get('title'),
+                          message: formData.get('message')
+                        });
+
+                        if (response.success) {
+                          toast({
+                            title: "تم بنجاح",
+                            description: "تم إرسال الإشعار بنجاح",
+                          });
+                          setShowSendNotificationDialog(false);
+                        }
+                      } catch (error) {
+                        console.error('Failed to send notification:', error);
+                        toast({
+                          title: "خطأ",
+                          description: "حدث خطأ أثناء إرسال الإشعار",
+                          variant: "destructive",
+                        });
+                      }
+                    }}>
+                      <DialogHeader>
+                        <DialogTitle>إرسال إشعار للصالون</DialogTitle>
+                        <DialogDescription>
+                          سيتم إرسال هذا الإشعار إلى صالون {salonData.name}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="title">عنوان الإشعار</Label>
+                          <Input
+                            id="title"
+                            name="title"
+                            placeholder="أدخل عنوان الإشعار"
+                            required
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="message">نص الإشعار</Label>
+                          <Textarea
+                            id="message"
+                            name="message"
+                            placeholder="أدخل نص الإشعار"
+                            rows={4}
+                            required
+                          />
+                        </div>
                       </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="notification-message">نص الإشعار</Label>
-                        <Textarea
-                          id="notification-message"
-                          placeholder="أدخل نص الإشعار"
-                          rows={4}
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowSendNotificationDialog(false)}
-                      >
-                        إلغاء
-                      </Button>
-                      <Button
-                        onClick={() => setShowSendNotificationDialog(false)}
-                      >
-                        إرسال الإشعار
-                      </Button>
-                    </DialogFooter>
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowSendNotificationDialog(false)}
+                        >
+                          إلغاء
+                        </Button>
+                        <Button type="submit">
+                          إرسال الإشعار
+                        </Button>
+                      </DialogFooter>
+                    </form>
                   </DialogContent>
                 </Dialog>
               </div>
-              <div className="flex gap-2 mt-2 w-full">
+              {/* <div className="flex gap-2 mt-2 w-full">
                 <Dialog
                   open={showSuspendDialog}
                   onOpenChange={setShowSuspendDialog}
@@ -915,7 +1097,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-              </div>
+              </div> */}
             </div>
 
             <Separator className="my-6" />
@@ -945,37 +1127,37 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </p>
                 </div>
               </div>
+              {/* <div className="flex items-start gap-3"> */}
+              {/* <Clock className="h-5 w-5 text-muted-foreground mt-0.5" /> */}
+              {/* <div>
+                  <p className="text-sm font-medium">ساعات العمل</p> */}
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">ساعات العمل</p>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">ساعات العمل</p>
-                      <div className="text-sm text-muted-foreground space-y-1 mt-1">
-                        {salonData.working_hours.map((hours, idx) => (
-                          <p key={idx}>
-                            {hours.day_of_week}: {" "}
-                            {hours.is_closed ? (
-                              <span className="text-red-500">مغلق</span>
-                            ) : (
-                              <>
-                                {hours.opening_time} - {hours.closing_time}
-                                {hours.break_start && hours.break_end && (
-                                  <span className="text-amber-600">
-                                    {" "}(استراحة: {hours.break_start} - {hours.break_end})
-                                  </span>
-                                )}
-                              </>
+                  <div className="text-sm text-muted-foreground space-y-1 mt-1">
+                    {salonData.working_hours.map((hours, idx) => (
+                      <p key={idx}>
+                        {DAYS_IN_ARABIC[hours.day_of_week.toLowerCase()]}: {" "}
+                        {hours.is_closed ? (
+                          <span className="text-red-500">مغلق</span>
+                        ) : (
+                          <>
+                            {hours.opening_time} - {hours.closing_time}
+                            {hours.break_start && hours.break_end && (
+                              <span className="text-amber-600">
+                                {" "}(استراحة: {hours.break_start} - {hours.break_end})
+                              </span>
                             )}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
+                          </>
+                        )}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </div>
+              {/* </div> */}
+              {/* </div> */}
             </div>
 
             <Separator className="my-6" />
@@ -1012,7 +1194,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         <Card className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab} >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="w-full justify-start">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -1025,7 +1207,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <img
                     src={salonData.icon_url || "/placeholder.svg"}
                     alt={salonData.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
 
@@ -1047,11 +1229,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         <div>
                           <p className="font-medium">{service.name.ar}</p>
                           <p className="text-sm text-muted-foreground">
-                            {service.duration_minutes}
+                            {service.duration_minutes}  دقيقة
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">{service.price}</p>
+                          <p className="font-medium"> {service.price + " د.إ"}</p>
                           <p className="text-sm text-muted-foreground">
                             {service.duration_minutes} حجز
                           </p>
@@ -1072,22 +1254,22 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
                               <AvatarImage
-                                src={review.customerAvatar}
-                                alt={review.customerName}
+                                src={review.user.avatar}
+                                alt={review.user.full_name}
                               />
                               <AvatarFallback>
-                                {review.customerName.charAt(0)}
+                                {review.user.first_name.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium">
-                                {review.customerName}
+                                {review.user.full_name}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
                                 {renderStars(review.rating)}
                                 <span className="text-xs text-muted-foreground">
-                                  {new Date(review.date).toLocaleDateString(
-                                    "ar-SA"
+                                  {new Date(review.created_at).toLocaleDateString(
+                                    "en-US"
                                   )}
                                 </span>
                               </div>
@@ -1166,11 +1348,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <div className="flex items-center">
                       <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                       <span className="font-medium text-lg ml-1">
-                        {salon.rating}
+                        {salonData.average_rating}
                       </span>
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      ({salon.totalReviews} تقييم)
+                      ({salonData.total_reviews} تقييم)
                     </span>
                   </div>
                 </div>
@@ -1183,30 +1365,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-1" />
                       </div>
                       <Progress
-                        value={
-                          rating === 5
-                            ? 65
-                            : rating === 4
-                              ? 25
-                              : rating === 3
-                                ? 7
-                                : rating === 2
-                                  ? 2
-                                  : 1
-                        }
+                        value={reviewStats[rating] || 0}
                         className="h-2 w-full mt-2"
                       />
                       <span className="text-xs text-muted-foreground mt-1">
-                        {rating === 5
-                          ? 65
-                          : rating === 4
-                            ? 25
-                            : rating === 3
-                              ? 7
-                              : rating === 2
-                                ? 2
-                                : 1}
-                        %
+                        {reviewStats[rating] || 0}%
                       </span>
                     </div>
                   ))}
@@ -1221,32 +1384,70 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
                             <AvatarImage
-                              src={review.customerAvatar}
-                              alt={review.customerName}
+                              src={review.user.avatar}
+                              alt={review.user.full_name}
                             />
                             <AvatarFallback>
-                              {review.customerName.charAt(0)}
+                              {review.user.full_name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{review.customerName}</p>
+                            <p className="font-medium">{review.user.full_name}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              {renderStars(review.rating)}
+                              <div className="text-yellow-500">{review.stars}</div>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(review.date).toLocaleDateString(
-                                  "ar-SA"
-                                )}
+                                {new Date(review.created_at).toLocaleDateString("en-US")}
                               </span>
                             </div>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          إخفاء التقييم
-                        </Button>
+                        {/* <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleReplyReview(review)}>
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              <span>الرد على التقييم</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleReportReview(review)}>
+                              <Flag className="mr-2 h-4 w-4" />
+                              <span>الإبلاغ عن التقييم</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeleteReview(review)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>حذف التقييم</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu> */}
                       </div>
                       <p className="mt-3">{review.comment}</p>
+                      {review.salon_reply && (
+                        <div className="mt-3 bg-muted/50 p-3 rounded-md">
+                          <p className="text-sm font-medium">رد الصالون:</p>
+                          <p className="text-sm mt-1">{review.salon_reply}</p>
+                        </div>
+                      )}
                     </div>
                   ))}
+                  {/* Add pagination component */}
+                  {reviewsTotalPages > 1 && (
+                    <div className="mt-4">
+                      <PaginationWithInfo
+                        currentPage={reviewsCurrentPage}
+                        totalPages={reviewsTotalPages}
+                        totalItems={reviewsTotalItems}
+                        itemsPerPage={reviewsPerPage}
+                        onPageChange={setReviewsCurrentPage}
+                      />
+                    </div>
+                  )}
                 </div>
               </TabsContent>
 
@@ -1296,7 +1497,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                                 <span className="text-sm">
                                   {new Date(
                                     appointment.date
-                                  ).toLocaleDateString("ar-SA")}
+                                  ).toLocaleDateString("en-US")}
                                 </span>
                               </div>
                               <div className="flex items-center">

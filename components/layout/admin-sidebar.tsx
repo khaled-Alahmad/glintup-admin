@@ -51,7 +51,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       active: pathname.startsWith("/users"),
     },
     {
-      name: "الخدمات",
+      name: "المجموعات",
       href: "/services",
       icon: HandHeart,
       active: pathname.startsWith("/services"),

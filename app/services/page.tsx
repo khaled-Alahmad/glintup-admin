@@ -3,7 +3,7 @@ import ServicesManagement from "@/components/services/services-management";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "إدارة الخدمات | لوحة تحكم Glintup",
+  title: "إدارة المجموعات | لوحة تحكم Glintup",
   description: "إدارة خدمات التجميل والعناية في منصة Glintup",
 };
 
