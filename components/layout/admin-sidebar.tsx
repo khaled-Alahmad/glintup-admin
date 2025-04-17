@@ -98,12 +98,12 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       icon: Star,
       active: pathname.startsWith("/reviews"),
     },
-    // {
-    //   name: "الشكاوى والدعم",
-    //   href: "/complaints",
-    //   icon: MessageSquare,
-    //   active: pathname.startsWith("/complaints"),
-    // },
+    {
+      name: "الشكاوى والدعم",
+      href: "/complaints",
+      icon: MessageSquare,
+      active: pathname.startsWith("/complaints"),
+    },
     {
       name: "الإعدادات",
       href: "/settings",
