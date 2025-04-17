@@ -316,14 +316,38 @@ export default function AdvertisementsManagement() {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                          <p className="text-muted-foreground">جاري تحميل البيانات...</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={`loading-${index}`} className="animate-pulse">
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-16 w-24 rounded-md bg-muted"></div>
+                            <div className="h-4 w-40 bg-muted rounded"></div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-muted"></div>
+                            <div className="h-4 w-24 bg-muted rounded"></div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-3.5 w-3.5 bg-muted rounded"></div>
+                              <div className="h-4 w-20 bg-muted rounded"></div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="h-3.5 w-3.5 bg-muted rounded"></div>
+                              <div className="h-4 w-20 bg-muted rounded"></div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell><div className="h-4 w-12 bg-muted rounded"></div></TableCell>
+                        <TableCell><div className="h-4 w-12 bg-muted rounded"></div></TableCell>
+                        <TableCell><div className="h-6 w-16 bg-muted rounded-full"></div></TableCell>
+                        <TableCell><div className="h-8 w-8 bg-muted rounded"></div></TableCell>
+                      </TableRow>
+                    ))
                   ) : advertisements.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8">

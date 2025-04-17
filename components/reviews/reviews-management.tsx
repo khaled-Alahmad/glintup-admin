@@ -128,7 +128,14 @@ export default function ReviewsManagement() {
   const fetchReviews = async () => {
     try {
       setIsLoading(true);
-      const response = await fetchData(`admin/reviews?page=${currentPage}&limit=${perPage}`);
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: perPage.toString(),
+        ...(searchQuery && { search: searchQuery }),
+        ...(ratingFilter !== 'all' && { rating: ratingFilter }),
+      });
+
+      const response = await fetchData(`admin/reviews?${queryParams}`);
       if (response.success) {
         setReviews(response.data);
         setTotalPages(response.meta.last_page);
@@ -150,7 +157,7 @@ export default function ReviewsManagement() {
 
   useEffect(() => {
     fetchReviews();
-  }, [currentPage]);
+  }, [currentPage, ratingFilter, searchQuery]);
 
   const handleReplyReview = async (review: Review) => {
     const reply = prompt('Enter your reply:');
@@ -368,20 +375,7 @@ export default function ReviewsManagement() {
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px] rounded-full">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <SelectValue placeholder="جميع الحالات" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="منشور">منشور</SelectItem>
-                    <SelectItem value="قيد المراجعة">قيد المراجعة</SelectItem>
-                    <SelectItem value="محجوب">محجوب</SelectItem>
-                  </SelectContent>
-                </Select>
+
                 <Select value={ratingFilter} onValueChange={setRatingFilter}>
                   <SelectTrigger className="w-[180px] rounded-full">
                     <div className="flex items-center gap-2">
@@ -403,10 +397,34 @@ export default function ReviewsManagement() {
 
             <div className="space-y-4">
               {isLoading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">جاري تحميل التقييمات...</p>
-                </div>
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={`loading-${index}`} className="overflow-hidden animate-pulse">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-muted"></div>
+                            <div>
+                              <div className="h-4 w-32 bg-muted rounded mb-2"></div>
+                              <div className="flex items-center gap-2">
+                                <div className="h-4 w-24 bg-muted rounded"></div>
+                                <div className="h-3 w-20 bg-muted rounded"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-16 bg-muted rounded"></div>
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 rounded-full bg-muted"></div>
+                            <div className="h-4 w-24 bg-muted rounded"></div>
+                          </div>
+                        </div>
+                        <div className="h-20 bg-muted/30 rounded-lg"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
               ) : reviews.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">لا توجد تقييمات متاحة</p>

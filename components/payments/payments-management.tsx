@@ -1,6 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,74 +29,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import { fetchData } from "@/lib/apiHelper"
+import { useToast } from "../ui/use-toast"
+import { PaginationWithInfo } from "../ui/pagination-with-info"
 
-const payments = [
-  {
-    id: "1",
-    customerName: "سارة أحمد",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون الأميرة",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    date: "2024-04-03",
-    amount: "450 د.إ",
-    method: "بطاقة ائتمان",
-    status: "مكتمل",
-    bookingId: "B-1234",
-    commission: "45 د.إ",
-  },
-  {
-    id: "2",
-    customerName: "نورة محمد",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون إليت",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    date: "2024-04-03",
-    amount: "350 د.إ",
-    method: "Apple Pay",
-    status: "مكتمل",
-    bookingId: "B-1235",
-    commission: "35 د.إ",
-  },
-  {
-    id: "3",
-    customerName: "عبير علي",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون جلام",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    date: "2024-04-03",
-    amount: "800 د.إ",
-    method: "بطاقة ائتمان",
-    status: "معلق",
-    bookingId: "B-1236",
-    commission: "80 د.إ",
-  },
-  {
-    id: "4",
-    customerName: "هند خالد",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون مس بيوتي",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    date: "2024-04-03",
-    amount: "200 د.إ",
-    method: "محفظة إلكترونية",
-    status: "مسترجع",
-    bookingId: "B-1237",
-    commission: "0 د.إ",
-  },
-  {
-    id: "5",
-    customerName: "ليلى عبدالله",
-    customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون روز",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    date: "2024-04-03",
-    amount: "300 د.إ",
-    method: "بطاقة ائتمان",
-    status: "مكتمل",
-    bookingId: "B-1238",
-    commission: "30 د.إ",
-  },
-]
 
 const refunds = [
   {
@@ -117,89 +62,116 @@ const refunds = [
     bookingId: "B-1240",
   },
 ]
-
+interface Transaction {
+  id: number;
+  user_id: number;
+  amount: string;
+  currency: string;
+  formatted_amount: string;
+  description: {
+    en: string;
+    ar: string;
+  };
+  status: 'pending' | 'completed' | 'failed';
+  type: 'deposit' | 'withdrawal' | 'ad' | 'booking' | 'gift_card';
+  is_refund: boolean;
+  transactionable_id: number;
+  transactionable_type: string;
+  direction: 'in' | 'out';
+  created_at: string;
+  updated_at: string;
+}
 export default function PaymentsManagement() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined)
 
-  const filteredPayments = payments.filter((payment) => {
-    const matchesSearch =
-      payment.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      payment.salonName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      payment.bookingId.toLowerCase().includes(searchQuery.toLowerCase())
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [perPage, setPerPage] = useState(20);
+  const { toast } = useToast()
+  // Add fetch function
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
-    const matchesStatus = statusFilter === "all" || payment.status === statusFilter
+  const fetchTransactions = async () => {
+    try {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: perPage.toString(),
+        ...(searchQuery && { search: searchQuery }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(typeFilter !== 'all' && { type: typeFilter }),
+        ...(dateFilter && {
+          created_at: new Date(dateFilter.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        }),
+      });
 
-    let matchesDate = true
-    if (dateFilter) {
-      const paymentDate = new Date(payment.date)
-      const filterDate = new Date(dateFilter)
-      matchesDate =
-        paymentDate.getDate() === filterDate.getDate() &&
-        paymentDate.getMonth() === filterDate.getMonth() &&
-        paymentDate.getFullYear() === filterDate.getFullYear()
+      const response = await fetchData(`admin/transactions?${queryParams}`);
+      if (response.success) {
+        setTransactions(response.data);
+        setTotalPages(response.meta.last_page);
+        setCurrentPage(response.meta.current_page);
+        setTotalItems(response.meta.total);
+        setPerPage(response.meta.per_page);
+      }
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل في تحميل المعاملات",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    return matchesSearch && matchesStatus && matchesDate
-  })
+  // Add useEffect
+  useEffect(() => {
+    fetchTransactions();
+  }, [currentPage, searchQuery, statusFilter, typeFilter, dateFilter]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "مكتمل":
-        return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            مكتمل
-          </Badge>
-        )
-      case "معلق":
-        return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            معلق
-          </Badge>
-        )
-      case "مسترجع":
-        return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            مسترجع
-          </Badge>
-        )
-      case "قيد المراجعة":
-        return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-            قيد المراجعة
-          </Badge>
-        )
-      default:
-        return <Badge variant="outline">{status}</Badge>
-    }
+  // Add helper function for transaction type
+  function getTransactionType(type: string) {
+    const types = {
+      deposit: 'إيداع',
+      withdrawal: 'سحب',
+      ad: 'إعلان',
+      booking: 'حجز',
+      gift_card: 'بطاقة هدية'
+    };
+    return types[type as keyof typeof types] || type;
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "مكتمل":
-        return <Check className="h-4 w-4 text-green-500" />
-      case "معلق":
-        return <ArrowUpDown className="h-4 w-4 text-amber-500" />
-      case "مسترجع":
-        return <X className="h-4 w-4 text-red-500" />
-      default:
-        return null
-    }
+  // Update status badge function
+  function getStatusBadge(status: string) {
+    const badges = {
+      completed: <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">مكتمل</Badge>,
+      pending: <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">معلق</Badge>,
+      failed: <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">فشل</Badge>
+    };
+    return badges[status as keyof typeof badges] || <Badge variant="outline">{status}</Badge>;
   }
+
+
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إدارة المدفوعات والاسترجاع</h1>
-        <div className="flex gap-2">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إدارة المدفوعات</h1>
+        {/* <div className="flex gap-2">
           <Button asChild>
             <Link href="/payments/add">إضافة عملية دفع</Link>
           </Button>
           <Button variant="outline" asChild>
             <Link href="/payments/refund">إضافة طلب استرجاع</Link>
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -250,12 +222,12 @@ export default function PaymentsManagement() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <CardTitle>المعاملات المالية</CardTitle>
-                <CardDescription>إدارة المدفوعات وعمليات الاسترجاع</CardDescription>
+                <CardDescription>إدارة المدفوعات</CardDescription>
               </div>
-              <TabsList>
+              {/* <TabsList>
                 <TabsTrigger value="payments">المدفوعات</TabsTrigger>
                 <TabsTrigger value="refunds">طلبات الاسترجاع</TabsTrigger>
-              </TabsList>
+              </TabsList> */}
             </div>
           </Tabs>
         </CardHeader>
@@ -273,19 +245,33 @@ export default function PaymentsManagement() {
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <DatePicker selected={dateFilter} onSelect={setDateFilter} placeholder="تاريخ الدفع" />
+                  <DatePicker
+                    selected={dateFilter}
+                    onSelect={setDateFilter}
+                    placeholder="تاريخ المعاملة"
+                  />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[180px]">
-                      <div className="flex items-center gap-2">
-                        <Filter className="h-4 w-4" />
-                        <SelectValue placeholder="جميع الحالات" />
-                      </div>
+                      <SelectValue placeholder="جميع الحالات" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">جميع الحالات</SelectItem>
-                      <SelectItem value="مكتمل">مكتمل</SelectItem>
-                      <SelectItem value="معلق">معلق</SelectItem>
-                      <SelectItem value="مسترجع">مسترجع</SelectItem>
+                      <SelectItem value="completed">مكتمل</SelectItem>
+                      <SelectItem value="pending">معلق</SelectItem>
+                      <SelectItem value="failed">فشل</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="نوع المعاملة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الأنواع</SelectItem>
+                      <SelectItem value="deposit">إيداع</SelectItem>
+                      <SelectItem value="withdrawal">سحب</SelectItem>
+                      <SelectItem value="ad">إعلان</SelectItem>
+                      <SelectItem value="booking">حجز</SelectItem>
+                      <SelectItem value="gift_card">بطاقة هدية</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -296,86 +282,103 @@ export default function PaymentsManagement() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>رقم العملية</TableHead>
-                      <TableHead>العميل</TableHead>
-                      <TableHead>الصالون</TableHead>
+                      <TableHead>النوع</TableHead>
+                      <TableHead>الوصف</TableHead>
                       <TableHead>التاريخ</TableHead>
-                      <TableHead>التكلفة</TableHead>
-                      <TableHead>طريقة الدفع</TableHead>
-                      <TableHead>العمولة</TableHead>
+                      <TableHead>المبلغ</TableHead>
+                      <TableHead>الاتجاه</TableHead>
+                      <TableHead>استرجاع</TableHead>
                       <TableHead>الحالة</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPayments.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>#{payment.id}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={payment.customerAvatar} alt={payment.customerName} />
-                              <AvatarFallback>{payment.customerName.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span>{payment.customerName}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8 border">
-                              <AvatarImage src={payment.salonLogo} alt={payment.salonName} />
-                              <AvatarFallback>{payment.salonName.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span>{payment.salonName}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-sm">{new Date(payment.date).toLocaleDateString("ar-SA")}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{payment.amount}</TableCell>
-                        <TableCell>{payment.method}</TableCell>
-                        <TableCell>{payment.commission}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(payment.status)}
-                            {getStatusBadge(payment.status)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>خيارات</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem asChild>
-                                <Link href={`/payments/${payment.id}`} className="cursor-pointer w-full">
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, index) => (
+                        <TableRow key={`loading-${index}`} className="animate-pulse">
+                          <TableCell><div className="h-4 w-16 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-4 w-24 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-4 w-48 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-4 w-24 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-4 w-20 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-4 w-16 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-4 w-16 bg-muted rounded"></div></TableCell>
+                          <TableCell><div className="h-6 w-24 bg-muted rounded-full"></div></TableCell>
+                          <TableCell><div className="h-8 w-8 bg-muted rounded"></div></TableCell>
+                        </TableRow>
+                      ))
+                    ) : transactions.length > 0 ? (
+                      transactions.map((transaction) => (
+                        <TableRow key={transaction.id}>
+                          <TableCell>#{transaction.id}</TableCell>
+                          <TableCell>{getTransactionType(transaction.type)}</TableCell>
+                          <TableCell className="max-w-[200px]">{transaction.description.ar}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-sm">
+                                {new Date(transaction.created_at).toLocaleDateString("en-US")}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{transaction.formatted_amount} {transaction.currency}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={transaction.direction === 'in' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}>
+                              {transaction.direction === 'in' ? 'وارد' : 'صادر'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={transaction.is_refund ? 'bg-amber-50 text-amber-700' : ''}>
+                              {transaction.is_refund ? 'استرجاع' : '-'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => {
+                                  setSelectedTransaction(transaction);
+                                  setIsDetailsOpen(true);
+                                }}>
                                   عرض التفاصيل
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>عرض الحجز</DropdownMenuItem>
-                              {payment.status === "معلق" && (
-                                <DropdownMenuItem className="text-green-600">تأكيد الدفع</DropdownMenuItem>
-                              )}
-                              {payment.status === "مكتمل" && (
-                                <DropdownMenuItem className="text-red-600">استرجاع التكلفة</DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                </DropdownMenuItem>
+                                {transaction.type === 'booking' && (
+                                  <DropdownMenuItem>عرض الحجز</DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8">
+                          لا توجد معاملات متطابقة مع معايير البحث
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
+              {totalPages > 1 && (
+                <div className="mt-4">
+                  <PaginationWithInfo
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={perPage}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
             </TabsContent>
 
-            <TabsContent value="refunds" className="space-y-4">
+            {/* <TabsContent value="refunds" className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-between">
                 <div className="relative w-full sm:w-auto">
                   <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -438,7 +441,7 @@ export default function PaymentsManagement() {
                         <TableCell>
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-sm">{new Date(refund.requestDate).toLocaleDateString("ar-SA")}</span>
+                            <span className="text-sm">{new Date(refund.requestDate).toLocaleDateString("en-US")}</span>
                           </div>
                         </TableCell>
                         <TableCell>{refund.amount}</TableCell>
@@ -470,10 +473,71 @@ export default function PaymentsManagement() {
                   </TableBody>
                 </Table>
               </div>
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </CardContent>
       </Card>
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>تفاصيل المعاملة #{selectedTransaction?.id}</DialogTitle>
+            <DialogDescription>عرض تفاصيل المعاملة المالية</DialogDescription>
+          </DialogHeader>
+          {selectedTransaction && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">رقم العملية</Label>
+                <div className="col-span-2 font-medium">#{selectedTransaction.id}</div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">نوع المعاملة</Label>
+                <div className="col-span-2">{getTransactionType(selectedTransaction.type)}</div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">الوصف</Label>
+                <div className="col-span-2">{selectedTransaction.description.ar}</div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">المبلغ</Label>
+                <div className="col-span-2 font-medium">
+                  {selectedTransaction.formatted_amount} {selectedTransaction.currency}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">الاتجاه</Label>
+                <div className="col-span-2">
+                  <Badge variant="outline" className={selectedTransaction.direction === 'in' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}>
+                    {selectedTransaction.direction === 'in' ? 'وارد' : 'صادر'}
+                  </Badge>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">الحالة</Label>
+                <div className="col-span-2">{getStatusBadge(selectedTransaction.status)}</div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">استرجاع</Label>
+                <div className="col-span-2">
+                  <Badge variant="outline" className={selectedTransaction.is_refund ? 'bg-amber-50 text-amber-700' : ''}>
+                    {selectedTransaction.is_refund ? 'استرجاع' : '-'}
+                  </Badge>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
+                <Label className="text-right">تاريخ المعاملة</Label>
+                <div className="col-span-2">
+                  {new Date(selectedTransaction.created_at).toLocaleDateString("en-US")}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+              إغلاق
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
