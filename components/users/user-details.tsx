@@ -285,7 +285,12 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     <h3 className="text-lg font-medium">حجوزات المستخدم</h3>
                     {/* <p className="text-sm text-muted-foreground">إجمالي الحجوزات: {user.bookingsCount}</p> */}
                   </div>
-                  <Button size="sm">عرض الكل</Button>
+                  <Button size="sm">
+                    <Link href={"/appointments"} className="text-sm">
+                      عرض الكل
+
+                    </Link>
+                  </Button>
                 </div>
 
                 <div className="rounded-md border">
@@ -375,7 +380,15 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     <h3 className="text-lg font-medium">مدفوعات المستخدم</h3>
                     {/* <p className="text-sm text-muted-foreground">إجمالي المدفوعات: {user.totalSpent}</p> */}
                   </div>
-                  <Button size="sm">عرض الكل</Button>
+                  <Button size="sm">
+
+                    <Link href={"/payments"} className="text-sm">
+
+
+                      عرض الكل
+                    </Link>
+
+                  </Button>
                 </div>
 
                 <div className="rounded-md border">
