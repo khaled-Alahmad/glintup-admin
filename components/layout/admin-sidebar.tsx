@@ -154,7 +154,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       </nav>
       <div className="border-t border-sidebar-border p-4">
         <p className="text-xs text-sidebar-foreground/70">
-          نسخة 1.0.0 - جميع الحقوق محفوظة © 2023
+          نسخة 1.0.0 - جميع الحقوق محفوظة © 2025
         </p>
       </div>
     </div>
