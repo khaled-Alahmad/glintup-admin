@@ -164,7 +164,7 @@ export default function GiftCardsManagement() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">إدارة بطاقات الهدايا</h1>
         {/* <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}> */}
