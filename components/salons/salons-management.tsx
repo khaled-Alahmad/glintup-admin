@@ -123,16 +123,23 @@ export default function SalonsManagement() {
 
   const [statusFilter, setStatusFilter] = useState("all")
   // Add fetch function
-  const fetchSalons = async (pageNumber = currentPage, limit = 10, search = searchQuery, status = statusFilter) => {
+  const fetchSalons = async () => {
     try {
       setIsLoading(true)
-      const response = await fetchData(`admin/salons?page=${pageNumber}&limit=${limit}&search=${search}${status !== "all" ? `&is_active=${status}` : ""}`)
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: perPage.toString(),
+        ...(searchQuery && { search: searchQuery }),
+        ...(statusFilter !== 'all' && { is_active: statusFilter === 'نشط' ? '1' : '0' }),
+      });
+
+      const response = await fetchData(`admin/salons?${queryParams.toString()}`)
       if (response.success) {
         setSalons(response.data)
         setTotalItems(response.data.total)
-        setPerPage(response.data.per_page)
-        setTotalPages(Math.ceil(response.data.total / response.data.per_page))
-        setCurrentPage(pageNumber)
+        setPerPage(response.meta.per_page);
+        setTotalPages(response.meta.last_page);
+        setCurrentPage(response.meta.current_page);
       }
     } catch (error) {
       console.error('Failed to fetch salons:', error)
@@ -158,7 +165,7 @@ export default function SalonsManagement() {
           title: "تم تحديث الحالة",
           description: "تم تحديث حالة الصالون بنجاح",
         })
-        fetchSalons(page)
+        fetchSalons()
       }
     } catch (error) {
       console.error('Failed to update salon status:', error)
@@ -171,13 +178,13 @@ export default function SalonsManagement() {
   }
 
   useEffect(() => {
-    fetchSalons(page)
+    fetchSalons()
   }, [page])
 
   // Update search and filter handlers
   useEffect(() => {
     // const timer = setTimeout(() => {
-    fetchSalons(currentPage, perPage, searchQuery, statusFilter)
+    fetchSalons()
     // }, 500)
     // return () => clearTimeout(timer)
   }, [searchQuery, statusFilter])

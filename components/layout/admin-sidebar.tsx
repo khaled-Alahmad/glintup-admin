@@ -75,7 +75,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       active: pathname.startsWith("/appointments"),
     },
     {
-      name: "المدفوعات",
+      name: "المعاملات المالية",
       href: "/payments",
       icon: Wallet,
       active: pathname.startsWith("/payments"),

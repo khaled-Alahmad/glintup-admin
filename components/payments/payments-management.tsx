@@ -163,7 +163,8 @@ export default function PaymentsManagement() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إدارة المدفوعات</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إدارة المعاملات المالية
+        </h1>
         {/* <div className="flex gap-2">
           <Button asChild>
             <Link href="/payments/add">إضافة عملية دفع</Link>
@@ -347,9 +348,9 @@ export default function PaymentsManagement() {
                                 }}>
                                   عرض التفاصيل
                                 </DropdownMenuItem>
-                                {transaction.type === 'booking' && (
+                                {/* {transaction.type === 'booking' && (
                                   <DropdownMenuItem>عرض الحجز</DropdownMenuItem>
-                                )}
+                                )} */}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>

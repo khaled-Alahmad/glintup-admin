@@ -51,6 +51,7 @@ interface GiftCard {
   full_phone: string;
   type: string;
   amount: string;
+  received_at: string;
   currency: string | null;
   services: number[];
   services_data: {
@@ -138,30 +139,28 @@ export default function GiftCardsManagement() {
   };
 
   // الحصول على لون الحالة
-  const getStatusColor = (status: Boolean) => {
-    switch (status) {
-      case true:
-        return "bg-green-100 text-green-800";
-
-      case false:
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const getStatusColor = (status: string | null | undefined) => {
+    if (status != null) {
+      return "bg-green-100 text-green-800";
+    } else if (status === null) {
+      return "bg-red-100 text-red-800";
+    } else {
+      return "bg-gray-100 text-gray-800";
     }
   };
+
 
   // الحصول على اسم الحالة بالعربية
-  const getStatusName = (status: Boolean) => {
-    switch (status) {
-      case true:
-        return "مستخدمة";
-
-      case false:
-        return "غير مستخدمة";
-      default:
-        return "غير معروف";
+  const getStatusName = (status: string | null | undefined) => {
+    if (status !== null && status !== undefined) {
+      return "مستخدمة";
+    } else if (status === null || status === undefined) {
+      return "غير مستخدمة";
+    } else {
+      return "غير معروف";
     }
   };
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -320,9 +319,8 @@ export default function GiftCardsManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="active">نشطة</SelectItem>
                 <SelectItem value="used">مستخدمة</SelectItem>
-                <SelectItem value="expired">منتهية</SelectItem>
+                <SelectItem value="active">غير مستخدمة</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -395,12 +393,12 @@ export default function GiftCardsManagement() {
 
                       <TableCell>{card.amount} د.إ</TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(card.is_used)}>
-                          {getStatusName(card.is_used)}
+                        <Badge className={getStatusColor(card.received_at)}>
+                          {getStatusName(card.received_at)}
                         </Badge>
                       </TableCell>
                       <TableCell>{card.created_at}</TableCell>
-                      <TableCell>{card.recipient?.full_name || "غير محدد"}</TableCell>
+                      <TableCell>{card.recipient?.full_name || "غير مسجل"}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
@@ -495,8 +493,8 @@ export default function GiftCardsManagement() {
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">
                     الحالة
                   </h3>
-                  <Badge className={getStatusColor(currentGiftCard.is_used)}>
-                    {getStatusName(currentGiftCard.is_used)}
+                  <Badge className={getStatusColor(currentGiftCard.received_at)}>
+                    {getStatusName(currentGiftCard.received_at)}
                   </Badge>
                 </div>
                 <div>
@@ -528,25 +526,25 @@ export default function GiftCardsManagement() {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       اسم المستلم
                     </h3>
-                    <p>{currentGiftCard.recipient?.full_name || "غير محدد"}</p>
+                    <p>{currentGiftCard.recipient?.full_name || "غير مسجل"}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       رقم المستلم
                     </h3>
-                    <p style={{ unicodeBidi: "plaintext", textAlign: 'right' }}>{currentGiftCard.recipient?.email || "غير محدد"}</p>
+                    <p style={{ unicodeBidi: "plaintext", textAlign: 'right' }}>{currentGiftCard.recipient?.email || "غير مسجل"}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       اسم المرسل
                     </h3>
-                    <p>{currentGiftCard.sender.full_name || "غير محدد"}</p>
+                    <p>{currentGiftCard.sender.full_name || "غير مسجل"}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
                       رقم المرسل
                     </h3>
-                    <p style={{ unicodeBidi: "plaintext", textAlign: "right" }}>{currentGiftCard.sender.full_phone || "غير محدد"}</p>
+                    <p style={{ unicodeBidi: "plaintext", textAlign: "right" }}>{currentGiftCard.sender.full_phone || "غير مسجل"}</p>
                   </div>
                 </div>
               </div>
