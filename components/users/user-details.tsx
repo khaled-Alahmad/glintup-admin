@@ -4,16 +4,112 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Calendar, Clock, Edit, Mail, MapPin, Phone, User } from "lucide-react"
+import { AlertCircle, ArrowLeft, Calendar, Clock, Edit, Mail, MapPin, Phone, User } from "lucide-react"
 import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
+import { useEffect, useState } from "react"
+import { fetchData } from "@/lib/apiHelper"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface UserDetailsProps {
   userId: string
 }
 
+interface UserData {
+  id: number
+  full_name: string
+  full_phone: string
+  avatar?: string
+  updated_at: string,
+  age: string
+  gender: string
+  phone: string
+  email: string
+  location: string
+  is_active: boolean
+  is_verified: boolean
+  created_at: string
+  last_login: string
+  bio?: string
+}
+
+interface Booking {
+  id: number
+  avatar: string
+  salon_name: string
+  service_name: string
+  date: string
+  time: string
+  status: string
+  price: number
+}
+
+interface Payment {
+  id: number
+  amount: number
+  status: string
+  payment_method: string
+  created_at: string
+}
+
 export default function UserDetails({ userId }: UserDetailsProps) {
-  // In a real app, you would fetch user data based on userId
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [bookingsData, setBookingsData] = useState<Booking[]>([])
+  const [paymentsData, setPaymentsData] = useState<Payment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("bookings");
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const [userRes, bookingsRes, paymentsRes] = await Promise.all([
+          fetchData(`admin/users/${userId}`),
+          fetchData(`admin/bookings?user_id=${userId}`),
+          fetchData(`admin/transactions?user_id=${userId}`)
+        ])
+
+        if (userRes.success) setUserData(userRes.data)
+        if (bookingsRes.success) setBookingsData(bookingsRes.data)
+        if (paymentsRes.success) setPaymentsData(paymentsRes.data)
+
+        setLoading(false)
+      } catch (err) {
+        setError('فشل في تحميل بيانات المستخدم')
+        setLoading(false)
+      }
+    }
+
+    fetchUserDetails()
+  }, [userId])
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-8 w-[200px]" />
+        <div className="grid gap-6 md:grid-cols-3">
+          <Skeleton className="h-[500px] w-full" />
+          <Skeleton className="h-[500px] w-full md:col-span-2" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[300px] gap-4">
+        <AlertCircle className="h-8 w-8 text-red-500" />
+        <p className="text-red-500 text-lg">{error}</p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          إعادة المحاولة
+        </Button>
+      </div>
+    )
+  }
+
+  if (!userData) return null
+
   const user = {
     id: userId,
     name: "سارة أحمد",
@@ -29,65 +125,6 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     bio: "عميلة منتظمة تفضل خدمات العناية بالشعر والمكياج.",
   }
 
-  const bookings = [
-    {
-      id: "1",
-      salonName: "صالون الأميرة",
-      salonLogo: "/placeholder.svg?height=32&width=32",
-      service: "قص شعر وصبغة",
-      date: "2024-04-03",
-      time: "10:30 صباحاً",
-      status: "مكتمل",
-      price: "450 د.إ",
-    },
-    {
-      id: "2",
-      salonName: "صالون إليت",
-      salonLogo: "/placeholder.svg?height=32&width=32",
-      service: "مكياج",
-      date: "2024-03-25",
-      time: "2:15 مساءً",
-      status: "مكتمل",
-      price: "350 د.إ",
-    },
-    {
-      id: "3",
-      salonName: "صالون جلام",
-      salonLogo: "/placeholder.svg?height=32&width=32",
-      service: "علاج بالكيراتين",
-      date: "2024-04-10",
-      time: "4:45 مساءً",
-      status: "مؤكد",
-      price: "800 د.إ",
-    },
-  ]
-
-  const payments = [
-    {
-      id: "1",
-      date: "2024-04-03",
-      amount: "450 د.إ",
-      method: "بطاقة ائتمان",
-      status: "مكتمل",
-      bookingId: "1",
-    },
-    {
-      id: "2",
-      date: "2024-03-25",
-      amount: "350 د.إ",
-      method: "Apple Pay",
-      status: "مكتمل",
-      bookingId: "2",
-    },
-    {
-      id: "3",
-      date: "2024-04-10",
-      amount: "800 د.إ",
-      method: "بطاقة ائتمان",
-      status: "معلق",
-      bookingId: "3",
-    },
-  ]
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -142,17 +179,19 @@ export default function UserDetails({ userId }: UserDetailsProps) {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={userData.avatar} alt={userData.full_name} />
+                <AvatarFallback>{userData.full_name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <h2 className="text-xl font-bold">{user.name}</h2>
-              <div className="mt-2">{getStatusBadge(user.status)}</div>
-              <p className="text-sm text-muted-foreground mt-2">عضو منذ {user.joinDate}</p>
-              <Button variant="outline" className="mt-4 w-full">
-                <Edit className="h-4 w-4 ml-2" />
-                تعديل البيانات
+              <h2 className="text-xl font-bold">{userData.full_name}</h2>
+              <div className="mt-2">{getStatusBadge(userData.is_active ? "نشط" : "غير نشط")}</div>
+              <p className="text-sm text-muted-foreground mt-2">عضو منذ {userData.created_at}</p>
+              <Button variant="outline" className="w-full mt-4" asChild>
+                <Link href={`/users/${userId}/edit`}>
+                  <Edit className="h-4 w-4 ml-2" />
+                  تعديل
+                </Link>
               </Button>
-              {user.status === "نشط" ? (
+              {/* {user.status === "نشط" ? (
                 <Button variant="destructive" className="mt-2 w-full">
                   حظر المستخدم
                 </Button>
@@ -160,65 +199,62 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                 <Button variant="default" className="mt-2 w-full">
                   إلغاء الحظر
                 </Button>
-              )}
+              )} */}
             </div>
 
             <div className="mt-6 space-y-4">
-              <div className="flex items-start gap-3">
+              {/* <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">البريد الإلكتروني</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <p className="text-sm text-muted-foreground">{userData.email}</p>
                 </div>
-              </div>
+              </div> */}
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">رقم الهاتف</p>
-                  <p className="text-sm text-muted-foreground">{user.phone}</p>
+                  <p className="text-sm text-muted-foreground" style={{ unicodeBidi: "plaintext", textAlign: "right" }}>{userData.phone}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">الموقع</p>
-                  <p className="text-sm text-muted-foreground">{user.location}</p>
+                  <p className="text-sm font-medium">العمر</p>
+                  <p className="text-sm text-muted-foreground">{userData.age}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">آخر تسجيل دخول</p>
-                  <p className="text-sm text-muted-foreground">{user.lastLogin}</p>
+                  <p className="text-sm text-muted-foreground">{userData.updated_at}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
+              {/* <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">ملاحظات</p>
                   <p className="text-sm text-muted-foreground">{user.bio}</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
 
         <Card className="md:col-span-2">
           <CardHeader>
-            <Tabs defaultValue="bookings">
+            <Tabs defaultValue="bookings" onValueChange={setActiveTab} >
               <TabsList>
                 <TabsTrigger value="bookings">الحجوزات</TabsTrigger>
                 <TabsTrigger value="payments">المدفوعات</TabsTrigger>
               </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="bookings">
+
               <TabsContent value="bookings" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium">حجوزات المستخدم</h3>
-                    <p className="text-sm text-muted-foreground">إجمالي الحجوزات: {user.bookingsCount}</p>
+                    {/* <p className="text-sm text-muted-foreground">إجمالي الحجوزات: {user.bookingsCount}</p> */}
                   </div>
                   <Button size="sm">عرض الكل</Button>
                 </div>
@@ -235,34 +271,40 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {bookings.map((booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8 border">
-                                <AvatarImage src={booking.salonLogo} alt={booking.salonName} />
-                                <AvatarFallback>{booking.salonName.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <span>{booking.salonName}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{booking.service}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <div className="flex items-center">
-                                <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="text-sm">{new Date(booking.date).toLocaleDateString("ar-SA")}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                <span className="text-sm">{booking.time}</span>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{booking.price}</TableCell>
-                          <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                        </TableRow>
-                      ))}
+                      {
+                        bookingsData.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center">لا يوجد حجوزات</TableCell>
+                          </TableRow>
+                        ) :
+                          bookingsData.map((booking) => (
+                            <TableRow key={booking.id}>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8 border">
+                                    <AvatarImage src={booking.avatar} alt={booking.salon_name} />
+                                    <AvatarFallback>{booking.salon_name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <span>{booking.salon_name}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>{booking.service_name}</TableCell>
+                              <TableCell>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center">
+                                    <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-sm">{new Date(booking.date).toLocaleDateString("ar-SA")}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                                    <span className="text-sm">{booking.time}</span>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>{booking.price}</TableCell>
+                              <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                            </TableRow>
+                          ))}
                     </TableBody>
                   </Table>
                 </div>
@@ -272,7 +314,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-lg font-medium">مدفوعات المستخدم</h3>
-                    <p className="text-sm text-muted-foreground">إجمالي المدفوعات: {user.totalSpent}</p>
+                    {/* <p className="text-sm text-muted-foreground">إجمالي المدفوعات: {user.totalSpent}</p> */}
                   </div>
                   <Button size="sm">عرض الكل</Button>
                 </div>
@@ -289,24 +331,37 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {payments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>#{payment.id}</TableCell>
-                          <TableCell>{new Date(payment.date).toLocaleDateString("ar-SA")}</TableCell>
-                          <TableCell>{payment.amount}</TableCell>
-                          <TableCell>{payment.method}</TableCell>
-                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                        </TableRow>
-                      ))}
+                      {
+                        paymentsData.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center">لا يوجد مدفوعات</TableCell>
+                          </TableRow>
+                        ) :
+
+
+                          paymentsData.map((payment) => (
+                            <TableRow key={payment.id}>
+                              <TableCell>#{payment.id}</TableCell>
+                              <TableCell>{new Date(payment.created_at).toLocaleDateString("ar-SA")}</TableCell>
+                              <TableCell>{payment.amount}</TableCell>
+                              <TableCell>{payment.payment_method}</TableCell>
+                              <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                            </TableRow>
+                          ))}
                     </TableBody>
                   </Table>
                 </div>
               </TabsContent>
             </Tabs>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="bookings">
+
+            </Tabs>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div >
   )
 }
 
