@@ -123,10 +123,10 @@ export default function SalonsManagement() {
 
   const [statusFilter, setStatusFilter] = useState("all")
   // Add fetch function
-  const fetchSalons = async (pageNumber = 1, search = searchQuery, status = statusFilter) => {
+  const fetchSalons = async (pageNumber = currentPage, limit = 10, search = searchQuery, status = statusFilter) => {
     try {
       setIsLoading(true)
-      const response = await fetchData(`admin/salons?limit=${perPage}&page=${pageNumber}&search=${search}&status=${status}`)
+      const response = await fetchData(`admin/salons?page=${pageNumber}&limit=${limit}&search=${search}${status !== "all" ? `&is_active=${status}` : ""}`)
       if (response.success) {
         setSalons(response.data)
         setTotalItems(response.data.total)
@@ -176,10 +176,10 @@ export default function SalonsManagement() {
 
   // Update search and filter handlers
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchSalons(1, searchQuery, statusFilter)
-    }, 500)
-    return () => clearTimeout(timer)
+    // const timer = setTimeout(() => {
+    fetchSalons(currentPage, perPage, searchQuery, statusFilter)
+    // }, 500)
+    // return () => clearTimeout(timer)
   }, [searchQuery, statusFilter])
 
 
@@ -194,15 +194,15 @@ export default function SalonsManagement() {
   //   return matchesSearch && matchesStatus
   // })
 
-  const getStatusBadge = (status: Number) => {
+  const getStatusBadge = (status: boolean) => {
     switch (status) {
-      case 1:
+      case true:
         return (
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             نشط
           </Badge>
         )
-      case 0:
+      case false:
         return (
           <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
             غير نشطس
@@ -250,9 +250,8 @@ export default function SalonsManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="نشط">نشط</SelectItem>
-                    <SelectItem value="معلق">معلق</SelectItem>
-                    <SelectItem value="محظور">محظور</SelectItem>
+                    <SelectItem value="1">نشط</SelectItem>
+                    <SelectItem value="0">غير نشط</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -317,7 +316,7 @@ export default function SalonsManagement() {
                           <span className="text-xs text-muted-foreground">{salon.email}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(salon.status)}</TableCell>
+                      <TableCell>{getStatusBadge(salon.is_active)}</TableCell>
                       <TableCell>{salon.bookings_count}</TableCell>
                       <TableCell style={{ unicodeBidi: 'plaintext' }} className=" text-right">{salon.total_revenue + " د.إ"}</TableCell>
                       <TableCell>
