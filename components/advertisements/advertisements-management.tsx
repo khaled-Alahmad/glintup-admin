@@ -436,19 +436,19 @@ export default function AdvertisementsManagement() {
                     </TableRow>
 
                   ))}
-                  <div className="mt-4">
-                    {!isLoading && advertisements.length > 0 && totalPages > 1 && (
-                      <PaginationWithInfo
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={totalItems}
-                        itemsPerPage={perPage}
-                        onPageChange={setCurrentPage}
-                      />
-                    )}
-                  </div>
                 </TableBody>
               </Table>
+            </div>
+            <div className="mt-4">
+              {!isLoading && advertisements.length > 0 && totalPages > 1 && (
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              )}
             </div>
           </div>
         </CardContent>

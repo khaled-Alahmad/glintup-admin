@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,89 +19,86 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import { fetchData, updateData } from "@/lib/apiHelper"
+import { useToast } from "../ui/use-toast"
+import { PaginationWithInfo } from "../ui/pagination-with-info"
 
-const users = [
-  {
-    id: "1",
-    name: "سارة أحمد",
-    avatar: "/placeholder.svg?height=40&width=40",
-    email: "sarah@example.com",
-    phone: "+966 50 123 4567",
-    location: "مدينة الكويت، الكويت",
-    status: "نشط",
-    joinDate: "12 يناير 2023",
-    lastLogin: "منذ 2 ساعة",
-    bookingsCount: 24,
-    totalSpent: "4,250 د.إ",
-  },
-  {
-    id: "2",
-    name: "محمد العلي",
-    avatar: "/placeholder.svg?height=40&width=40",
-    email: "mohammed@example.com",
-    phone: "+966 55 987 6543",
-    location: "جدة، السعودية",
-    status: "نشط",
-    joinDate: "23 فبراير 2023",
-    lastLogin: "منذ 5 أيام",
-    bookingsCount: 18,
-    totalSpent: "3,120 د.إ",
-  },
-  {
-    id: "3",
-    name: "نورة المطيري",
-    avatar: "/placeholder.svg?height=40&width=40",
-    email: "noura@example.com",
-    phone: "+966 54 456 7890",
-    location: "الدمام، السعودية",
-    status: "نشط",
-    joinDate: "5 مارس 2023",
-    lastLogin: "منذ 1 يوم",
-    bookingsCount: 32,
-    totalSpent: "5,680 د.إ",
-  },
-  {
-    id: "4",
-    name: "خالد السعيد",
-    avatar: "/placeholder.svg?height=40&width=40",
-    email: "khaled@example.com",
-    phone: "+966 56 234 5678",
-    location: "مدينة الكويت، الكويت",
-    status: "محظور",
-    joinDate: "17 أبريل 2023",
-    lastLogin: "منذ 30 يوم",
-    bookingsCount: 7,
-    totalSpent: "1,150 د.إ",
-  },
-  {
-    id: "5",
-    name: "منى الشهري",
-    avatar: "/placeholder.svg?height=40&width=40",
-    email: "mona@example.com",
-    phone: "+966 58 345 6789",
-    location: "جدة، السعودية",
-    status: "نشط",
-    joinDate: "30 مايو 2023",
-    lastLogin: "منذ 12 ساعة",
-    bookingsCount: 15,
-    totalSpent: "2,600 د.إ",
-  },
-]
 
+interface UserInfo {
+  all_count: number;
+  active_count: number;
+  unactive_count: number;
+  average_spending: number;
+}
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  balance: number;
+  full_phone: string;
+  gender: string;
+  birth_date: string;
+  age: string;
+  avatar: string | null;
+  phone_code: string;
+  phone: string;
+  role: string;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
 export default function UsersManagement() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.phone.toLowerCase().includes(searchQuery.toLowerCase())
+  const [users, setUsers] = useState<User[]>([]);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [perPage, setPerPage] = useState(5);
+  const { toast } = useToast()
+  const [totalItems, setTotalItems] = useState(0)
 
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: perPage.toString(),
+        ...(searchQuery && { search: searchQuery }),
+        ...(statusFilter !== 'all' && { is_active: statusFilter === 'نشط' ? '1' : '0' }),
+      });
 
-    return matchesSearch && matchesStatus
-  })
+      const response = await fetchData(`admin/users?${queryParams}`);
+      if (response.success) {
+        setUsers(response.data);
+        setUserInfo(response.info);
+        setTotalPages(response.meta.last_page);
+        setCurrentPage(response.meta.current_page);
+        setTotalItems(response.meta.total)
+
+        setPerPage(response.meta.per_page);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch users",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage, statusFilter, searchQuery]);
+
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -121,7 +118,27 @@ export default function UsersManagement() {
         return <Badge variant="outline">{status}</Badge>
     }
   }
-
+  const handleStatusUpdate = async (userId: number, newStatus: boolean) => {
+    try {
+      const response = await updateData(`admin/users/${userId}`, {
+        is_active: newStatus
+      });
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: `User ${newStatus ? 'activated' : 'deactivated'} successfully`,
+        });
+        fetchUsers(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user status",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -140,8 +157,7 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">إجمالي المستخدمين</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,532</div>
-            <p className="text-xs text-muted-foreground mt-1">زيادة 125 مستخدم هذا الشهر</p>
+            <div className="text-2xl font-bold">{userInfo?.all_count || 0}</div>
           </CardContent>
         </Card>
 
@@ -150,8 +166,10 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">مستخدمين نشطين</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,498</div>
-            <p className="text-xs text-muted-foreground mt-1">98% من إجمالي المستخدمين</p>
+            <div className="text-2xl font-bold">{userInfo?.active_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {userInfo ? `${((userInfo.active_count / userInfo.all_count) * 100).toFixed(1)}% من إجمالي المستخدمين` : ''}
+            </p>
           </CardContent>
         </Card>
 
@@ -160,8 +178,10 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">مستخدمين محظورين</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">34</div>
-            <p className="text-xs text-muted-foreground mt-1">2% من إجمالي المستخدمين</p>
+            <div className="text-2xl font-bold">{userInfo?.unactive_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {userInfo ? `${((userInfo.unactive_count / userInfo.all_count) * 100).toFixed(1)}% من إجمالي المستخدمين` : ''}
+            </p>
           </CardContent>
         </Card>
 
@@ -170,11 +190,12 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">متوسط الإنفاق</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">320 د.إ</div>
-            <p className="text-xs text-muted-foreground mt-1">لكل مستخدم شهرياً</p>
+            <div className="text-2xl font-bold">{userInfo?.average_spending.toFixed(2) || 0} د.إ</div>
+            <p className="text-xs text-muted-foreground mt-1">لكل مستخدم</p>
           </CardContent>
         </Card>
       </div>
+
 
       <Card>
         <CardHeader>
@@ -184,16 +205,16 @@ export default function UsersManagement() {
                 <CardTitle>المستخدمين</CardTitle>
                 <CardDescription>قائمة بجميع المستخدمين المسجلين في النظام</CardDescription>
               </div>
-              <TabsList>
+              {/* <TabsList>
                 <TabsTrigger value="all">الكل</TabsTrigger>
                 <TabsTrigger value="active">نشط</TabsTrigger>
                 <TabsTrigger value="blocked">محظور</TabsTrigger>
-              </TabsList>
+              </TabsList> */}
             </div>
           </Tabs>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
               <div className="relative w-full sm:w-auto">
                 <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -227,76 +248,130 @@ export default function UsersManagement() {
                   <TableRow>
                     <TableHead>المستخدم</TableHead>
                     <TableHead>التواصل</TableHead>
-                    <TableHead>الموقع</TableHead>
+                    <TableHead>الرصيد</TableHead>
                     <TableHead>الحالة</TableHead>
-                    <TableHead>آخر تسجيل دخول</TableHead>
-                    <TableHead>الحجوزات</TableHead>
-                    <TableHead>الإنفاق</TableHead>
+                    <TableHead>تاريخ التسجيل</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage src={user.avatar} alt={user.name} />
-                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{user.name}</span>
-                            <span className="text-xs text-muted-foreground">{user.joinDate}</span>
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={`loading-${index}`} className="animate-pulse">
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-full bg-muted"></div>
+                            <div>
+                              <div className="h-4 w-24 bg-muted rounded mb-1"></div>
+                              <div className="h-3 w-16 bg-muted rounded"></div>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-xs">{user.phone}</span>
-                          <span className="text-xs text-muted-foreground">{user.email}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.location}</TableCell>
-                      <TableCell>{getStatusBadge(user.status)}</TableCell>
-                      <TableCell>{user.lastLogin}</TableCell>
-                      <TableCell>{user.bookingsCount}</TableCell>
-                      <TableCell>{user.totalSpent}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
+                        </TableCell>
+                        <TableCell><div className="h-4 w-32 bg-muted rounded"></div></TableCell>
+                        <TableCell><div className="h-4 w-20 bg-muted rounded"></div></TableCell>
+                        <TableCell><div className="h-6 w-16 bg-muted rounded-full"></div></TableCell>
+                        <TableCell><div className="h-4 w-24 bg-muted rounded"></div></TableCell>
+                        <TableCell><div className="h-8 w-8 bg-muted rounded"></div></TableCell>
+                      </TableRow>
+                    ))
+                  ) :
+                    users && users.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <p className="text-muted-foreground">لا يوجد مستخدمين مسجلين</p>
+                            <Button asChild variant="link" className="gap-1">
+                              <Link href="/users/add">
+                                إضافة مستخدم جديد
+                              </Link>
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>خيارات</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <Link href={`/users/${user.id}`} className="cursor-pointer w-full">
-                                عرض التفاصيل
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/users/${user.id}/edit`} className="cursor-pointer w-full">
-                                تعديل البيانات
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>عرض الحجوزات</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {user.status === "نشط" ? (
-                              <DropdownMenuItem className="text-red-600">حظر المستخدم</DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem className="text-green-600">إلغاء الحظر</DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) :
+                      users.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-9 w-9">
+                                <AvatarImage src={user.avatar || ''} alt={user.full_name} />
+                                <AvatarFallback>{user.full_name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{user.full_name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(user.created_at).toLocaleDateString("en-US")}
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-xs text-right" style={{ unicodeBidi: "plaintext" }}>{user.full_phone}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{user.balance} د.إ</TableCell>
+                          <TableCell>
+                            {getStatusBadge(user.is_active ? 'نشط' : 'محظور')}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(user.created_at).toLocaleDateString("en-US")}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>خيارات</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/users/${user.id}`}>عرض التفاصيل</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/users/${user.id}/edit`}>تعديل البيانات</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {user.is_active ? (
+                                  <DropdownMenuItem
+                                    className="text-red-600"
+                                    onClick={() => handleStatusUpdate(user.id, false)}
+                                  >
+                                    حظر المستخدم
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    className="text-green-600"
+                                    onClick={() => handleStatusUpdate(user.id, true)}
+                                  >
+                                    إلغاء الحظر
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+
                 </TableBody>
+
               </Table>
             </div>
+            {!isLoading && users.length > 0 && totalPages > 1 && (
+              <div className="mt-4">
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
+
         </CardContent>
       </Card>
     </div>
