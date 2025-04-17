@@ -59,7 +59,7 @@ export default function UsersManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(25);
   const { toast } = useToast()
   const [totalItems, setTotalItems] = useState(0)
 

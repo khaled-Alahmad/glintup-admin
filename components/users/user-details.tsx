@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useEffect, useState } from "react"
 import { fetchData } from "@/lib/apiHelper"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
 interface UserDetailsProps {
   userId: string
@@ -33,23 +34,50 @@ interface UserData {
   last_login: string
   bio?: string
 }
+interface Salon {
+  id: number
+  icon_url: string
+  name: string
 
+}
+interface Service {
+  id: number;
+  name: {
+    en: string;
+    ar: string;
+  };
+  duration_minutes: number;
+
+  final_price: number;
+  currency: string;
+}
+interface BookingService {
+  id: number;
+  booking_id: number;
+  service_id: number;
+  service: Service;
+
+}
 interface Booking {
   id: number
   avatar: string
+  notes: string
+  total_price: string
   salon_name: string
+  salon: Salon
   service_name: string
   date: string
   time: string
   status: string
   price: number
+  booking_services: BookingService[]
 }
 
 interface Payment {
   id: number
   amount: number
   status: string
-  payment_method: string
+  type: string
   created_at: string
 }
 
@@ -162,6 +190,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
         return <Badge variant="outline">{status}</Badge>
     }
   }
+  console.log(paymentsData);
 
   return (
     <div className="flex flex-col gap-6">
@@ -282,18 +311,48 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                               <TableCell>
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8 border">
-                                    <AvatarImage src={booking.avatar} alt={booking.salon_name} />
-                                    <AvatarFallback>{booking.salon_name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={booking.avatar} alt={booking.salon.name} />
+                                    <AvatarFallback>{booking.salon.name.charAt(0)}</AvatarFallback>
                                   </Avatar>
-                                  <span>{booking.salon_name}</span>
+                                  <span>{booking.salon.name}</span>
                                 </div>
                               </TableCell>
-                              <TableCell>{booking.service_name}</TableCell>
+                              <TableCell>
+                                {booking.booking_services.length > 0 && (
+                                  <>
+                                    <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary inline-flex">
+                                      {booking.booking_services[0].service.name.ar}
+                                    </span>
+                                    {booking.booking_services.length > 1 && (
+                                      <Popover>
+                                        <PopoverTrigger className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                                          +{booking.booking_services.length - 1} more
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-60">
+                                          <div className="flex flex-col gap-2">
+                                            {booking.booking_services.slice(1).map((service) => (
+                                              <div key={service.id} className="flex flex-col">
+                                                <span className="text-sm font-medium">
+                                                  {service.service.name.ar}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground">
+                                                  {service.service.final_price} {service.service.currency} • {service.service.duration_minutes} minutes
+                                                </span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </PopoverContent>
+                                      </Popover>
+                                    )}
+                                  </>
+                                )}
+
+                              </TableCell>
                               <TableCell>
                                 <div className="flex flex-col">
                                   <div className="flex items-center">
                                     <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{new Date(booking.date).toLocaleDateString("ar-SA")}</span>
+                                    <span className="text-sm">{new Date(booking.date).toLocaleDateString("en-US")}</span>
                                   </div>
                                   <div className="flex items-center">
                                     <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
@@ -301,7 +360,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                                   </div>
                                 </div>
                               </TableCell>
-                              <TableCell>{booking.price}</TableCell>
+                              <TableCell>{booking.total_price} د.إ</TableCell>
                               <TableCell>{getStatusBadge(booking.status)}</TableCell>
                             </TableRow>
                           ))}
@@ -326,7 +385,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                         <TableHead>رقم العملية</TableHead>
                         <TableHead>التاريخ</TableHead>
                         <TableHead>التكلفة</TableHead>
-                        <TableHead>طريقة الدفع</TableHead>
+                        <TableHead> النوع</TableHead>
                         <TableHead>الحالة</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -342,9 +401,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                           paymentsData.map((payment) => (
                             <TableRow key={payment.id}>
                               <TableCell>#{payment.id}</TableCell>
-                              <TableCell>{new Date(payment.created_at).toLocaleDateString("ar-SA")}</TableCell>
+                              <TableCell>{new Date(payment.created_at).toLocaleDateString("en-US")}</TableCell>
                               <TableCell>{payment.amount}</TableCell>
-                              <TableCell>{payment.payment_method}</TableCell>
+                              <TableCell>{payment.type}</TableCell>
                               <TableCell>{getStatusBadge(payment.status)}</TableCell>
                             </TableRow>
                           ))}
