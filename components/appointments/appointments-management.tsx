@@ -288,7 +288,7 @@ export default function AppointmentsManagement() {
                     <TableHead>الصالون</TableHead>
                     <TableHead>الخدمة</TableHead>
                     <TableHead>التاريخ والوقت</TableHead>
-                    <TableHead>حالة الدفع</TableHead>
+                    {/* <TableHead>حالة الدفع</TableHead> */}
                     <TableHead>الحالة</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
@@ -395,17 +395,16 @@ export default function AppointmentsManagement() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                           <div className="flex flex-col">
-                            <Badge variant="outline" className={
-                              booking.payment_status === "paid"
+                            <Badge variant="outline" className={`w-fit ${booking.payment_status === "paid"
                                 ? "bg-green-50 text-green-700 border-green-200"
                                 : "bg-red-50 text-red-700 border-red-200"
-                            }>
+                              }`}>
                               {booking.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
                             </Badge>
                           </div>
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {/* {getStatusIcon(booking.status)} */}

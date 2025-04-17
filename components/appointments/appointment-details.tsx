@@ -538,7 +538,7 @@ export default function AppointmentDetails({
                 <span className="text-muted-foreground">حالة الحجز</span>
                 <span>{getStatusBadge(booking.status)}</span>
               </div>
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">حالة الدفع</span>
                 <Badge
                   variant="outline"
@@ -548,7 +548,7 @@ export default function AppointmentDetails({
                 >
                   {booking.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
                 </Badge>
-              </div>
+              </div> */}
               {/* <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">طريقة الدفع</span>
                 <span>{appointmentData.paymentMethod}</span>
