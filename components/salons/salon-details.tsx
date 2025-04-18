@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle } from 'lucide-react';
+import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle, CalendarIcon, Eye } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,6 +91,98 @@ interface Appointment {
   };
   booking_services: any[];
 }
+interface GiftCard {
+  id: number;
+  code: string;
+  sender_id: number;
+  recipient_id: number | null;
+  phone_code: string;
+  phone: string;
+  full_phone: string;
+  type: string;
+  amount: string;
+  received_at: string;
+  currency: string | null;
+  services: number[];
+  services_data: {
+    id: number;
+    name: {
+      en: string;
+      ar: string;
+    };
+    duration_minutes: number;
+    final_price: number;
+  }[];
+  message: string;
+  is_used: boolean;
+  sender: {
+
+    id: number;
+    full_phone: string;
+    full_name: string;
+    avatar: string | null;
+  };
+  recipient: {
+    id: number;
+    email: string;
+    full_name: string;
+    avatar: string | null;
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
+interface BookingService {
+  id: number;
+  booking_id: number;
+  service_id: number;
+  service: Service;
+
+
+}
+
+interface User {
+  id: number;
+  full_name: string;
+  avatar: string | null;
+  full_phone: string;
+}
+
+interface Salon {
+  id: number;
+  name: string;
+  icon_url: string;
+}
+
+interface Booking {
+  id: number;
+  code: string;
+  date: string;
+  total_price: number;
+  time: string;
+  end_time: string;
+  total_service_time_in_minutes: number;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  payment_status: "paid" | "unpaid";
+  user: User;
+  salon: Salon;
+  booking_services: BookingService[];
+}
+
+interface Payment {
+  id: number;
+  amount: string;
+  currency: string;
+  method: string;
+  status: string;
+  is_refund: boolean;
+  system_percentage: string;
+  paymentable_id: number;
+  paymentable_type: string;
+  booking?: Booking;
+  gift_card?: GiftCard;
+  created_at: string;
+  updated_at: string;
+}
 const DAYS_IN_ARABIC: Record<string, string> = {
   'sunday': 'الأحد',
   'monday': 'الإثنين',
@@ -150,6 +242,8 @@ interface Service {
   icon: string;
   duration_minutes: number;
   price: number;
+  final_price: number;
+  currency: string;
   icon_url: string;
   gender: 'male' | 'female' | 'both';
   is_active: number;
@@ -194,6 +288,18 @@ interface Review {
     avatar: string;
   };
 }
+interface Holiday {
+  id: number;
+  salon_id: number;
+  holiday_date: string;
+  reason: string;
+  is_full_day: boolean;
+  is_partial: boolean;
+  start_time: string | null;
+  end_time: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [showSendNotificationDialog, setShowSendNotificationDialog] =
@@ -207,7 +313,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
   const [totalPages, setTotalPages] = useState(1);
-  const [perPage, setPerPage] = useState(2);
+  const [perPage, setPerPage] = useState(4);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("both");
@@ -218,7 +324,512 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   // Add new state for salons
-  const [salons, setSalons] = useState<{ id: number; name: string }[]>([]);
+  // Add these state variables in your component
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [holidaysCurrentPage, setHolidaysCurrentPage] = useState(1);
+  const [holidaysTotalPages, setHolidaysTotalPages] = useState(1);
+  const [holidaysPerPage, setHolidaysPerPage] = useState(10);
+  const [holidaysTotalItems, setHolidaysTotalItems] = useState(0);
+  const [editingHoliday, setEditingHoliday] = useState<Holiday | null>(null);
+  const [isHolidayDialogOpen, setIsHolidayDialogOpen] = useState(false);
+
+  // Add these state variables in your component
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentsCurrentPage, setPaymentsCurrentPage] = useState(1);
+  const [paymentsTotalPages, setPaymentsTotalPages] = useState(1);
+  const [paymentsPerPage, setPaymentsPerPage] = useState(10);
+  const [paymentsTotalItems, setPaymentsTotalItems] = useState(0);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+
+  // Add this function to fetch payments
+  const fetchPayments = async () => {
+    try {
+      setIsLoadingPayments(true);
+      const response = await fetchData(`admin/salon-payments?salon_id=${salonId}&page=${paymentsCurrentPage}`);
+      if (response.success) {
+        setPayments(response.data);
+        setPaymentsTotalPages(response.meta.last_page);
+        setPaymentsCurrentPage(response.meta.current_page);
+        setPaymentsPerPage(response.meta.per_page);
+        setPaymentsTotalItems(response.meta.total);
+        setIsLoadingPayments(false);
+
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب المدفوعات",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Add useEffect for payments
+  useEffect(() => {
+    if (activeTab === 'payments') {
+      fetchPayments();
+    }
+  }, [activeTab, paymentsCurrentPage, salonId]);
+
+  // Add the PaymentsTab component
+  const PaymentsTab = () => (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">المدفوعات</h3>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>رقم العملية</TableHead>
+                <TableHead>المبلغ</TableHead>
+                <TableHead>طريقة الدفع</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead>النوع</TableHead>
+                <TableHead>التاريخ</TableHead>
+                <TableHead>الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoadingReviews ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                      <p className="text-sm text-muted-foreground">جاري تحميل المدفوعات...</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : payments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">لا توجد مدفوعات</p>
+                  </TableCell>
+                </TableRow>
+              ) : payments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>#{payment.id}</TableCell>
+                  <TableCell>{payment.amount} {payment.currency}</TableCell>
+                  <TableCell>
+                    {payment.method === 'wallet' ? 'المحفظة' :
+                      payment.method === 'stripe' ? 'بطاقة ائتمان' :
+                        payment.method === 'cash' ? 'نقداً' :
+                          payment.method}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-md text-sm font-medium ${payment.status === 'confirm' ? 'bg-green-50 text-green-700' :
+                      payment.status === 'pending' ? 'bg-amber-50 text-amber-700' :
+                        payment.status === 'canceled' ? 'bg-red-50 text-red-700' :
+                          payment.status === 'rejected' ? 'bg-red-50 text-red-700' :
+                            'bg-gray-50 text-gray-700'
+                      }`}>
+                      {payment.status === 'confirm' ? 'مؤكد' :
+                        payment.status === 'pending' ? 'قيد الانتظار' :
+                          payment.status === 'canceled' ? 'ملغي' :
+                            payment.status === 'rejected' ? 'مرفوض' :
+                              payment.status}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {payment.paymentable_type.includes('Booking') ? 'حجز' : 'بطاقة هدية'}
+                  </TableCell>
+                  <TableCell>{new Date(payment.created_at).toLocaleDateString('ar-EG')}</TableCell>
+                  <TableCell>
+                    {payment.paymentable_type.includes('Booking') && (
+                      <>
+                        <Link href={`/appointments/${payment.paymentable_id}`}>
+                          <Button variant="ghost" size="icon">
+                            <Calendar className="h-4 w-4" />
+                          </Button>
+                        </Link>
+
+                      </>)}
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedPayment(payment);
+                        setShowPaymentDetails(true);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="flex justify-center p-4">
+          <PaginationWithInfo
+            currentPage={paymentsCurrentPage}
+            totalPages={paymentsTotalPages}
+            totalItems={paymentsTotalItems}
+            itemsPerPage={paymentsPerPage}
+            onPageChange={setPaymentsCurrentPage}
+          />
+        </CardFooter>
+      </Card>
+
+      <Dialog open={showPaymentDetails} onOpenChange={setShowPaymentDetails}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>تفاصيل العملية #{selectedPayment?.id}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>المبلغ</Label>
+                <p className="text-lg font-medium">{selectedPayment?.amount} {selectedPayment?.currency}</p>
+              </div>
+              <div>
+                <Label>طريقة الدفع</Label>
+                <p className="text-lg font-medium">{selectedPayment?.method}</p>
+              </div>
+              <div>
+                <Label>الحالة</Label>
+                <Badge variant={selectedPayment?.status === 'confirm' ? 'success' : 'secondary'}>
+                  {selectedPayment?.status}
+                </Badge>
+              </div>
+              <div>
+                <Label>نسبة النظام</Label>
+                <p className="text-lg font-medium">{selectedPayment?.system_percentage}%</p>
+              </div>
+            </div>
+
+            {selectedPayment?.paymentable_type.includes('Booking') && selectedPayment?.booking && (
+              <div className="space-y-4">
+                <Separator />
+                <h4 className="font-medium">تفاصيل الحجز</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>رقم الحجز</Label>
+                    <p className="text-lg font-medium">{selectedPayment.booking.code}</p>
+                  </div>
+                  <div>
+                    <Label>التاريخ والوقت</Label>
+                    <p className="text-lg font-medium">
+                      {new Date(selectedPayment.booking.date).toLocaleDateString('ar-EG')} - {selectedPayment.booking.time}
+                    </p>
+                  </div>
+                  <div>
+                    <Label>الحالة</Label>
+                    <div className="mt-1">
+                      {getAppointmentStatusBadge(selectedPayment.booking.status)}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>المبلغ الإجمالي</Label>
+                    <p className="text-lg font-medium">{selectedPayment.booking.total_price} {selectedPayment.currency}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>الخدمات</Label>
+                  {selectedPayment.booking.booking_services.map((bookingService) => (
+                    <div key={bookingService.id} className="flex justify-between items-center p-2 border rounded">
+                      <span>{bookingService.service.name.ar}</span>
+                      <span>{bookingService.service.final_price} {bookingService.service.currency}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedPayment?.paymentable_type.includes('GiftCard') && selectedPayment?.gift_card && (
+              <div className="space-y-4">
+                <Separator />
+                <h4 className="font-medium">تفاصيل بطاقة الهدية</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>الكود</Label>
+                    <p className="text-lg font-medium">{selectedPayment.gift_card.code}</p>
+                  </div>
+                  <div>
+                    <Label>القيمة</Label>
+                    <p className="text-lg font-medium">{selectedPayment.gift_card.amount} {selectedPayment.currency}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+
+
+
+
+
+  // Add this function to fetch holidays
+  const [isLoadingHolidays, setIsLoadingHolidays] = useState(false);
+
+  const fetchHolidays = async () => {
+    try {
+      setIsLoadingHolidays(true);
+      const response = await fetchData(`admin/salon-holidays?salon_id=${salonId}&page=${holidaysCurrentPage}`);
+      if (response.success) {
+        setHolidays(response.data);
+        setHolidaysTotalPages(response.meta.last_page);
+        setHolidaysCurrentPage(response.meta.current_page);
+        setHolidaysPerPage(response.meta.per_page);
+        setHolidaysTotalItems(response.meta.total);
+        setIsLoadingHolidays(false);
+
+      }
+    } catch (error) {
+      console.error('Error fetching holidays:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب العطلات",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Add useEffect for holidays
+  useEffect(() => {
+    if (activeTab === 'holidays') {
+      fetchHolidays();
+    }
+  }, [activeTab, holidaysCurrentPage, salonId]);
+
+  const HolidaysTab = () => (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">العطلات والإجازات</h3>
+        <Button onClick={() => {
+          setEditingHoliday(null);
+          setIsHolidayDialogOpen(true);
+        }}>
+          <Plus className="h-4 w-4 ml-2" />
+          إضافة عطلة
+        </Button>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>التاريخ</TableHead>
+                <TableHead>السبب</TableHead>
+                <TableHead>نوع العطلة</TableHead>
+                <TableHead>التوقيت</TableHead>
+                <TableHead>الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoadingHolidays ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                      <p className="text-sm text-muted-foreground">جاري تحميل العطلات...</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : holidays.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">لا توجد عطلات</p>
+                  </TableCell>
+                </TableRow>
+              ) : holidays.map((holiday) => (
+                <TableRow key={holiday.id}>
+                  <TableCell>{new Date(holiday.holiday_date).toLocaleDateString('ar-EG')}</TableCell>
+                  <TableCell>{holiday.reason}</TableCell>
+                  <TableCell>
+                    {holiday.is_full_day ? 'يوم كامل' : 'جزئي'}
+                  </TableCell>
+                  <TableCell>
+                    {holiday.is_partial ? `${holiday.start_time} - ${holiday.end_time}` : 'طوال اليوم'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditingHoliday(holiday);
+                          setIsHolidayDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('هل أنت متأكد من حذف هذه العطلة؟')) {
+                            try {
+                              await deleteData(`admin/salon-holidays/${holiday.id}`);
+                              toast({
+                                title: "تم بنجاح",
+                                description: "تم حذف العطلة بنجاح",
+                              });
+                              fetchHolidays();
+                            } catch (error) {
+                              console.error('Error deleting holiday:', error);
+                              toast({
+                                title: "خطأ",
+                                description: "فشل في حذف العطلة",
+                                variant: "destructive",
+                              });
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="flex justify-center p-4">
+          <PaginationWithInfo
+            currentPage={holidaysCurrentPage}
+            totalPages={holidaysTotalPages}
+            totalItems={holidaysTotalItems}
+            itemsPerPage={holidaysPerPage}
+            onPageChange={setHolidaysCurrentPage}
+          />
+        </CardFooter>
+      </Card>
+
+      <Dialog open={isHolidayDialogOpen} onOpenChange={setIsHolidayDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingHoliday ? 'تعديل عطلة' : 'إضافة عطلة جديدة'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const isPartial = formData.get('is_partial') === 'true';
+
+            const holidayData = {
+              salon_id: Number(salonId),
+              holiday_date: formData.get('holiday_date'),
+              reason: formData.get('reason'),
+              is_full_day: !isPartial,
+              is_partial: isPartial,
+              ...(isPartial && {
+                start_time: formData.get('start_time'),
+                end_time: formData.get('end_time')
+              })
+            };
+
+
+            try {
+              if (editingHoliday) {
+                await updateData(`admin/salon-holidays/${editingHoliday.id}`, holidayData);
+              } else {
+                await addData('admin/salon-holidays', holidayData);
+              }
+              toast({
+                title: "تم بنجاح",
+                description: editingHoliday ? "تم تعديل العطلة بنجاح" : "تمت إضافة العطلة بنجاح",
+              });
+              setIsHolidayDialogOpen(false);
+              fetchHolidays();
+            } catch (error) {
+              console.error('Error saving holiday:', error);
+              toast({
+                title: "خطأ",
+                description: "فشل في حفظ العطلة",
+                variant: "destructive",
+              });
+            }
+          }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="holiday_date">التاريخ</Label>
+                <Input
+                  id="holiday_date"
+                  name="holiday_date"
+                  type="date"
+                  defaultValue={editingHoliday?.holiday_date}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="reason">السبب</Label>
+                <Input
+                  id="reason"
+                  name="reason"
+                  defaultValue={editingHoliday?.reason}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>نوع العطلة</Label>
+                <Select
+                  name="is_partial"
+                  defaultValue={editingHoliday?.is_partial ? 'true' : 'false'}
+                  onValueChange={(value) => {
+                    const form = document.querySelector('form');
+                    const timeInputs = form?.querySelector('.time-inputs');
+                    if (timeInputs) {
+                      (timeInputs as HTMLElement).style.display = value === 'true' ? 'grid' : 'none';
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر نوع العطلة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="false">يوم كامل</SelectItem>
+                    <SelectItem value="true">فترة محددة</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="time-inputs grid gap-4" style={{ display: editingHoliday?.is_partial ? 'grid' : 'none' }}>
+                <div className="grid gap-2">
+                  <Label htmlFor="start_time">وقت البداية</Label>
+                  <Input
+                    id="start_time"
+                    name="start_time"
+                    type="time"
+                    defaultValue={editingHoliday?.start_time || ''}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="end_time">وقت النهاية</Label>
+                  <Input
+                    id="end_time"
+                    name="end_time"
+                    type="time"
+                    defaultValue={editingHoliday?.end_time || ''}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsHolidayDialogOpen(false)}>
+                إلغاء
+              </Button>
+              <Button type="submit">
+                {editingHoliday ? 'تعديل' : 'إضافة'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+
+
   const fetchServices = async () => {
     try {
       // setIsLoading(true);
@@ -249,9 +860,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
   const [reviewsPerPage, setReviewsPerPage] = useState(5);
   const [reviewsTotalItems, setReviewsTotalItems] = useState(0);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
 
   const fetchReviews = async () => {
     try {
+      setIsLoadingReviews(true);
       const response = await fetchData(`admin/reviews?salon_id=${salonId}&page=${reviewsCurrentPage}&limit=${reviewsPerPage}`);
       if (response.success) {
         setReviews(response.data);
@@ -260,6 +873,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setReviewsCurrentPage(response.meta.current_page);
         setReviewsPerPage(response.meta.per_page);
         setReviewsTotalItems(response.meta.total);
+        setIsLoadingReviews(false);
+
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -526,16 +1141,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
     fetchServices();
     // }
-  }, [salonId]);
-  // إضافة خدمة إلى الصالون
-  // interface Service {
-  //   id: string;
-  //   name: string;
-  //   duration: number;
-  //   price: number;
-  //   description: string;
-  //   category: string;
-  // }
+  }, [salonId, currentPage, perPage, selectedCategory, selectedStatus]);
+
   const [salonData, setSalonData] = useState<SalonData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -556,206 +1163,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
     fetchSalonData();
   }, [salonId]);
-  // console.log("salonData", salonData);
-
-  // const [availableServices, setAvailableServices] = useState<Service[]>([
-  //   {
-  //     id: "1",
-  //     name: "قص الشعر",
-  //     duration: 60,
-  //     price: 150,
-  //     description: "قص الشعر بأحدث التقنيات والموضات",
-  //     category: "hair",
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "صبغة شعر",
-  //     duration: 120,
-  //     price: 300,
-  //     description: "صبغة شعر بألوان عالمية وتقنيات حديثة",
-  //     category: "hair",
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "تسريحة شعر",
-  //     duration: 90,
-  //     price: 200,
-  //     description: "تسريحات متنوعة للمناسبات والحفلات",
-  //     category: "hair",
-  //   },
-  //   {
-  //     id: "4",
-  //     name: "مكياج",
-  //     duration: 60,
-  //     price: 250,
-  //     description: "مكياج احترافي للمناسبات والسهرات",
-  //     category: "makeup",
-  //   },
-  //   {
-  //     id: "5",
-  //     name: "مانيكير",
-  //     duration: 45,
-  //     price: 100,
-  //     description: "عناية كاملة بالأظافر",
-  //     category: "nails",
-  //   },
-  //   {
-  //     id: "6",
-  //     name: "باديكير",
-  //     duration: 45,
-  //     price: 120,
-  //     description: "عناية كاملة بأظافر القدم",
-  //     category: "nails",
-  //   },
-  //   {
-  //     id: "7",
-  //     name: "تنظيف بشرة",
-  //     duration: 60,
-  //     price: 200,
-  //     description: "تنظيف عميق للبشرة",
-  //     category: "skin",
-  //   },
-  //   {
-  //     id: "8",
-  //     name: "ماسك للوجه",
-  //     duration: 30,
-  //     price: 100,
-  //     description: "ماسكات طبيعية للوجه",
-  //     category: "skin",
-  //   },
-  // ]);
-
-  // قائمة المجموعات المتاحة
-  // const [availableCollections, setAvailableCollections] = useState<
-  //   Collection[]
-  // >([
-  //   {
-  //     id: "1",
-  //     name: "باقة العروس",
-  //     description: "باقة متكاملة لتجهيز العروس",
-  //     services: ["1", "3", "4"],
-  //     price: 550,
-  //     discount: 50,
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "باقة العناية الكاملة",
-  //     description: "باقة للعناية الكاملة بالجسم",
-  //     services: ["5", "6", "7", "8"],
-  //     price: 450,
-  //     discount: 70,
-  //   },
-  // ]);
-
-
-
-  // In a real app, you would fetch salon data based on salonId
-  const salon = {
-    id: salonId,
-    name: "صالون الأميرة",
-    logo: "/placeholder.svg?height=128&width=128",
-    cover: "/placeholder.svg?height=400&width=800",
-    description:
-      "صالون الأميرة هو صالون متخصص في خدمات التجميل والعناية بالشعر والبشرة للسيدات. نقدم خدمات عالية الجودة بأيدي خبيرات متخصصات في مجال التجميل.",
-    category: "نسائي",
-    status: "نشط",
-    featured: true,
-    verified: true,
-    owner: "منيرة السعيد",
-    email: "princess@salon.com",
-    phone: "+966 50 123 4567",
-    address: "منطقة السالمية، شارع الخليج العربي، مدينة الكويت",
-    city: "مدينة الكويت",
-    district: "السالمية",
-    postalCode: "20001",
-    location: "مدينة الكويت، الكويت",
-
-    workingHours: {
-      الأحد: { from: "09:00", to: "21:00" },
-      الاثنين: { from: "09:00", to: "21:00" },
-      الثلاثاء: { from: "09:00", to: "21:00" },
-      الأربعاء: { from: "09:00", to: "21:00" },
-      الخميس: { from: "09:00", to: "21:00" },
-      الجمعة: { from: "16:00", to: "22:00" },
-      السبت: { from: "09:00", to: "21:00" },
-    },
-    socialMedia: {
-      instagram: "princess_salon",
-      twitter: "princess_salon",
-      snapchat: "princess_salon",
-      tiktok: "princess_salon",
-    },
-    rating: 4.8,
-    totalReviews: 245,
-    totalBookings: 1245,
-    revenue: "52,450 د.إ",
-    joinDate: "12 يناير 2023",
-  };
-
-  // const services = [
-  //   {
-  //     id: "1",
-  //     name: "قص شعر",
-  //     duration: "60 دقيقة",
-  //     price: "150 د.إ",
-  //     bookings: 320,
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "صبغة شعر",
-  //     duration: "120 دقيقة",
-  //     price: "300 د.إ",
-  //     bookings: 180,
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "تسريحة شعر",
-  //     duration: "90 دقيقة",
-  //     price: "200 د.إ",
-  //     bookings: 210,
-  //   },
-  //   {
-  //     id: "4",
-  //     name: "مكياج",
-  //     duration: "60 دقيقة",
-  //     price: "250 د.إ",
-  //     bookings: 150,
-  //   },
-  //   {
-  //     id: "5",
-  //     name: "مانيكير وباديكير",
-  //     duration: "90 دقيقة",
-  //     price: "180 د.إ",
-  //     bookings: 95,
-  //   },
-  // ];
-
-  // const reviews = [
-  //   {
-  //     id: "1",
-  //     customerName: "سارة أحمد",
-  //     customerAvatar: "/placeholder.svg?height=40&width=40",
-  //     rating: 5,
-  //     comment: "خدمة ممتازة وموظفات محترفات",
-  //     date: "2024-04-01",
-  //   },
-  //   {
-  //     id: "2",
-  //     customerName: "نورة محمد",
-  //     customerAvatar: "/placeholder.svg?height=40&width=40",
-  //     rating: 4,
-  //     comment: "تجربة جيدة ولكن كان هناك تأخير بسيط",
-  //     date: "2024-03-25",
-  //   },
-  //   {
-  //     id: "3",
-  //     customerName: "عبير علي",
-  //     customerAvatar: "/placeholder.svg?height=40&width=40",
-  //     rating: 5,
-  //     comment: "من أفضل الصالونات التي زرتها",
-  //     date: "2024-03-20",
-  //   },
-  // ];
   const getAppointmentStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -786,79 +1193,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
-  // const appointments = [
-  //   {
-  //     id: "1",
-  //     customerName: "سارة أحمد",
-  //     customerAvatar: "/placeholder.svg?height=40&width=40",
-  //     service: "قص شعر",
-  //     date: "2024-04-03",
-  //     time: "10:30 صباحاً",
-  //     status: "مؤكد",
-  //   },
-  //   {
-  //     id: "2",
-  //     customerName: "نورة محمد",
-  //     customerAvatar: "/placeholder.svg?height=40&width=40",
-  //     service: "صبغة شعر",
-  //     date: "2024-04-03",
-  //     time: "2:15 مساءً",
-  //     status: "معلق",
-  //   },
-  //   {
-  //     id: "3",
-  //     customerName: "عبير علي",
-  //     customerAvatar: "/placeholder.svg?height=40&width=40",
-  //     service: "تسريحة شعر",
-  //     date: "2024-04-04",
-  //     time: "4:45 مساءً",
-  //     status: "مؤكد",
-  //   },
-  // ];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "نشط":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
-          >
-            نشط
-          </Badge>
-        );
-      case "معلق":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-amber-50 text-amber-700 border-amber-200"
-          >
-            معلق
-          </Badge>
-        );
-      case "محظور":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            محظور
-          </Badge>
-        );
-      case "مؤكد":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
-          >
-            مؤكد
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
   const renderStars = (rating: number) => {
     return (
       <div className="flex">
@@ -874,14 +1208,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       </div>
     );
   };
-  // const handleServiceSelection = (serviceId: string) => {
-  //   setSelectedServiceId(serviceId);
-  //   const service = availableServices.find((s) => s.id === serviceId);
-  //   if (service) {
-  //     setCustomPrice(service.price);
-  //     setCustomDuration(service.duration);
-  //   }
-  // };
   if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-3 w-full">
@@ -1283,14 +1609,28 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         <Card className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab} >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
                 <TabsTrigger value="appointments">الحجوزات</TabsTrigger>
+                <TabsTrigger value="holidays">
+                  {/* <CalendarIcon className="h-4 w-4 ml-2" /> */}
+                  العطلات
+                </TabsTrigger>
+                <TabsTrigger value="payments">
+                  {/* <CreditCard className="h-4 w-4 ml-2" /> */}
+                  المدفوعات
+                </TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
+              <TabsContent className="space-y-6" value="payments">
+                <PaymentsTab />
+              </TabsContent>
+              <TabsContent value="holidays" className="space-y-6">
+                <HolidaysTab />
+              </TabsContent>
               <TabsContent value="overview" className="space-y-6">
                 <div className="rounded-lg overflow-hidden h-48 md:h-64">
                   <img
@@ -1480,7 +1820,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Separator />
 
                 <div className="space-y-4">
-                  {isLoading
+                  {isLoadingReviews
                     ? (
                       <div className="text-center py-12">
                         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -2180,3 +2520,4 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
     </Card>
   )
 }
+
