@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle, CalendarIcon, Eye } from 'lucide-react';
+import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle, CalendarIcon, Eye, Pencil } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +56,8 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogOverlay,
+  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -72,6 +74,37 @@ import {
 import { addData, deleteData, fetchData, updateData } from "@/lib/apiHelper";
 import { useToast } from "../ui/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
+import { Checkbox } from "../ui/checkbox";
+interface SalonPermission {
+  id: number;
+  name: {
+    en: string;
+    ar: string;
+  };
+  key: string;
+}
+
+interface StaffMember {
+  id: number;
+  salon_id: number;
+  user_id: number;
+  position: string;
+  is_active: boolean;
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    full_phone: string;
+    gender: string;
+    birth_date: string;
+    phone_code: string;
+    phone: string;
+    salon_permissions: Array<{
+      permission: SalonPermission;
+    }>;
+  };
+}
 
 interface SalonDetailsProps {
   salonId: string;
@@ -332,7 +365,17 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [holidaysTotalItems, setHolidaysTotalItems] = useState(0);
   const [editingHoliday, setEditingHoliday] = useState<Holiday | null>(null);
   const [isHolidayDialogOpen, setIsHolidayDialogOpen] = useState(false);
-
+  // Add these state variables
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [staffCurrentPage, setStaffCurrentPage] = useState(1);
+  const [staffTotalPages, setStaffTotalPages] = useState(1);
+  const [staffPerPage, setStaffPerPage] = useState(10);
+  const [staffTotalItems, setStaffTotalItems] = useState(0);
+  const [permissions, setPermissions] = useState<SalonPermission[]>([]);
+  const [isAddStaffDialogOpen, setIsAddStaffDialogOpen] = useState(false);
+  const [isEditStaffDialogOpen, setIsEditStaffDialogOpen] = useState(false);
+  const [isDeleteStaffDialogOpen, setIsDeleteStaffDialogOpen] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
   // Add these state variables in your component
   const [payments, setPayments] = useState<Payment[]>([]);
   const [paymentsCurrentPage, setPaymentsCurrentPage] = useState(1);
@@ -342,7 +385,487 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+  const fetchStaff = async () => {
+    try {
+      const response = await fetchData(`admin/salon-staff?salon_id=${salonId}&page=${staffCurrentPage}`);
+      if (response.success) {
+        setStaff(response.data);
+        setStaffTotalPages(response.meta.last_page);
+        setStaffCurrentPage(response.meta.current_page);
+        setStaffPerPage(response.meta.per_page);
+        setStaffTotalItems(response.meta.total);
+      }
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب الموظفين",
+        variant: "destructive",
+      });
+    }
+  };
 
+  const fetchPermissions = async () => {
+    try {
+      const response = await fetchData('admin/salon-permissions');
+      if (response.success) {
+        setPermissions(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching permissions:', error);
+    }
+  };
+
+  // Add useEffect for staff
+  useEffect(() => {
+    if (activeTab === 'staff') {
+      fetchStaff();
+      fetchPermissions();
+    }
+  }, [activeTab, staffCurrentPage, salonId]);
+  const StaffTab = () => {
+    const handleAddStaff = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+
+      try {
+        const response = await addData('admin/salon-staff',
+          {
+            salon_id: salonId,
+            first_name: formData.get('first_name'),
+            last_name: formData.get('last_name'),
+            phone_code: formData.get('phone_code'),
+            phone: formData.get('phone'),
+            gender: formData.get('gender'),
+            birth_date: formData.get('birth_date'),
+            password: formData.get('password'),
+            position: formData.get('position'),
+            is_active: formData.get('is_active') === '1',
+            permissions: Array.from(formData.getAll('permissions')).map(Number),
+          }
+        );
+
+        if (response.success) {
+          toast({
+            title: "تم",
+            description: "تمت إضافة الموظف بنجاح",
+          });
+          setIsAddStaffDialogOpen(false);
+          fetchStaff();
+        }
+      } catch (error) {
+        console.error('Error adding staff:', error);
+        toast({
+          title: "خطأ",
+          description: "فشل في إضافة الموظف",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const handleEditStaff = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!editingStaff) return;
+
+      const formData = new FormData(e.currentTarget);
+
+      try {
+        const response = await updateData(`admin/salon-staff/${editingStaff.id}`, {
+          salon_id: salonId,
+          first_name: formData.get('first_name'),
+          last_name: formData.get('last_name'),
+          phone_code: formData.get('phone_code'),
+          phone: formData.get('phone'),
+          gender: formData.get('gender'),
+          birth_date: formData.get('birth_date'),
+          position: formData.get('position'),
+          is_active: formData.get('is_active') === '1',
+          permissions: Array.from(formData.getAll('permissions')).map(Number),
+        });
+
+        if (response.success) {
+          toast({
+            title: "تم",
+            description: "تم تحديث بيانات الموظف بنجاح",
+          });
+          setIsEditStaffDialogOpen(false);
+          fetchStaff();
+        }
+      } catch (error) {
+        console.error('Error updating staff:', error);
+        toast({
+          title: "خطأ",
+          description: "فشل في تحديث بيانات الموظف",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const handleDeleteStaff = async () => {
+      if (!editingStaff) return;
+
+      try {
+        const response = await deleteData(`admin/salon-staff/${editingStaff.id}`);
+
+        if (response.success) {
+          toast({
+            title: "تم",
+            description: "تم حذف الموظف بنجاح",
+          });
+          setIsDeleteStaffDialogOpen(false);
+          fetchStaff();
+        }
+      } catch (error) {
+        console.error('Error deleting staff:', error);
+        toast({
+          title: "خطأ",
+          description: "فشل في حذف الموظف",
+          variant: "destructive",
+        });
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">الموظفين</h3>
+          <Button onClick={() => setIsAddStaffDialogOpen(true)}>
+            <Plus className="h-4 w-4 ml-2" />
+            إضافة موظف
+          </Button>
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>الاسم</TableHead>
+                  <TableHead>المنصب</TableHead>
+                  <TableHead>رقم الهاتف</TableHead>
+                  <TableHead>الصلاحيات</TableHead>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead>الإجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {staff.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.user.first_name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{member.user.full_name}</p>
+                          <p className="text-sm text-muted-foreground">{member.user.gender === 'male' ? 'ذكر' : 'أنثى'}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{member.position}</TableCell>
+                    <TableCell style={{unicodeBidi:"plaintext"}}>{member.user.full_phone}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 flex-wrap">
+                        {member.user.salon_permissions.map((p) => (
+                          <Badge key={p.permission.id} variant="secondary">
+                            {p.permission.name.ar}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={member.is_active ? 'success' : 'secondary'}>
+                        {member.is_active ? 'نشط' : 'غير نشط'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingStaff(member);
+                            setIsEditStaffDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingStaff(member);
+                            setIsDeleteStaffDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <CardFooter className="flex justify-center p-4">
+            <PaginationWithInfo
+              currentPage={staffCurrentPage}
+              totalPages={staffTotalPages}
+              totalItems={staffTotalItems}
+              itemsPerPage={staffPerPage}
+              onPageChange={setStaffCurrentPage}
+            />
+          </CardFooter>
+        </Card>
+
+        {/* Add Staff Dialog */}
+        <Dialog open={isAddStaffDialogOpen} onOpenChange={setIsAddStaffDialogOpen} >
+          <DialogPortal>
+            {/* <DialogOverlay /> */}
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>إضافة موظف جديد</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleAddStaff}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="first_name">الاسم الأول</Label>
+                      <Input id="first_name" name="first_name" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">الاسم الأخير</Label>
+                      <Input id="last_name" name="last_name" required />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone_code">رمز الدولة</Label>
+                      <Input id="phone_code" name="phone_code" defaultValue="+961" required />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">رقم الهاتف</Label>
+                      <Input id="phone" name="phone" required />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="gender">الجنس</Label>
+                      <Select name="gender">
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الجنس" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">ذكر</SelectItem>
+                          <SelectItem value="female">أنثى</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="birth_date">تاريخ الميلاد</Label>
+                      <Input id="birth_date" name="birth_date" type="date" required />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="password">كلمة المرور</Label>
+                    <Input id="password" name="password" type="password" required />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="position">المنصب</Label>
+                    <Input id="position" name="position" required />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="permissions">الصلاحيات</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {permissions.map((permission) => (
+                        <label key={permission.id} className="flex items-center gap-2">
+                          <Checkbox name="permissions" value={permission.id} />
+                          <span>{permission.name.ar}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="is_active">الحالة</Label>
+                    <Select name="is_active" defaultValue="1">
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">نشط</SelectItem>
+                        <SelectItem value="0">غير نشط</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsAddStaffDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button type="submit">إضافة</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+
+          </DialogPortal>
+        </Dialog>
+
+        {/* Edit Staff Dialog */}
+        <Dialog open={isEditStaffDialogOpen} onOpenChange={setIsEditStaffDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>تعديل بيانات الموظف</DialogTitle>
+            </DialogHeader>
+            {editingStaff && (
+              <form onSubmit={handleEditStaff}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="first_name">الاسم الأول</Label>
+                      <Input
+                        id="first_name"
+                        name="first_name"
+                        defaultValue={editingStaff.user.first_name}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">الاسم الأخير</Label>
+                      <Input
+                        id="last_name"
+                        name="last_name"
+                        defaultValue={editingStaff.user.last_name}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone_code">رمز الدولة</Label>
+                      <Input
+                        id="phone_code"
+                        name="phone_code"
+                        defaultValue={editingStaff.user.phone_code}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">رقم الهاتف</Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        defaultValue={editingStaff.user.phone}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="gender">الجنس</Label>
+                      <Select name="gender" defaultValue={editingStaff.user.gender}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الجنس" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">ذكر</SelectItem>
+                          <SelectItem value="female">أنثى</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="birth_date">تاريخ الميلاد</Label>
+                      <Input
+                        id="birth_date"
+                        name="birth_date"
+                        type="date"
+                        defaultValue={editingStaff.user.birth_date}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="position">المنصب</Label>
+                    <Input
+                      id="position"
+                      name="position"
+                      defaultValue={editingStaff.position}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="permissions">الصلاحيات</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {permissions.map((permission) => (
+                        <label key={permission.id} className="flex items-center gap-2">
+                          <Checkbox
+                            name="permissions"
+                            value={permission.id}
+                            defaultChecked={editingStaff.user.salon_permissions.some(
+                              p => p.permission.id === permission.id
+                            )}
+                          />
+                          <span>{permission.name.ar}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="is_active">الحالة</Label>
+                    <Select name="is_active" defaultValue={editingStaff.is_active ? "1" : "0"}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الحالة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">نشط</SelectItem>
+                        <SelectItem value="0">غير نشط</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsEditStaffDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button type="submit">حفظ التغييرات</Button>
+                </DialogFooter>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Staff Dialog */}
+        <Dialog open={isDeleteStaffDialogOpen} onOpenChange={setIsDeleteStaffDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>حذف موظف</DialogTitle>
+              <DialogDescription>
+                هل أنت متأكد من رغبتك في حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteStaffDialogOpen(false)}>
+                إلغاء
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteStaff}>
+                حذف
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
   // Add this function to fetch payments
   const fetchPayments = async () => {
     try {
@@ -1609,7 +2132,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         <Card className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab} >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -1618,13 +2141,18 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   {/* <CalendarIcon className="h-4 w-4 ml-2" /> */}
                   العطلات
                 </TabsTrigger>
+
                 <TabsTrigger value="payments">
                   {/* <CreditCard className="h-4 w-4 ml-2" /> */}
                   المدفوعات
                 </TabsTrigger>
+                <TabsTrigger value="staff">الموظفين</TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
+              <TabsContent value="staff" className="space-y-6">
+                <StaffTab />
+              </TabsContent>
               <TabsContent className="space-y-6" value="payments">
                 <PaymentsTab />
               </TabsContent>
