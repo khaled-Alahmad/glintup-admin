@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Menu, Search } from "lucide-react";
@@ -21,6 +21,7 @@ import Link from "next/link";
 import { addData, handleLogout } from "@/lib/apiHelper";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import Loading from "../ui/loading";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -212,7 +213,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         <main className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden">
-          {children}
+          <Suspense fallback={<Loading />}>
+            {children}
+          </Suspense>
         </main>
       </div>
     </div>

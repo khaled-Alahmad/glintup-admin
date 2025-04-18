@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 
-export default function ServicesLoading() {
+export default function Loading() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex items-center justify-center min-h-[60vh]">
