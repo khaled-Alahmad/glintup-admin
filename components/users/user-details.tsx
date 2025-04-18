@@ -381,16 +381,11 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     {/* <p className="text-sm text-muted-foreground">إجمالي المدفوعات: {user.totalSpent}</p> */}
                   </div>
                   <Button size="sm">
-
                     <Link href={"/payments"} className="text-sm">
-
-
                       عرض الكل
                     </Link>
-
                   </Button>
                 </div>
-
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
