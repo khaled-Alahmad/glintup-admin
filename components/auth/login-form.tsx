@@ -21,6 +21,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { addData } from "@/lib/apiHelper";
 import { setCookie } from "cookies-next";
+import { getFirebaseToken } from "@/app/firebaseConfig";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +56,11 @@ export function LoginForm() {
     try {
 
       // console.log("dda");
+      const deviceToken = await getFirebaseToken(); // Get Firebase token
+      console.log("Firebase Device Token:", deviceToken);
+      console.log("after getFirebaseToken");
 
-      const response = await addData("admin/auth/login", formData);
+      const response = await addData("admin/auth/login", { ...formData, device_token: deviceToken });
       console.log(response);
       if (response.success) {
         setCookie('token', response.access_token, {

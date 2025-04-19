@@ -2,43 +2,60 @@
 
 import { useEffect } from "react";
 import { getToken, onMessage } from "firebase/messaging";
-import { messaging } from "@/app/firebaseConfig";
+import { messaging, initializeFirebaseMessaging } from "@/app/firebaseConfig";
+import { NotificationContainer } from "@/components/ui/notification-container";
 
 const FCMInitializer = () => {
   useEffect(() => {
-    if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/firebase-messaging-sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered:", registration);
+    const initializeFCM = async () => {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          console.warn('Notification permission not granted');
+          return;
+        }
 
-          // Retrieve the FCM token using the imported messaging object
-          getToken(messaging, { serviceWorkerRegistration: registration })
-            .then((currentToken) => {
-              if (currentToken) {
-                console.log("FCM Token:", currentToken);
-                // Optionally send token to backend server
-              } else {
-                console.warn("No FCM token available. Request permission.");
-              }
-            })
-            .catch((error) => {
-              console.error("Error retrieving FCM token:", error);
-            });
+        await initializeFirebaseMessaging();
 
-          // Listen for foreground messages
-          onMessage(messaging, (payload) => {
-            console.log("Message received:", payload);
-            // Handle the received message
-          });
-        })
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error);
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+        if (!vapidKey) {
+          throw new Error("VAPID key is not set");
+        }
+
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          throw new Error("Service Worker not registered");
+        }
+
+        const currentToken = await getToken(messaging, {
+          vapidKey,
+          serviceWorkerRegistration: registration,
         });
+
+        if (currentToken) {
+          console.log("FCM Token:", currentToken);
+          // You can send this token to your server here
+        } else {
+          console.warn("No FCM token available");
+        }
+
+        // Handle foreground messages
+        onMessage(messaging, (payload) => {
+          console.log("Foreground message received:", payload);
+          // Dispatch custom event for NotificationContainer
+          window.postMessage({ type: 'FCM_MESSAGE', payload }, '*');
+        });
+      } catch (error) {
+        console.error("FCM initialization error:", error);
+      }
+    };
+
+    if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
+      initializeFCM();
     }
   }, []);
 
-  return null;
+  return <NotificationContainer />;
 };
 
 export default FCMInitializer;

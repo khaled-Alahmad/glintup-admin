@@ -34,7 +34,7 @@ const initializeFirebaseMessaging = async () => {
       console.log("Firebase Cloud Messaging is not supported in this browser.");
       return;
     }
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { type: 'module' });
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
     ;
     console.log("Service Worker registered with scope:", registration.scope);
   } catch (error) {
