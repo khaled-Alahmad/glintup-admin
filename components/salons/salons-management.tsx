@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { fetchData, updateData } from "@/lib/apiHelper"
+import { addData, fetchData, updateData } from "@/lib/apiHelper"
 import { useToast } from "../ui/use-toast"
 import { PaginationWithInfo } from "../ui/pagination-with-info"
 import { Skeleton } from "../ui/skeleton"
@@ -231,9 +231,9 @@ export default function SalonsManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">إدارة الصالونات</h1>
-        <Button asChild>
+        {/* <Button asChild>
           <Link href="/salons/add">إضافة صالون جديد</Link>
-        </Button>
+        </Button> */}
       </div>
 
       <Card>
@@ -368,7 +368,7 @@ export default function SalonsManagement() {
                               إرسال إشعار
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {salon.status === "نشط" ? (
+                            {/* {salon.status === "نشط" ? (
                               <DropdownMenuItem
                                 className="text-amber-600 cursor-pointer"
                                 onClick={() => {
@@ -382,7 +382,7 @@ export default function SalonsManagement() {
                               <DropdownMenuItem className="text-green-600 cursor-pointer">
                                 تفعيل الصالون
                               </DropdownMenuItem>
-                            )}
+                            )} */}
                             <DropdownMenuItem
                               className="text-red-600 cursor-pointer"
                               onClick={() => {
@@ -418,28 +418,72 @@ export default function SalonsManagement() {
       {/* نافذة إرسال إشعار */}
       <Dialog open={showNotificationDialog} onOpenChange={setShowNotificationDialog}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>إرسال إشعار للصالون</DialogTitle>
-            <DialogDescription>
-              {selectedSalon && `سيتم إرسال هذا الإشعار إلى صالون ${selectedSalon.name}`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="notification-title">عنوان الإشعار</Label>
-              <Input id="notification-title" placeholder="أدخل عنوان الإشعار" />
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+
+            try {
+              const response = await addData(`admin/salons/${selectedSalon.id}/send-notification`, {
+                title: formData.get('title'),
+                message: formData.get('message')
+              });
+
+              if (response.success) {
+                toast({
+                  title: "تم بنجاح",
+                  description: "تم إرسال الإشعار بنجاح",
+                });
+                setShowNotificationDialog(false);
+              }
+            } catch (error) {
+              console.error('Failed to send notification:', error);
+              toast({
+                title: "خطأ",
+                description: "حدث خطأ أثناء إرسال الإشعار",
+                variant: "destructive",
+              });
+            }
+          }}>
+            <DialogHeader>
+              <DialogTitle>إرسال إشعار للصالون</DialogTitle>
+              <DialogDescription>
+                {/* سيتم إرسال هذا الإشعار إلى صالون {selectedSalon.merchant_legal_name} */}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">عنوان الإشعار</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="أدخل عنوان الإشعار"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="message">نص الإشعار</Label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  placeholder="أدخل نص الإشعار"
+                  rows={4}
+                  required
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="notification-message">نص الإشعار</Label>
-              <Textarea id="notification-message" placeholder="أدخل نص الإشعار" rows={4} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNotificationDialog(false)}>
-              إلغاء
-            </Button>
-            <Button onClick={() => setShowNotificationDialog(false)}>إرسال الإشعار</Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowNotificationDialog(false)}
+              >
+                إلغاء
+              </Button>
+              <Button type="submit">
+                إرسال الإشعار
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -487,26 +531,53 @@ export default function SalonsManagement() {
       {/* نافذة حظر الصالون */}
       <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>حظر الصالون</DialogTitle>
-            <DialogDescription>
-              {selectedSalon && `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.name} بشكل دائم؟`}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="ban-reason">سبب الحظر</Label>
-              <Textarea id="ban-reason" placeholder="أدخل سبب حظر الصالون" rows={4} />
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+
+            try {
+              const response = await updateData(`admin/salons/${selectedSalon.id}`, {
+                is_active: 0,
+                message: formData.get('ban-reason')
+              });
+
+              if (response.success) {
+                toast({
+                  title: "تم بنجاح",
+                  description: "تم إرسال الإشعار بنجاح",
+                });
+                setShowBanDialog(false);
+              }
+            } catch (error) {
+              console.error('Failed to send notification:', error);
+              toast({
+                title: "خطأ",
+                description: "حدث خطأ أثناء إرسال الإشعار",
+                variant: "destructive",
+              });
+            }
+          }}>
+            <DialogHeader>
+              <DialogTitle>حظر الصالون</DialogTitle>
+              <DialogDescription>
+                {selectedSalon && `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.name} بشكل دائم؟`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="ban-reason">سبب الحظر</Label>
+                <Textarea id="ban-reason" name="ban-reason" placeholder="أدخل سبب حظر الصالون" rows={4} />
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowBanDialog(false)}>
-              إلغاء
-            </Button>
-            <Button variant="destructive" onClick={() => setShowBanDialog(false)}>
-              حظر الصالون
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBanDialog(false)}>
+                إلغاء
+              </Button>
+              <Button variant="destructive" type="submit" >
+                حظر الصالون
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

@@ -564,6 +564,21 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         description: formData.get('description'),
         is_active: formData.get('is_active') === 'on' ? 1 : 0,
         is_approved: formData.get('is_approved') === 'on' ? 1 : 0,
+        merchant_legal_name: formData.get('merchant_legal_name'),
+        merchant_commercial_name: formData.get('merchant_commercial_name'),
+        address: formData.get('address'),
+        city_street_name: formData.get('city_street_name'),
+        contact_name: formData.get('contact_name'),
+        contact_number: formData.get('contact_number'),
+        contact_email: formData.get('contact_email')
+        ,
+        business_contact_name: formData.get('business_contact_name'),
+        business_contact_number: formData.get('business_contact_number'),
+        business_contact_email: formData.get('business_contact_email'),
+        // description: "",
+        bio: formData.get('bio'),
+        // icon: logoText,
+
         // logo_url: logoPreview,
         // cover_url: coverPreview,
         // gallery_urls: galleryPreviews,
@@ -794,7 +809,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <Label htmlFor="name">
                       اسم الصالون <span className="text-red-500">*</span>
                     </Label>
-                    <Input id="name" name="name" defaultValue={salonData?.name} required />
+                    <Input id="name" name="name" defaultValue={salonData?.business_contact_name} required />
                   </div>
 
                 </div>
@@ -806,6 +821,119 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     name="description"
                     defaultValue={salonData?.description}
                     rows={4}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="merchant_legal_name">الاسم القانوني للتاجر</Label>
+                    <Input
+                      id="merchant_legal_name"
+                      name="merchant_legal_name"
+                      defaultValue={salonData?.merchant_legal_name}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="merchant_commercial_name">الاسم التجاري للتاجر</Label>
+                    <Input
+                      id="merchant_commercial_name"
+                      name="merchant_commercial_name"
+                      defaultValue={salonData?.merchant_commercial_name}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">العنوان</Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      defaultValue={salonData?.address}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="city_street_name">الشارع والمدينة</Label>
+                    <Input
+                      id="city_street_name"
+                      name="city_street_name"
+                      defaultValue={salonData?.city_street_name}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact_name">اسم جهة الاتصال</Label>
+                    <Input
+                      id="contact_name"
+                      name="contact_name"
+                      defaultValue={salonData?.contact_name}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact_number">رقم جهة الاتصال</Label>
+                    <Input
+                      id="contact_number"
+                      name="contact_number"
+                      defaultValue={salonData?.contact_number}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="contact_email">البريد الإلكتروني لجهة الاتصال</Label>
+                    <Input
+                      id="contact_email"
+                      name="contact_email"
+                      type="email"
+                      defaultValue={salonData?.contact_email}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="business_contact_name">الاسم التجاري لجهة الأعمال</Label>
+                    <Input
+                      id="business_contact_name"
+                      name="business_contact_name"
+                      defaultValue={salonData?.business_contact_name}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="business_contact_number">رقم جهة الأعمال</Label>
+                    <Input
+                      id="business_contact_number"
+                      name="business_contact_number"
+                      defaultValue={salonData?.business_contact_number}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="business_contact_email">البريد الإلكتروني لجهة الأعمال</Label>
+                    <Input
+                      id="business_contact_email"
+                      name="business_contact_email"
+                      type="email"
+                      defaultValue={salonData?.business_contact_email}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-6">
+                  <Label htmlFor="description">وصف الصالون</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    rows={4}
+                    defaultValue={salonData?.description}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bio">نبذة عن الصالون</Label>
+                  <Textarea
+                    id="bio"
+                    name="bio"
+                    rows={3}
+                    defaultValue={salonData?.bio}
                   />
                 </div>
 

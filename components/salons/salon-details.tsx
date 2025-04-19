@@ -231,6 +231,17 @@ interface SalonData {
   icon_url: string;
   description: string;
   is_active: boolean;
+  merchant_legal_name: "",
+  merchant_commercial_name: "",
+  address: "",
+  city_street_name: "",
+  contact_name: "",
+  contact_number: "",
+  contact_email: "",
+  business_contact_name: "",
+  business_contact_number: "",
+  business_contact_email: "",
+  bio: "",
   is_approved: boolean;
   average_rating: number;
   total_reviews: number;
@@ -563,7 +574,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       </div>
                     </TableCell>
                     <TableCell>{member.position}</TableCell>
-                    <TableCell style={{unicodeBidi:"plaintext"}}>{member.user.full_phone}</TableCell>
+                    <TableCell style={{ unicodeBidi: "plaintext" }}>{member.user.full_phone}</TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {member.user.salon_permissions.map((p) => (
@@ -2168,11 +2179,72 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   />
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-2">
                   <h3 className="text-lg font-medium">عن الصالون</h3>
                   <p className="text-muted-foreground">{salonData.description}</p>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">الاسم القانوني للتاجر</h3>
+                    <p>{salonData.merchant_legal_name}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">الاسم التجاري للتاجر</h3>
+                    <p>{salonData.merchant_commercial_name}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">العنوان</h3>
+                    <p>{salonData.address}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">الشارع والمدينة</h3>
+                    <p>{salonData.city_street_name}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">اسم جهة الاتصال</h3>
+                    <p>{salonData.contact_name}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">رقم جهة الاتصال</h3>
+                    <p>{salonData.contact_number}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">البريد الإلكتروني لجهة الاتصال</h3>
+                    <p>{salonData.contact_email}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">الاسم التجاري لجهة الأعمال</h3>
+                    <p>{salonData.business_contact_name}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">رقم جهة الأعمال</h3>
+                    <p>{salonData.business_contact_number}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">البريد الإلكتروني لجهة الأعمال</h3>
+                    <p>{salonData.business_contact_email}</p>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <h3 className="text-sm font-medium text-muted-foreground">الوصف</h3>
+                    <p>{salonData.description}</p>
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <h3 className="text-sm font-medium text-muted-foreground">نبذة</h3>
+                    <p>{salonData.bio}</p>
+                  </div>
+                </div>
                 <Separator />
 
                 <div className="space-y-4">
