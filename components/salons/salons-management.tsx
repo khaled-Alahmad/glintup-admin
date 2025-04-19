@@ -201,7 +201,14 @@ export default function SalonsManagement() {
   //   return matchesSearch && matchesStatus
   // })
 
-  const getStatusBadge = (status: boolean) => {
+  const getStatusBadge = (status: boolean, isApproved: boolean) => {
+    if (!isApproved) {
+      return (
+        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          قيد المراجعة
+        </Badge>
+      )
+    }
     switch (status) {
       case true:
         return (
@@ -212,10 +219,9 @@ export default function SalonsManagement() {
       case false:
         return (
           <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            غير نشطس
+            غير نشط
           </Badge>
         )
-
       default:
         return <Badge variant="outline">{status ? "نشط" : "غير نشط"}</Badge>
     }
@@ -225,9 +231,9 @@ export default function SalonsManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">إدارة الصالونات</h1>
-        {/* <Button asChild>
+        <Button asChild>
           <Link href="/salons/add">إضافة صالون جديد</Link>
-        </Button> */}
+        </Button>
       </div>
 
       <Card>
@@ -307,23 +313,23 @@ export default function SalonsManagement() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9 border">
-                            <AvatarImage src={salon.logo} alt={salon.name} />
-                            <AvatarFallback>{salon.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={salon.icon_url} alt={salon.merchant_commercial_name} />
+                            <AvatarFallback>{salon.merchant_commercial_name?.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
-                            <span className="font-medium">{salon.name}</span>
-                            <span className="text-xs text-muted-foreground">{salon.owner}</span>
+                            <span className="font-medium">{salon.merchant_commercial_name}</span>
+                            <span className="text-xs text-muted-foreground">{salon.owner?.full_name}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{salon.location}</TableCell>
+                      <TableCell>{salon.city_street_name || salon.address}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-xs text-right" style={{ unicodeBidi: 'plaintext' }}>{salon.phone_code}{salon.phone}</span>
-                          <span className="text-xs text-muted-foreground">{salon.email}</span>
+                          <span className="text-xs text-right" style={{ unicodeBidi: 'plaintext' }}>{salon.contact_number}</span>
+                          <span className="text-xs text-muted-foreground">{salon.contact_email}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge(salon.is_active)}</TableCell>
+                      <TableCell>{getStatusBadge(salon.is_active, salon.is_approved)}</TableCell>
                       <TableCell>{salon.bookings_count}</TableCell>
                       <TableCell style={{ unicodeBidi: 'plaintext' }} className=" text-right">{salon.total_revenue + " د.إ"}</TableCell>
                       <TableCell>

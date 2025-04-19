@@ -4,6 +4,8 @@ import type React from "react";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { addData } from "@/lib/apiHelper";
 import {
   Card,
   CardContent,
@@ -31,15 +33,62 @@ export default function AddSalon() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const { toast } = useToast();
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [formData, setFormData] = useState({
+    user: {
+      first_name: "",
+      last_name: "",
+      password: "",
+      password_confirmation: "",
+      phone_code: "+352",
+      phone: "",
+      gender: "male",
+      birth_date: ""
+    },
+    merchant_legal_name: "",
+    merchant_commercial_name: "",
+    address: "",
+    city_street_name: "",
+    contact_name: "",
+    contact_number: "",
+    contact_email: "",
+    business_contact_name: "",
+    business_contact_number: "",
+    business_contact_email: "",
+    description: "",
+    bio: "",
+    icon: "",
+    types: ["salon"],
+    latitude: "",
+    longitude: "",
+  });
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+      uploadFormData.append('folder', "salons");
+
+      const response = await addData('general/upload-image', uploadFormData);
+
+      if (response.success) {
+        setLogoPreview(response.data.image_url);
+        setFormData(prev => ({
+          ...prev,
+          icon: response.data.image_name
+        }));
+      }
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      toast({
+        title: "خطأ في رفع الصورة",
+        description: "تعذر رفع الصورة، الرجاء المحاولة مرة أخرى",
+        variant: "destructive",
+      });
     }
   };
 
@@ -53,21 +102,46 @@ export default function AddSalon() {
       reader.readAsDataURL(file);
     }
   };
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [salonImages, setSalonImages] = useState<{ id: number; url: string }[]>([]);
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const newPreviews: string[] = [];
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          newPreviews.push(reader.result as string);
-          if (newPreviews.length === files.length) {
-            setGalleryPreviews([...galleryPreviews, ...newPreviews]);
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      try {
+        const files = Array.from(e.target.files);
+        setNewImages(prev => [...prev, ...files]);
+
+        // Upload each image and store their names and URLs
+        const uploadPromises = files.map(async (file) => {
+          const formData = new FormData();
+          formData.append('image', file);
+          formData.append('folder', "salons");
+
+          const response = await addData('general/upload-image', formData);
+          if (response.success) {
+            return {
+              name: response.data.image_name,
+              url: response.data.image_url
+            };
           }
-        };
-        reader.readAsDataURL(file);
-      });
+          return null;
+        });
+
+        const imageResults = await Promise.all(uploadPromises);
+        const validResults = imageResults.filter((result): result is { name: string, url: string } => result !== null);
+
+        setSalonImages(prev => [...prev, ...validResults.map((r, index) => ({
+          id: Date.now() + index, // Convert to number
+          url: r.url
+        }))]);
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        toast({
+          title: "خطأ في رفع الصور",
+          description: "حدث خطأ أثناء رفع الصور",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -75,10 +149,45 @@ export default function AddSalon() {
     setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // هنا يتم معالجة إرسال البيانات
-    console.log("تم إرسال النموذج");
+    try {
+      const uploadedImages = await Promise.all(
+        newImages.map(async (file) => {
+          const imageFormData = new FormData();
+          imageFormData.append('image', file);
+          imageFormData.append('folder', "salons");
+
+          const response = await addData('general/upload-image', imageFormData);
+          return response.data.image_name;
+        })
+      );
+      const updateDataToSend = {
+
+        ...formData,
+        images: uploadedImages,
+        // images_remove: imagesToRemove,
+        // icon: logoText
+      };
+
+      // formData.images = uploadedImages
+      const response = await addData('admin/salons/register', updateDataToSend);
+
+      if (response.success) {
+        toast({
+          title: "تمت الإضافة بنجاح",
+          description: "تم إنشاء الصالون الجديد",
+        });
+        window.location.href = '/salons';
+      }
+    } catch (error) {
+      console.error('Error adding salon:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في إضافة الصالون",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -102,20 +211,141 @@ export default function AddSalon() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* المعلومات الأساسية */}
+            {/* معلومات المالك */}
+            <h3 className="text-lg font-medium">معلومات المالك</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">
-                  اسم الصالون <span className="text-red-500">*</span>
-                </Label>
-                <Input id="name" placeholder="أدخل اسم الصالون" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="owner">
-                  اسم المالك <span className="text-red-500">*</span>
+                <Label htmlFor="first_name">
+                  الاسم الأول <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  id="owner"
-                  placeholder="أدخل اسم مالك الصالون"
+                  id="first_name"
+                  value={formData.user.first_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, first_name: e.target.value } }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">
+                  الاسم الأخير <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="last_name"
+                  value={formData.user.last_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, last_name: e.target.value } }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  كلمة المرور <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.user.password}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, password: e.target.value } }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password_confirmation">
+                  تأكيد كلمة المرور <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="password_confirmation"
+                  type="password"
+                  value={formData.user.password_confirmation}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, password_confirmation: e.target.value } }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="phone_code">
+                  رمز الهاتف <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="phone_code"
+                  value={formData.user.phone_code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, phone_code: e.target.value } }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">
+                  رقم الهاتف <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="phone"
+                  value={formData.user.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, phone: e.target.value } }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="gender">
+                  الجنس <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.user.gender}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, user: { ...prev.user, gender: value } }))}
+                >
+                  <SelectTrigger id="gender">
+                    <SelectValue placeholder="اختر الجنس" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">ذكر</SelectItem>
+                    <SelectItem value="female">أنثى</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="birth_date">
+                  تاريخ الميلاد <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="birth_date"
+                  type="date"
+                  value={formData.user.birth_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, birth_date: e.target.value } }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* معلومات الصالون */}
+            <h3 className="text-lg font-medium">معلومات الصالون</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="merchant_legal_name">
+                  الاسم القانوني <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="merchant_legal_name"
+                  value={formData.merchant_legal_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, merchant_legal_name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="merchant_commercial_name">
+                  الاسم التجاري <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="merchant_commercial_name"
+                  value={formData.merchant_commercial_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, merchant_commercial_name: e.target.value }))}
                   required
                 />
               </div>
@@ -125,7 +355,20 @@ export default function AddSalon() {
               <Label htmlFor="description">وصف الصالون</Label>
               <Textarea
                 id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="أدخل وصف الصالون"
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bio">نبذة عن الصالون</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="أدخل نبذة عن الصالون"
                 rows={4}
               />
             </div>
@@ -176,21 +419,78 @@ export default function AddSalon() {
             <h3 className="text-lg font-medium">معلومات الاتصال</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="email">
-                  البريد الإلكتروني <span className="text-red-500">*</span>
+                <Label htmlFor="contact_email">
+                  البريد الإلكتروني للتواصل <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  id="email"
+                  id="contact_email"
                   type="email"
-                  placeholder="البريد الإلكتروني"
+                  value={formData.contact_email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contact_email: e.target.value }))}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">
-                  رقم الهاتف <span className="text-red-500">*</span>
+                <Label htmlFor="contact_number">
+                  رقم هاتف التواصل <span className="text-red-500">*</span>
                 </Label>
-                <Input id="phone" placeholder="رقم الهاتف" required />
+                <Input
+                  id="contact_number"
+                  value={formData.contact_number}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contact_number: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="business_contact_email">
+                  البريد الإلكتروني للأعمال <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="business_contact_email"
+                  type="email"
+                  value={formData.business_contact_email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, business_contact_email: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="business_contact_number">
+                  رقم هاتف الأعمال <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="business_contact_number"
+                  value={formData.business_contact_number}
+                  onChange={(e) => setFormData(prev => ({ ...prev, business_contact_number: e.target.value }))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="contact_name">
+                  اسم جهة الاتصال <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="contact_name"
+                  value={formData.contact_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="business_contact_name">
+                  اسم جهة الاتصال للأعمال <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="business_contact_name"
+                  value={formData.business_contact_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, business_contact_name: e.target.value }))}
+                  required
+                />
               </div>
             </div>
 
@@ -200,13 +500,55 @@ export default function AddSalon() {
               </Label>
               <Textarea
                 id="address"
+                value={formData.address}
+                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                 placeholder="العنوان التفصيلي"
                 className="min-h-[80px]"
                 required
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="city_street_name">
+                اسم الشارع والمدينة <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="city_street_name"
+                value={formData.city_street_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, city_street_name: e.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="latitude">
+                  خط العرض <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="latitude"
+                  value={formData.latitude}
+                  onChange={(e) => setFormData(prev => ({ ...prev, latitude: e.target.value }))}
+                  placeholder="مثال: 24.431126"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="longitude">
+                  خط الطول <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="longitude"
+                  value={formData.longitude}
+                  onChange={(e) => setFormData(prev => ({ ...prev, longitude: e.target.value }))}
+                  placeholder="مثال: 54.649244"
+                  required
+                />
+              </div>
+            </div>
+            {/* </div> */}
+
+            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="city">
                   المدينة <span className="text-red-500">*</span>
@@ -238,7 +580,7 @@ export default function AddSalon() {
               </div>
             </div>
 
-            <Separator />
+            <Separator /> */}
 
             {/* الصور */}
             <h3 className="text-lg font-medium">صور الصالون</h3>
@@ -265,27 +607,29 @@ export default function AddSalon() {
                         حذف
                       </Button>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">اختر شعار الصالون</p>
-                    </div>
-                  )}
-                  <Input
-                    id="logo"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleLogoChange}
-                    required
-                  />
-                  {!logoPreview && (
-                    <Label htmlFor="logo" className="mt-4">
-                      <Button type="button" variant="outline">
-                        اختر شعار
-                      </Button>
-                    </Label>
-                  )}
+                  ) :
+                    !logoPreview && (
+                      <Label htmlFor="logo" className="mt-4">
+                        <div className="flex flex-col items-center">
+                          <Upload className="h-10 w-10 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">اختر شعار الصالون</p>
+                        </div>
+                        {/* <Button type="button" variant="outline">
+                          اختر شعار
+                        </Button> */}
+                        <Input
+                          id="logo"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleLogoChange}
+                          required
+                        />
+                      </Label>
+                    )}
+
+
+
                 </div>
               </div>
               <div className="space-y-4">
@@ -294,39 +638,37 @@ export default function AddSalon() {
                   عدة صور للغلاف<span className="text-red-500">*</span>
                 </Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col items-center">
-                    <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600 mb-1">
-                      اسحب وأفلت صور الصالون هنا أو انقر للتصفح
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      PNG, JPG حتى 5MB لكل صورة
-                    </p>
-                  </div>
-                  <Input
-                    id="gallery"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleGalleryChange}
-                  />
                   <Label htmlFor="gallery" className="mt-4">
-                    <Button type="button" variant="outline">
-                      إضافة صور جديدة
-                    </Button>
+                    <div className="flex flex-col items-center">
+                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت صور الصالون هنا أو انقر للتصفح
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG حتى 5MB لكل صورة
+                      </p>
+                    </div>
+                    <Input
+                      id="gallery"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleGalleryChange}
+                    />
+                    {/* s */}
                   </Label>
                 </div>
 
-                {galleryPreviews.length > 0 && (
+                {salonImages.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                    {galleryPreviews.map((preview, index) => (
+                    {salonImages.map((preview, index) => (
                       <div
                         key={index}
                         className="relative rounded-md overflow-hidden h-40"
                       >
                         <img
-                          src={preview || "/placeholder.svg"}
+                          src={preview.url || "/placeholder.svg"}
                           alt={`صورة ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -426,6 +768,6 @@ export default function AddSalon() {
           </CardFooter>
         </Card>
       </form>
-    </div>
+    </div >
   );
 }
