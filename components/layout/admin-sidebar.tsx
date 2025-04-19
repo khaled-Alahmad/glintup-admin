@@ -16,6 +16,7 @@ import {
   X,
   FileText,
   Gift,
+  Bell,
 } from "lucide-react";
 import { CalendarClock } from "lucide-react";
 
@@ -103,6 +104,12 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       href: "/complaints",
       icon: MessageSquare,
       active: pathname.startsWith("/complaints"),
+    },
+    {
+      name: "الإشعارات",
+      href: "/notifications",
+      icon: Bell,
+      active: pathname.startsWith("/notifications"),
     },
     {
       name: "الإعدادات",
