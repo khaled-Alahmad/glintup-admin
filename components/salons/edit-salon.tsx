@@ -570,8 +570,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         city_street_name: formData.get('city_street_name'),
         contact_name: formData.get('contact_name'),
         contact_number: formData.get('contact_number'),
-        contact_email: formData.get('contact_email')
-        ,
+        contact_email: formData.get('contact_email')       ,
         business_contact_name: formData.get('business_contact_name'),
         business_contact_number: formData.get('business_contact_number'),
         business_contact_email: formData.get('business_contact_email'),

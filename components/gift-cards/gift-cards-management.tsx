@@ -161,6 +161,7 @@ export default function GiftCardsManagement() {
     }
   };
 
+  console.log(giftCards);
 
   return (
     <div className="flex flex-col gap-6">
@@ -336,7 +337,9 @@ export default function GiftCardsManagement() {
                   <TableHead>المبلغ</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead>تاريخ الانشاء</TableHead>
+                  <TableHead>المرسل</TableHead>
                   <TableHead>المستلم</TableHead>
+
                   <TableHead>الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -398,6 +401,8 @@ export default function GiftCardsManagement() {
                         </Badge>
                       </TableCell>
                       <TableCell>{card.created_at}</TableCell>
+                      <TableCell>{card.sender?.full_name || "غير مسجل"}</TableCell>
+
                       <TableCell>{card.recipient?.full_name || "غير مسجل"}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">

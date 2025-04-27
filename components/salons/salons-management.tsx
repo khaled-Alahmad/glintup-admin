@@ -32,80 +32,6 @@ import { addData, fetchData, updateData } from "@/lib/apiHelper"
 import { useToast } from "../ui/use-toast"
 import { PaginationWithInfo } from "../ui/pagination-with-info"
 import { Skeleton } from "../ui/skeleton"
-
-// const salons = [
-//   {
-//     id: "1",
-//     name: "صالون الأميرة",
-//     logo: "/placeholder.svg?height=40&width=40",
-//     location: "مدينة الكويت، الكويت",
-//     owner: "منيرة السعيد",
-//     phone: "+966 50 123 4567",
-//     email: "princess@salon.com",
-//     status: "نشط",
-//     totalBookings: 1245,
-//     revenue: "52,450 د.إ",
-//     joinDate: "12 يناير 2023",
-//     rating: 4.8,
-//   },
-//   {
-//     id: "2",
-//     name: "صالون إليت",
-//     logo: "/placeholder.svg?height=40&width=40",
-//     location: "جدة، السعودية",
-//     owner: "سارة الأحمد",
-//     phone: "+966 55 987 6543",
-//     email: "elite@salon.com",
-//     status: "نشط",
-//     totalBookings: 968,
-//     revenue: "41,250 د.إ",
-//     joinDate: "23 فبراير 2023",
-//     rating: 4.5,
-//   },
-//   {
-//     id: "3",
-//     name: "صالون جلام",
-//     logo: "/placeholder.svg?height=40&width=40",
-//     location: "الدمام، السعودية",
-//     owner: "نورة المطيري",
-//     phone: "+966 54 456 7890",
-//     email: "glam@salon.com",
-//     status: "نشط",
-//     totalBookings: 756,
-//     revenue: "32,800 د.إ",
-//     joinDate: "5 مارس 2023",
-//     rating: 4.7,
-//   },
-//   {
-//     id: "4",
-//     name: "صالون مس بيوتي",
-//     logo: "/placeholder.svg?height=40&width=40",
-//     location: "مدينة الكويت، الكويت",
-//     owner: "لمياء القحطاني",
-//     phone: "+966 56 234 5678",
-//     email: "missbeauty@salon.com",
-//     status: "معلق",
-//     totalBookings: 532,
-//     revenue: "22,150 د.إ",
-//     joinDate: "17 أبريل 2023",
-//     rating: 4.2,
-//   },
-//   {
-//     id: "5",
-//     name: "صالون روز",
-//     logo: "/placeholder.svg?height=40&width=40",
-//     location: "جدة، السعودية",
-//     owner: "دانة الشهري",
-//     phone: "+966 58 345 6789",
-//     email: "rose@salon.com",
-//     status: "نشط",
-//     totalBookings: 425,
-//     revenue: "18,600 د.إ",
-//     joinDate: "30 مايو 2023",
-//     rating: 4.6,
-//   },
-// ]
-
 export default function SalonsManagement() {
   const [salons, setSalons] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -156,8 +82,8 @@ export default function SalonsManagement() {
   // Add status update function
   const updateSalonStatus = async (salonId: number, status: string, reason?: string) => {
     try {
-      const response = await updateData(`admin/salons/${salonId}/status`, {
-        status,
+      const response = await updateData(`admin/salons/${salonId}`, {
+        is_active: status === "نشط" ? '1' : '0',
         reason,
       })
       if (response.success) {
@@ -231,9 +157,9 @@ export default function SalonsManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">إدارة الصالونات</h1>
-        {/* <Button asChild>
+        <Button asChild>
           <Link href="/salons/add">إضافة صالون جديد</Link>
-        </Button> */}
+        </Button>
       </div>
 
       <Card>
@@ -368,7 +294,7 @@ export default function SalonsManagement() {
                               إرسال إشعار
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {/* {salon.status === "نشط" ? (
+                            {salon.status === "نشط" ? (
                               <DropdownMenuItem
                                 className="text-amber-600 cursor-pointer"
                                 onClick={() => {
@@ -379,10 +305,12 @@ export default function SalonsManagement() {
                                 تعليق الصالون
                               </DropdownMenuItem>
                             ) : (
-                              <DropdownMenuItem className="text-green-600 cursor-pointer">
+                              <DropdownMenuItem
+                                onClick={() => updateSalonStatus(salon.id, "نشط")}
+                                className="text-green-600 cursor-pointer">
                                 تفعيل الصالون
                               </DropdownMenuItem>
-                            )} */}
+                            )}
                             <DropdownMenuItem
                               className="text-red-600 cursor-pointer"
                               onClick={() => {

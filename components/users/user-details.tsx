@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { fetchData } from "@/lib/apiHelper"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { PaginationWithInfo } from "../ui/pagination-with-info"
 
 interface UserDetailsProps {
   userId: string
@@ -81,26 +82,121 @@ interface Payment {
   created_at: string
 }
 
+interface GiftCard {
+  id: number
+  code: string
+  type: string
+  amount: string
+  currency: string
+  is_used: boolean
+  message: string
+  phone: string
+  full_phone: string
+  created_at: string
+  updated_at: string
+}
+
+interface LoyaltyPoint {
+  id: number
+  points: number
+  salon: {
+    id: number
+    name: string
+    icon_url: string
+  }
+  taken_at: string | null
+  used_at: string | null
+}
+
+interface Review {
+  id: number
+  rating: number
+  stars: string
+  comment: string
+  salon: {
+    id: number
+    name: string
+    icon_url: string
+  }
+  salon_reply: string | null
+  salon_reply_at: string | null
+  created_at: string
+}
+
 export default function UserDetails({ userId }: UserDetailsProps) {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [bookingsData, setBookingsData] = useState<Booking[]>([])
   const [paymentsData, setPaymentsData] = useState<Payment[]>([])
+  const [giftCardsData, setGiftCardsData] = useState<GiftCard[]>([])
+  const [loyaltyPointsData, setLoyaltyPointsData] = useState<LoyaltyPoint[]>([])
+  const [reviewsData, setReviewsData] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("bookings");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [perPage, setPerPage] = useState(20);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const [userRes, bookingsRes, paymentsRes] = await Promise.all([
+        const [userRes, bookingsRes, paymentsRes, giftCardsRes, loyaltyPointsRes, reviewsRes] = await Promise.all([
           fetchData(`admin/users/${userId}`),
-          fetchData(`admin/bookings?user_id=${userId}`),
-          fetchData(`admin/transactions?user_id=${userId}`)
+          fetchData(`admin/bookings?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
+          fetchData(`admin/transactions?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
+          fetchData(`admin/gift-cards?sender_id=${userId}&page=${currentPage}&limit=${perPage}`),
+          fetchData(`admin/loyalty-points?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
+          fetchData(`admin/reviews?user_id=${userId}&page=${currentPage}&limit=${perPage}`)
         ])
 
         if (userRes.success) setUserData(userRes.data)
-        if (bookingsRes.success) setBookingsData(bookingsRes.data)
-        if (paymentsRes.success) setPaymentsData(paymentsRes.data)
+        if (bookingsRes.success) {
+          setBookingsData(bookingsRes.data)
+          setTotalPages(bookingsRes.meta.last_page)
+          setCurrentPage(bookingsRes.meta.current_page)
+          setTotalItems(bookingsRes.meta.total)
+          setPerPage(bookingsRes.meta.per_page)
+        }
+        if (paymentsRes.success) {
+          setPaymentsData(paymentsRes.data)
+          if (activeTab === 'payments') {
+            setTotalPages(paymentsRes.meta.last_page)
+            setCurrentPage(paymentsRes.meta.current_page)
+            setTotalItems(paymentsRes.meta.total)
+            setPerPage(paymentsRes.meta.per_page)
+          }
+        }
+
+        if (giftCardsRes.success) {
+          setGiftCardsData(giftCardsRes.data)
+          if (activeTab === 'gift-cards') {
+            setTotalPages(giftCardsRes.meta.last_page)
+            setCurrentPage(giftCardsRes.meta.current_page)
+            setTotalItems(giftCardsRes.meta.total)
+            setPerPage(giftCardsRes.meta.per_page)
+          }
+        }
+
+        if (loyaltyPointsRes.success) {
+          setLoyaltyPointsData(loyaltyPointsRes.data)
+          if (activeTab === 'loyalty-points') {
+            setTotalPages(loyaltyPointsRes.meta.last_page)
+            setCurrentPage(loyaltyPointsRes.meta.current_page)
+            setTotalItems(loyaltyPointsRes.meta.total)
+            setPerPage(loyaltyPointsRes.meta.per_page)
+          }
+        }
+
+        if (reviewsRes.success) {
+          setReviewsData(reviewsRes.data)
+          if (activeTab === 'reviews') {
+            setTotalPages(reviewsRes.meta.last_page)
+            setCurrentPage(reviewsRes.meta.current_page)
+            setTotalItems(reviewsRes.meta.total)
+            setPerPage(reviewsRes.meta.per_page)
+          }
+        }
 
         setLoading(false)
       } catch (err) {
@@ -110,7 +206,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     }
 
     fetchUserDetails()
-  }, [userId])
+  }, [userId, currentPage, activeTab])
 
   if (loading) {
     return (
@@ -137,21 +233,6 @@ export default function UserDetails({ userId }: UserDetailsProps) {
   }
 
   if (!userData) return null
-
-  const user = {
-    id: userId,
-    name: "سارة أحمد",
-    avatar: "/placeholder.svg?height=128&width=128",
-    email: "sarah@example.com",
-    phone: "+966 50 123 4567",
-    location: "مدينة الكويت، الكويت",
-    status: "نشط",
-    joinDate: "12 يناير 2023",
-    lastLogin: "منذ 2 ساعة",
-    bookingsCount: 24,
-    totalSpent: "4,250 د.إ",
-    bio: "عميلة منتظمة تفضل خدمات العناية بالشعر والمكياج.",
-  }
 
 
   const getStatusBadge = (status: string) => {
@@ -272,12 +353,17 @@ export default function UserDetails({ userId }: UserDetailsProps) {
         </Card>
 
         <Card className="md:col-span-2">
-          <CardHeader>
-            <Tabs defaultValue="bookings" onValueChange={setActiveTab} >
-              <TabsList>
+          <Tabs defaultValue="bookings" className="w-full" value={activeTab} onValueChange={setActiveTab} >
+            <CardHeader className="w-full overflow-x-auto" >
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="bookings">الحجوزات</TabsTrigger>
                 <TabsTrigger value="payments">المدفوعات</TabsTrigger>
+                <TabsTrigger value="gift-cards">بطاقات الهدايا المرسلة</TabsTrigger>
+                <TabsTrigger value="loyalty-points">نقاط الولاء</TabsTrigger>
+                <TabsTrigger value="reviews">التقييمات</TabsTrigger>
               </TabsList>
+            </CardHeader>
+            <CardContent>
 
               <TabsContent value="bookings" className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -372,6 +458,13 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     </TableBody>
                   </Table>
                 </div>
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
               </TabsContent>
 
               <TabsContent value="payments" className="space-y-4">
@@ -418,13 +511,166 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     </TableBody>
                   </Table>
                 </div>
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
               </TabsContent>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="bookings">
 
-            </Tabs>
+              <TabsContent value="gift-cards" className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-medium">بطاقات الهدايا المرسلة</h3>
+                  </div>
+                </div>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>رقم البطاقة</TableHead>
+                        <TableHead>القيمة</TableHead>
+                        <TableHead>رقم الهاتف</TableHead>
+                        <TableHead>التاريخ</TableHead>
+                        <TableHead>الحالة</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {giftCardsData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center">لا يوجد بطاقات هدايا</TableCell>
+                        </TableRow>
+                      ) : (
+                        giftCardsData.map((giftCard) => (
+                          <TableRow key={giftCard.id}>
+                            <TableCell>{giftCard.code}</TableCell>
+                            <TableCell>{giftCard.amount} {giftCard.currency}</TableCell>
+                            <TableCell>{giftCard.full_phone}</TableCell>
+                            <TableCell>{new Date(giftCard.created_at).toLocaleDateString("en-US")}</TableCell>
+                            <TableCell>{getStatusBadge(giftCard.is_used ? "مستخدمة" : "غير مستخدمة")}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              </TabsContent>
+
+              <TabsContent value="loyalty-points" className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-medium">نقاط الولاء</h3>
+                  </div>
+                </div>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>الصالون</TableHead>
+                        <TableHead>النقاط</TableHead>
+                        <TableHead>تاريخ الاكتساب</TableHead>
+                        <TableHead>تاريخ الاستخدام</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {loyaltyPointsData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center">لا يوجد نقاط ولاء</TableCell>
+                        </TableRow>
+                      ) : (
+                        loyaltyPointsData.map((point) => (
+                          <TableRow key={point.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8 border">
+                                  <AvatarImage src={point.salon.icon_url} alt={point.salon.name} />
+                                  <AvatarFallback>{point.salon.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span>{point.salon.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{point.points}</TableCell>
+                            <TableCell>{point.taken_at ? new Date(point.taken_at).toLocaleDateString("en-US") : "-"}</TableCell>
+                            <TableCell>{point.used_at ? new Date(point.used_at).toLocaleDateString("en-US") : "-"}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              </TabsContent>
+
+              <TabsContent value="reviews" className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-medium">التقييمات</h3>
+                  </div>
+                </div>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>الصالون</TableHead>
+                        <TableHead>التقييم</TableHead>
+                        <TableHead>التعليق</TableHead>
+                        <TableHead>رد الصالون</TableHead>
+                        <TableHead>التاريخ</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reviewsData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center">لا يوجد تقييمات</TableCell>
+                        </TableRow>
+                      ) : (
+                        reviewsData.map((review) => (
+                          <TableRow key={review.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8 border">
+                                  <AvatarImage src={review.salon.icon_url} alt={review.salon.name} />
+                                  <AvatarFallback>{review.salon.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span>{review.salon.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>{review.stars}</TableCell>
+                            <TableCell>{review.comment}</TableCell>
+                            <TableCell>{review.salon_reply || "-"}</TableCell>
+                            <TableCell>{new Date(review.created_at).toLocaleDateString("en-US")}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+          <CardContent>
           </CardContent>
         </Card>
       </div>

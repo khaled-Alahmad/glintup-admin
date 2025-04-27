@@ -4,7 +4,6 @@ import type React from "react";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { addData } from "@/lib/apiHelper";
 import {
   Card,
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useToast } from "../ui/use-toast";
 
 export default function AddSalon() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -180,11 +180,11 @@ export default function AddSalon() {
         });
         window.location.href = '/salons';
       }
-    } catch (error) {
+    } catch (error : any) {
       console.error('Error adding salon:', error);
       toast({
         title: "خطأ",
-        description: "فشل في إضافة الصالون",
+        description: error.respone.message ,
         variant: "destructive",
       });
     }
