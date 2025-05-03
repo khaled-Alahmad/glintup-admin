@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { ReviewActionDialog } from "./review-action-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
@@ -17,9 +18,9 @@ import { Filter, MoreHorizontal, Search, Star, ThumbsDown, ThumbsUp } from "luci
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "../ui/use-toast"
-import { addData, deleteData, fetchData } from "@/lib/apiHelper"
+import { addData, deleteData, fetchData, updateData } from "@/lib/apiHelper"
 import { PaginationWithInfo } from "../ui/pagination-with-info"
+import { useToast } from "@/hooks/use-toast"
 interface Review {
   id: number;
   user_id: number;
@@ -32,6 +33,8 @@ interface Review {
   salon_report: string | null;
   reason_for_report: string | null;
   salon_reported_at: string | null;
+  is_reviewed: number;
+  is_visible: number;
   created_at: string;
   updated_at: string;
   user: {
@@ -43,6 +46,7 @@ interface Review {
   };
   salon: {
     id: number;
+    merchant_commercial_name: string;
     name: string;
     icon_url: string;
     average_rating: number;
@@ -111,11 +115,25 @@ interface Review {
 //     serviceType: "حمام مغربي",
 //   },
 // ]
+interface ReviewsInfo {
+  total_reviews: number;
+  average_rating: number;
+  pending_reviews: number;
+  completed_count: number;
+  negative_reviews: number;
+}
 
 export default function ReviewsManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [ratingFilter, setRatingFilter] = useState("all")
+  const [reviewsInfo, setReviewsInfo] = useState<ReviewsInfo>({
+    total_reviews: 0,
+    average_rating: 0,
+    pending_reviews: 0,
+    completed_count: 0,
+    negative_reviews: 0,
+  });
   const [reviews, setReviews] = useState<Review[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,6 +160,7 @@ export default function ReviewsManagement() {
         setCurrentPage(response.meta.current_page);
         setPerPage(response.meta.per_page);
         setTotalItems(response.meta.total);
+        setReviewsInfo(response.info);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -159,47 +178,81 @@ export default function ReviewsManagement() {
     fetchReviews();
   }, [currentPage, ratingFilter, searchQuery]);
 
+  const [isReplyDialogOpen, setIsReplyDialogOpen] = useState(false)
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null)
+
   const handleReplyReview = async (review: Review) => {
-    const reply = prompt('Enter your reply:');
-    if (!reply) return;
+    setSelectedReview(review)
+    setIsReplyDialogOpen(true)
+  };
+
+  const handleReplySubmit = async (reply: string) => {
+    if (!selectedReview) return;
 
     try {
-      const response = await addData(`admin/reviews/${review.id}/reply`, { reply });
+      const response = await addData(`admin/reviews/${selectedReview.id}/reply`, { salon_reply: reply });
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Reply added successfully",
+          title: "نجاح",
+          description: "تم إضافة الرد بنجاح",
         });
         fetchReviews();
       }
     } catch (error) {
       console.error('Error replying to review:', error);
       toast({
-        title: "Error",
-        description: "Failed to add reply",
+        title: "خطأ",
+        description: "فشل في إضافة الرد",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleReviewStatus = async (review: Review, field: 'is_reviewed' | 'is_visible') => {
+    try {
+      const response = await updateData(`admin/reviews/${review.id}`, {
+        [field]: review[field] === 1 ? 0 : 1
+      });
+      if (response.success) {
+        toast({
+          title: "نجاح",
+          description: `تم تحديث حالة التقييم بنجاح`,
+        });
+        fetchReviews();
+      }
+    } catch (error) {
+      console.error('Error updating review status:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث حالة التقييم",
         variant: "destructive",
       });
     }
   };
 
   const handleReportReview = async (review: Review) => {
-    const reason = prompt('Enter report reason:');
-    if (!reason) return;
+    setSelectedReview(review)
+    setIsReportDialogOpen(true)
+  };
+
+  const handleReportSubmit = async (reason: string) => {
+    if (!selectedReview) return;
 
     try {
-      const response = await addData(`admin/reviews/${review.id}/report`, { reason });
+      const response = await addData(`admin/reviews/${selectedReview.id}/report`, { salon_report: reason, reason_for_report: "other" });
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Review reported successfully",
+          title: "نجاح",
+          description: "تم الإبلاغ عن التقييم بنجاح",
         });
         fetchReviews();
       }
     } catch (error) {
       console.error('Error reporting review:', error);
       toast({
-        title: "Error",
-        description: "Failed to report review",
+        title: "خطأ",
+        description: "فشل في الإبلاغ عن التقييم",
         variant: "destructive",
       });
     }
@@ -239,29 +292,26 @@ export default function ReviewsManagement() {
   //   return matchesSearch && matchesStatus && matchesRating
   // })
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "منشور":
-        return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            منشور
-          </Badge>
-        )
-      case "قيد المراجعة":
-        return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-            قيد المراجعة
-          </Badge>
-        )
-      case "محجوب":
-        return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            محجوب
-          </Badge>
-        )
-      default:
-        return <Badge variant="outline">{status}</Badge>
+  const getStatusBadge = (review: Review) => {
+    if (!review.is_reviewed) {
+      return (
+        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          قيد المراجعة
+        </Badge>
+      )
     }
+    if (!review.is_visible) {
+      return (
+        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          محجوب
+        </Badge>
+      )
+    }
+    return (
+      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+        منشور
+      </Badge>
+    )
   }
 
   const renderStars = (rating: number) => {
@@ -279,6 +329,24 @@ export default function ReviewsManagement() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReviewActionDialog
+        isOpen={isReplyDialogOpen}
+        onClose={() => setIsReplyDialogOpen(false)}
+        onSubmit={handleReplySubmit}
+        title="الرد على التقييم"
+        description="أدخل ردك على تقييم العميل"
+        submitLabel="إرسال الرد"
+        placeholder="اكتب ردك هنا..."
+      />
+      <ReviewActionDialog
+        isOpen={isReportDialogOpen}
+        onClose={() => setIsReportDialogOpen(false)}
+        onSubmit={handleReportSubmit}
+        title="الإبلاغ عن التقييم"
+        description="أدخل سبب الإبلاغ عن هذا التقييم"
+        submitLabel="إرسال البلاغ"
+        placeholder="اكتب سبب الإبلاغ هنا..."
+      />
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-heading">إدارة التقييمات</h1>
       </div>
@@ -291,7 +359,9 @@ export default function ReviewsManagement() {
             <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,245</div>
+            <div className="text-2xl font-bold">
+              {reviewsInfo.total_reviews}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">تقييم</p>
           </CardContent>
         </Card>
@@ -302,7 +372,9 @@ export default function ReviewsManagement() {
             <CardTitle className="text-sm font-medium">متوسط التقييم</CardTitle>
             <div className="flex items-center">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-sm font-medium ml-1">4.2</span>
+              <span className="text-sm font-medium ml-1">
+                {reviewsInfo.average_rating.toFixed(1)}
+              </span>
             </div>
           </CardHeader>
           <CardContent>
@@ -327,7 +399,9 @@ export default function ReviewsManagement() {
             <ThumbsUp className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">
+              {reviewsInfo.pending_reviews}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">بحاجة للمراجعة</p>
           </CardContent>
         </Card>
@@ -339,7 +413,9 @@ export default function ReviewsManagement() {
             <ThumbsDown className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">85</div>
+            <div className="text-2xl font-bold">
+              {reviewsInfo.negative_reviews}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">أقل من 3 نجوم</p>
           </CardContent>
         </Card>
@@ -448,6 +524,37 @@ export default function ReviewsManagement() {
                               </span>
                             </div>
                           </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(review)}
+                          {/* {review.is_visible ? "مخفي" : "مفعل"} */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>خيارات</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleToggleReviewStatus(review, 'is_reviewed')}>
+                                {!review.is_reviewed ? 'تمت المراجعة' : 'إلغاء المراجعة'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleReviewStatus(review, 'is_visible')}>
+                                {!review.is_visible ? 'إظهار التقييم' : 'إخفاء التقييم'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleReplyReview(review)}>
+                                الرد على التقييم
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleReportReview(review)}>
+                                الإبلاغ عن التقييم
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteReview(review.id)}>
+                                حذف التقييم
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                         {/* <div className="flex items-center gap-2">
                           {getStatusBadge(review.status)}
