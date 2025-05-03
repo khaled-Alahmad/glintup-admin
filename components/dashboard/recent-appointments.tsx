@@ -7,6 +7,7 @@ interface Salon {
   id: number;
   name: string;
   icon: string;
+  merchant_commercial_name: string;
 }
 
 interface User {
@@ -71,7 +72,7 @@ export function RecentAppointments({ appointments }: { appointments: Appointment
               {getStatusBadge(appointment.status)}
             </div>
             <div className="flex gap-4">
-              <p className="text-xs text-muted-foreground">{appointment.salon.name}</p>
+              <p className="text-xs text-muted-foreground">{appointment.salon.merchant_commercial_name}</p>
               <p className="text-xs text-muted-foreground flex items-center">
                 <Clock className="mr-1 h-3 w-3" /> {`${appointment.date.split('T')[0]} ${appointment.time}`}
               </p>

@@ -82,7 +82,16 @@ interface User {
 interface Salon {
   id: number;
   name: string;
+  merchant_commercial_name: string;
   icon_url: string;
+}
+
+interface BookingInfo {
+  all_count: number;
+  pending_count: number;
+  confirmed_count: number;
+  completed_count: number;
+  cancelled_count: number;
 }
 
 interface Booking {
@@ -101,6 +110,7 @@ interface Booking {
 
 export default function AppointmentsManagement() {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookingInfo, setBookingInfo] = useState<BookingInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -133,6 +143,11 @@ export default function AppointmentsManagement() {
       if (response.success) {
         setBookings(response.data);
         setTotal(response.meta?.total);
+        
+        // استخراج معلومات الإحصائيات من الاستجابة
+        if (response.info) {
+          setBookingInfo(response.info);
+        }
       }
     } catch (error) {
       toast({
@@ -224,6 +239,58 @@ export default function AppointmentsManagement() {
         {/* <Button asChild>
           <Link href="/appointments/add">إضافة حجز جديد</Link>
         </Button> */}
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{bookingInfo?.all_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">في النظام</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">حجوزات معلقة</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{bookingInfo?.pending_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">بانتظار التأكيد</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">حجوزات مؤكدة</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{bookingInfo?.confirmed_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">تم تأكيدها</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">حجوزات مكتملة</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{bookingInfo?.completed_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">تم إكمالها</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">حجوزات ملغية</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{bookingInfo?.cancelled_count || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">تم إلغاؤها</p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -337,13 +404,13 @@ export default function AppointmentsManagement() {
                             <Avatar className="h-8 w-8 border">
                               <AvatarImage
                                 src={booking.salon.icon_url}
-                                alt={booking.salon.name}
+                                alt={booking.salon.merchant_commercial_name}
                               />
                               <AvatarFallback>
-                                {booking.salon.name.charAt(0)}
+                                {booking.salon.merchant_commercial_name.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{booking.salon.name}</span>
+                            <span>{booking.salon.merchant_commercial_name}</span>
                           </div>
                         </TableCell>
 

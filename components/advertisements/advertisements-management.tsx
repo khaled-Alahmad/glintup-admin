@@ -377,10 +377,10 @@ export default function AdvertisementsManagement() {
                         {ad.salon && (
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8 border">
-                              <AvatarImage src={ad.salon.logo_url} alt={ad.salon.name} />
-                              <AvatarFallback>{ad.salon.name.charAt(0)}</AvatarFallback>
+                              <AvatarImage src={ad.salon.logo_url} alt={ad.salon.merchant_commercial_name} />
+                              <AvatarFallback>{ad.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <span>{ad.salon.name}</span>
+                            <span>{ad.salon.merchant_commercial_name}</span>
                           </div>
                         )}
                       </TableCell>

@@ -38,6 +38,7 @@ interface UserData {
 interface Salon {
   id: number
   icon_url: string
+  merchant_commercial_name: string
   name: string
 
 }
@@ -103,6 +104,7 @@ interface LoyaltyPoint {
     id: number
     name: string
     icon_url: string
+    merchant_commercial_name: string
   }
   taken_at: string | null
   used_at: string | null
@@ -115,6 +117,7 @@ interface Review {
   comment: string
   salon: {
     id: number
+    merchant_commercial_name: string
     name: string
     icon_url: string
   }
@@ -128,6 +131,8 @@ export default function UserDetails({ userId }: UserDetailsProps) {
   const [bookingsData, setBookingsData] = useState<Booking[]>([])
   const [paymentsData, setPaymentsData] = useState<Payment[]>([])
   const [giftCardsData, setGiftCardsData] = useState<GiftCard[]>([])
+  const [giftCardsDataRecover, setGiftCardsDataRecover] = useState<GiftCard[]>([])
+
   const [loyaltyPointsData, setLoyaltyPointsData] = useState<LoyaltyPoint[]>([])
   const [reviewsData, setReviewsData] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
@@ -141,10 +146,12 @@ export default function UserDetails({ userId }: UserDetailsProps) {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const [userRes, bookingsRes, paymentsRes, giftCardsRes, loyaltyPointsRes, reviewsRes] = await Promise.all([
+        const [userRes, bookingsRes, paymentsRes, giftCardsRecoverRes, giftCardsRes, loyaltyPointsRes, reviewsRes] = await Promise.all([
           fetchData(`admin/users/${userId}`),
           fetchData(`admin/bookings?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
           fetchData(`admin/transactions?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
+          fetchData(`admin/gift-cards?recipient_id=${userId}&page=${currentPage}&limit=${perPage}`),
+
           fetchData(`admin/gift-cards?sender_id=${userId}&page=${currentPage}&limit=${perPage}`),
           fetchData(`admin/loyalty-points?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
           fetchData(`admin/reviews?user_id=${userId}&page=${currentPage}&limit=${perPage}`)
@@ -167,7 +174,15 @@ export default function UserDetails({ userId }: UserDetailsProps) {
             setPerPage(paymentsRes.meta.per_page)
           }
         }
-
+        if (giftCardsRecoverRes.success) {
+          setGiftCardsDataRecover(giftCardsRecoverRes.data)
+          if (activeTab === 'gift-cards-recover') {
+            setTotalPages(giftCardsRecoverRes.meta.last_page)
+            setCurrentPage(giftCardsRecoverRes.meta.current_page)
+            setTotalItems(giftCardsRecoverRes.meta.total)
+            setPerPage(giftCardsRecoverRes.meta.per_page)
+          }
+        }
         if (giftCardsRes.success) {
           setGiftCardsData(giftCardsRes.data)
           if (activeTab === 'gift-cards') {
@@ -355,10 +370,12 @@ export default function UserDetails({ userId }: UserDetailsProps) {
         <Card className="md:col-span-2">
           <Tabs defaultValue="bookings" className="w-full" value={activeTab} onValueChange={setActiveTab} >
             <CardHeader className="w-full overflow-x-auto" >
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="bookings">الحجوزات</TabsTrigger>
                 <TabsTrigger value="payments">المدفوعات</TabsTrigger>
                 <TabsTrigger value="gift-cards">بطاقات الهدايا المرسلة</TabsTrigger>
+                <TabsTrigger value="gift-cards-recover">بطاقات الهدايا المستلمة</TabsTrigger>
+
                 <TabsTrigger value="loyalty-points">نقاط الولاء</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
               </TabsList>
@@ -402,10 +419,10 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                               <TableCell>
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8 border">
-                                    <AvatarImage src={booking.avatar} alt={booking.salon.name} />
-                                    <AvatarFallback>{booking.salon.name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage src={booking.avatar} alt={booking.salon.merchant_commercial_name} />
+                                    <AvatarFallback>{booking.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
                                   </Avatar>
-                                  <span>{booking.salon.name}</span>
+                                  <span>{booking.salon.merchant_commercial_name}</span>
                                 </div>
                               </TableCell>
                               <TableCell>
@@ -564,7 +581,50 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                   onPageChange={setCurrentPage}
                 />
               </TabsContent>
-
+              <TabsContent value="gift-cards-recover" className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-medium">بطاقات الهدايا المستلمة</h3>
+                  </div>
+                </div>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>رقم البطاقة</TableHead>
+                        <TableHead>القيمة</TableHead>
+                        <TableHead>رقم الهاتف</TableHead>
+                        <TableHead>التاريخ</TableHead>
+                        <TableHead>الحالة</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {giftCardsDataRecover.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center">لا يوجد بطاقات هدايا</TableCell>
+                        </TableRow>
+                      ) : (
+                        giftCardsDataRecover.map((giftCard) => (
+                          <TableRow key={giftCard.id}>
+                            <TableCell>{giftCard.code}</TableCell>
+                            <TableCell>{giftCard.amount} {giftCard.currency}</TableCell>
+                            <TableCell>{giftCard.full_phone}</TableCell>
+                            <TableCell>{new Date(giftCard.created_at).toLocaleDateString("en-US")}</TableCell>
+                            <TableCell>{getStatusBadge(giftCard.is_used ? "مستخدمة" : "غير مستخدمة")}</TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              </TabsContent>
               <TabsContent value="loyalty-points" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
@@ -592,10 +652,10 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8 border">
-                                  <AvatarImage src={point.salon.icon_url} alt={point.salon.name} />
-                                  <AvatarFallback>{point.salon.name.charAt(0)}</AvatarFallback>
+                                  <AvatarImage src={point.salon.icon_url} alt={point.salon.merchant_commercial_name} />
+                                  <AvatarFallback>{point.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <span>{point.salon.name}</span>
+                                <span>{point.salon.merchant_commercial_name}</span>
                               </div>
                             </TableCell>
                             <TableCell>{point.points}</TableCell>
@@ -644,10 +704,10 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8 border">
-                                  <AvatarImage src={review.salon.icon_url} alt={review.salon.name} />
-                                  <AvatarFallback>{review.salon.name.charAt(0)}</AvatarFallback>
+                                  <AvatarImage src={review.salon.icon_url} alt={review.salon.merchant_commercial_name} />
+                                  <AvatarFallback>{review.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <span>{review.salon.name}</span>
+                                <span>{review.salon.merchant_commercial_name}</span>
                               </div>
                             </TableCell>
                             <TableCell>{review.stars}</TableCell>

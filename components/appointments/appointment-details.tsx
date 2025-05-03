@@ -403,15 +403,15 @@ export default function AppointmentDetails({
                   <Avatar className="h-16 w-16 border">
                     <AvatarImage
                       src={booking.salon.icon_url || "/placeholder.svg"}
-                      alt={booking.salon.name}
+                      alt={booking.salon.merchant_commercial_name}
                     />
                     <AvatarFallback>
-                      {booking.salon.name.charAt(0)}
+                      {booking.salon.merchant_commercial_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium text-lg">
-                      {booking.salon.name}
+                      {booking.salon.merchant_commercial_name}
                     </p>
                     <p className="text-muted-foreground">
                       {booking.salon.location}

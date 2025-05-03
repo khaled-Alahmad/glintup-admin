@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Bar,
   BarChart,
@@ -80,10 +81,23 @@ export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState("daily");
+  const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
+  const [toDate, setToDate] = useState<Date | undefined>(undefined);
+  const [showDateRange, setShowDateRange] = useState(false);
+
   const fetchDashboardData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetchData(`admin/dashboard?date=${dateFilter}`);
+      let url = `admin/dashboard?date=${dateFilter}`;
+      
+      // Add date range parameters if custom filter is selected
+      if (dateFilter === "custom" && fromDate && toDate) {
+        const fromDateStr = fromDate.toISOString().split('T')[0];
+        const toDateStr = toDate.toISOString().split('T')[0];
+        url = `admin/dashboard?date=${dateFilter}&from=${fromDateStr}&to=${toDateStr}`;
+      }
+      
+      const response = await fetchData(url);
       if (response.success) {
         setDashboardData(response.data);
       }
@@ -95,8 +109,17 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [dateFilter]); // Add dateFilter as dependency
+    if (dateFilter === "custom") {
+      setShowDateRange(true);
+      // Only fetch data if both dates are selected
+      if (fromDate && toDate) {
+        fetchDashboardData();
+      }
+    } else {
+      setShowDateRange(false);
+      fetchDashboardData();
+    }
+  }, [dateFilter, fromDate, toDate]); // Add fromDate and toDate as dependencies
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -127,8 +150,25 @@ export default function AdminDashboard() {
               <TabsTrigger value="weekly">أسبوعي</TabsTrigger>
               <TabsTrigger value="monthly">شهري</TabsTrigger>
               <TabsTrigger value="yearly">سنوي</TabsTrigger>
+              <TabsTrigger value="custom">مخصص</TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          {showDateRange && (
+            <div className="flex items-center gap-2 mr-2">
+              <DatePicker
+                selected={fromDate}
+                onSelect={setFromDate}
+                placeholder="من تاريخ"
+              />
+              <DatePicker
+                selected={toDate}
+                onSelect={setToDate}
+                placeholder="إلى تاريخ"
+                minDate={fromDate}
+              />
+            </div>
+          )}
         </div>
       </div>
 

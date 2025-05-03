@@ -242,7 +242,7 @@ export default function ServicesManagement() {
       if (response.success) {
         setSalons(response.data.map((salon: any) => ({
           id: salon.id,
-          name: salon.name
+          name: salon.merchant_commercial_name
         })));
       }
     } catch (error) {
@@ -657,7 +657,7 @@ export default function ServicesManagement() {
                     <SelectGroup>
                       {salons.map((salon) => (
                         <SelectItem key={salon.id} value={salon.id.toString()}>
-                          {salon.name}
+                          {salon.merchant_commercial_name}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -705,7 +705,7 @@ export default function ServicesManagement() {
                       <SelectGroup>
                         {salons.map((salon) => (
                           <SelectItem key={salon.id} value={salon.id.toString()}>
-                            {salon.name}
+                            {salon.merchant_commercial_name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -809,7 +809,7 @@ export default function ServicesManagement() {
                     <SelectGroup>
                       {salons.map((salon) => (
                         <SelectItem key={salon.id} value={salon.id.toString()}>
-                          {salon.name}
+                          {salon.merchant_commercial_name}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -954,7 +954,7 @@ export default function ServicesManagement() {
                       <SelectGroup>
                         {salons.map((salon) => (
                           <SelectItem key={salon.id} value={salon.id.toString()}>
-                            {salon.name}
+                            {salon.merchant_commercial_name}
                           </SelectItem>
                         ))}
                       </SelectGroup>

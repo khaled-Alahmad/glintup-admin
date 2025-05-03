@@ -1958,7 +1958,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <DialogHeader>
                       <DialogTitle>تعليق الصالون</DialogTitle>
                       <DialogDescription>
-                        هل أنت متأكد من رغبتك في تعليق صالون {salon.name}؟
+                        هل أنت متأكد من رغبتك في تعليق صالون {salon.merchant_commercial_name}؟
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -2016,7 +2016,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <DialogHeader>
                       <DialogTitle>حظر الصالون</DialogTitle>
                       <DialogDescription>
-                        هل أنت متأكد من رغبتك في حظر صالون {salon.name} بشكل
+                        هل أنت متأكد من رغبتك في حظر صالون {salon.merchant_commercial_name} بشكل
                         دائم؟
                       </DialogDescription>
                     </DialogHeader>
@@ -2685,7 +2685,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <SelectGroup>
                       {salons.map((salon) => (
                         <SelectItem key={salon.id} value={salon.id.toString()}>
-                          {salon.name}
+                          {salon.merchant_commercial_name}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -2830,7 +2830,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       <SelectGroup>
                         {salons.map((salon) => (
                           <SelectItem key={salon.id} value={salon.id.toString()}>
-                            {salon.name}
+                            {salon.merchant_commercial_name}
                           </SelectItem>
                         ))}
                       </SelectGroup>

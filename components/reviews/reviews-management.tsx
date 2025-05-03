@@ -486,10 +486,10 @@ export default function ReviewsManagement() {
                         <span className="font-medium">الصالون:</span>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6 border">
-                            <AvatarImage src={review.salon.icon_url} alt={review.salon.name} />
-                            <AvatarFallback>{review.salon.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={review.salon.icon_url} alt={review.salon.merchant_commercial_name} />
+                            <AvatarFallback>{review.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
                           </Avatar>
-                          <span>{review.salon.name}</span>
+                          <span>{review.salon.merchant_commercial_name}</span>
                         </div>
                         {/* <span className="mx-2">•</span>
                         <span className="font-medium">الخدمة:</span>

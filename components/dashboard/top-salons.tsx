@@ -69,6 +69,7 @@ export function TopSalons({ salons }: {
     bookingsCount: number;
     rating: number;
     maxBookings: number;
+    merchant_commercial_name: string;
     percentage: number;
     color: string;
   }>
@@ -82,12 +83,12 @@ export function TopSalons({ salons }: {
         >
           <div className="flex items-center gap-4">
             <Avatar className="h-10 w-10 border ring-2 ring-primary/10">
-              <AvatarImage src={salon.logo} alt={salon.name} />
-              <AvatarFallback>{salon.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={salon.logo} alt={salon.merchant_commercial_name} />
+              <AvatarFallback>{salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium leading-none">{salon.name}</p>
+                <p className="text-sm font-medium leading-none">{salon.merchant_commercial_name}</p>
                 <div className="flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
                   <span className="text-xs font-medium">{salon.rating}</span>

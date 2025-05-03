@@ -118,7 +118,7 @@ export default function SalonsManagement() {
 
   // const filteredSalons = salons.filter((salon) => {
   //   const matchesSearch =
-  //     salon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     salon.merchant_commercial_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
   //     salon.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
   //     salon.owner.toLowerCase().includes(searchQuery.toLowerCase())
 
@@ -421,7 +421,7 @@ export default function SalonsManagement() {
           <DialogHeader>
             <DialogTitle>تعليق الصالون</DialogTitle>
             <DialogDescription>
-              {selectedSalon && `هل أنت متأكد من رغبتك في تعليق صالون ${selectedSalon.name}؟`}
+              {selectedSalon && `هل أنت متأكد من رغبتك في تعليق صالون ${selectedSalon.merchant_commercial_name}؟`}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -488,7 +488,7 @@ export default function SalonsManagement() {
             <DialogHeader>
               <DialogTitle>حظر الصالون</DialogTitle>
               <DialogDescription>
-                {selectedSalon && `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.name} بشكل دائم؟`}
+                {selectedSalon && `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.merchant_commercial_name} بشكل دائم؟`}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">

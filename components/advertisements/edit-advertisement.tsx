@@ -255,7 +255,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                     <SelectGroup>
                       {salons.map((salon: any) => (
                         <SelectItem key={salon.id} value={String(salon.id)}>
-                          {salon.name}
+                          {salon.merchant_commercial_name}
                         </SelectItem>
                       ))}
                     </SelectGroup>
