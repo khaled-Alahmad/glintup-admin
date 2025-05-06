@@ -2612,7 +2612,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                                 <div className="flex flex-col">
                                   <div className="flex items-center">
                                     <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{new Date(appointment.date).toLocaleDateString("ar-SA")}</span>
+                                    <span className="text-sm">{new Date(appointment.date).toLocaleDateString("ar-EG")}</span>
                                   </div>
                                   <div className="flex items-center">
                                     <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />

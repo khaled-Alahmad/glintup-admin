@@ -520,7 +520,7 @@ export default function ReviewsManagement() {
                             <div className="flex items-center gap-2 mt-1">
                               <div className="text-yellow-500">{review.stars}</div>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(review.created_at).toLocaleDateString("ar-SA")}
+                                {new Date(review.created_at).toLocaleDateString("ar-EG")}
                               </span>
                             </div>
                           </div>

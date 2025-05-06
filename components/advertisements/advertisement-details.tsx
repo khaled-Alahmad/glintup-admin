@@ -169,20 +169,20 @@ export default function AdvertisementDetails({
             </CardHeader>
             <CardContent className="space-y-6">
 
-              <div className="rounded-md overflow-hidden">
+              <div className="rounded-md overflow-hidden flex justify-center">
                 <img
                   src={advertisement.image_url || "/placeholder.svg"}
                   alt={advertisement.title.ar}
-                  className="w-full h-auto object-cover"
+                  className="w-[400px] h-auto object-contain"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <h3 className="text-lg font-medium">وصف الإعلان</h3>
-                  <p>{advertisement.description.ar}</p>
-                  <p className="text-muted-foreground">{advertisement.description.en}</p>
-                </div>
+                  <p>{advertisement.title?.ar || ""}</p>
+                  <p className="text-muted-foreground">{advertisement.title?.en || ""}</p>
+                </div> */}
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">فترة العرض</h3>
                   <div className="space-y-2">

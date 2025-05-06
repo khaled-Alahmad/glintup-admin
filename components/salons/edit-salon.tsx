@@ -147,6 +147,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
   const [salonData, setSalonData] = useState<any>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoText, setLogoText] = useState<string | null>(null);
+  const [types, setTypes] = useState<string[]>([]);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
@@ -511,6 +512,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           setGalleryPreviews(data.images || []);
           setSalonServices(data.services || []);
           setLogoText(data.icon);
+          setTypes(data.types || []);
 
           setSelectedCollections(data.collections || []);
         }
@@ -570,11 +572,11 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         city_street_name: formData.get('city_street_name'),
         contact_name: formData.get('contact_name'),
         contact_number: formData.get('contact_number'),
-        contact_email: formData.get('contact_email')       ,
+        contact_email: formData.get('contact_email'),
         business_contact_name: formData.get('business_contact_name'),
         business_contact_number: formData.get('business_contact_number'),
         business_contact_email: formData.get('business_contact_email'),
-        // description: "",
+        types: types,
         bio: formData.get('bio'),
         // icon: logoText,
 
@@ -934,6 +936,64 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     rows={3}
                     defaultValue={salonData?.bio}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>أنواع الصالون</Label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant={types.includes('salon') ? 'default' : 'outline'}
+                      onClick={() => {
+                        setTypes(prev => 
+                          prev.includes('salon')
+                            ? prev.filter(t => t !== 'salon')
+                            : [...prev, 'salon']
+                        );
+                      }}
+                    >
+                      صالون
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={types.includes('home_service') ? 'default' : 'outline'}
+                      onClick={() => {
+                        setTypes(prev => {
+                          const prevArray = Array.isArray(prev) ? prev : [];
+                          return prevArray.includes('home_service')
+                            ? prevArray.filter(t => t !== 'home_service')
+                            : [...prevArray, 'home_service'];
+                        });
+                      }}
+                    >
+                      خدمة منزلية
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={types.includes('beautician') ? 'default' : 'outline'}
+                      onClick={() => {
+                        setTypes(prev => 
+                          prev.includes('beautician')
+                            ? prev.filter(t => t !== 'beautician')
+                            : [...prev, 'beautician']
+                        );
+                      }}
+                    >
+                      خبير تجميل
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={types.includes('clinic') ? 'default' : 'outline'}
+                      onClick={() => {
+                        setTypes(prev => 
+                          prev.includes('clinic')
+                            ? prev.filter(t => t !== 'clinic')
+                            : [...prev, 'clinic']
+                        );
+                      }}
+                    >
+                      عيادة
+                    </Button>
+                  </div>
                 </div>
 
 

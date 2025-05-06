@@ -273,11 +273,11 @@ export default function OffersManagement() {
                         <div className="flex flex-col text-sm">
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{new Date(offer.startDate).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(offer.startDate).toLocaleDateString("ar-EG")}</span>
                           </div>
                           <div className="flex items-center">
                             <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{new Date(offer.endDate).toLocaleDateString("ar-SA")}</span>
+                            <span>{new Date(offer.endDate).toLocaleDateString("ar-EG")}</span>
                           </div>
                         </div>
                       </TableCell>

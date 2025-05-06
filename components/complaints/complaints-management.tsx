@@ -350,7 +350,7 @@ export default function ComplaintsManagement() {
                             </p>
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs text-muted-foreground">
-                                {new Date(item.date).toLocaleDateString("ar-SA")}
+                                {new Date(item.date).toLocaleDateString("ar-EG")}
                               </span>
                               <span className="text-xs text-muted-foreground">•</span>
                               <span className="text-xs text-muted-foreground">{item.category}</span>

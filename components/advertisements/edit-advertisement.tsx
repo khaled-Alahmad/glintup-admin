@@ -263,13 +263,13 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="description_ar">وصف الإعلان (عربي)</Label>
                   <Textarea
                     id="description_ar"
                     name="description_ar"
-                    value={formData.description.ar}
+                    value={formData.description?.ar || " "}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
                       description: { ...prev.description, ar: e.target.value }
@@ -284,7 +284,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                   <Textarea
                     id="description_en"
                     name="description_en"
-                    value={formData.description.en}
+                    value={formData.description?.en || ""}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
                       description: { ...prev.description, en: e.target.value }
@@ -295,7 +295,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                   />
 
                 </div>
-              </div>
+              </div> */}
               <div className="space-y-2">
                 <Label htmlFor="image">صورة الإعلان</Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">

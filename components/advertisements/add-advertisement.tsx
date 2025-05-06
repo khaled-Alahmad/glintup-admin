@@ -128,7 +128,7 @@ export default function AddAdvertisement() {
       formData.set('title[ar]', formData.get('title_ar') as string);
       formData.set('title[en]', formData.get('title_en') as string);
       formData.set('description[ar]', formData.get('description_ar') as string);
-      formData.set('description[en]', formData.get('description_en') as string);
+      formData.set('description[en]', formData.get('title_en') as string);
       formData.set('is_active', isActive ? '1' : '0');
       if (uploadedImageName) {
         formData.set('image', uploadedImageName);
@@ -230,7 +230,7 @@ export default function AddAdvertisement() {
           </div>
 
           {/* Update description fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="description_ar">وصف الإعلان (عربي)</Label>
               <Textarea
@@ -251,7 +251,7 @@ export default function AddAdvertisement() {
                 required
               />
             </div>
-          </div>
+          </div> */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">تفاصيل العرض</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

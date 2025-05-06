@@ -42,6 +42,7 @@ interface Advertisement {
   clicks: number;
   salon: {
     id: number;
+    merchant_commercial_name: string;
     name: string;
     logo_url: string;
   } | null;
@@ -159,9 +160,9 @@ export default function AdvertisementsManagement() {
     fetchAdvertisements();
   }, [currentPage, searchQuery, statusFilter]);
 
-  const handleStatusUpdate = async (adId: number, action: 'approve' | 'reject' | 'stop') => {
+  const handleStatusUpdate = async (adId: number, action: Boolean) => {
     try {
-      const response = await updateData(`admin/promotion-ads/${adId}/status`, { status: action });
+      const response = await updateData(`admin/promotion-ads/${adId}`, { is_active: action });
       if (response.success) {
         await fetchAdvertisements();
         toast({
@@ -203,6 +204,7 @@ export default function AdvertisementsManagement() {
         return <Badge variant="outline">{status === true ? "نشط " : "غير نشط"}</Badge>
     }
   }
+  console.log(advertisements);
 
   return (
     <div className="flex flex-col gap-6">
@@ -418,14 +420,14 @@ export default function AdvertisementsManagement() {
                               <Link href={`/advertisements/${ad.id}/edit`}>تعديل الإعلان</Link>
                             </DropdownMenuItem>
                             {!ad.is_active && (
-                              <DropdownMenuItem onClick={() => handleStatusUpdate(ad.id, 'approve')}>
+                              <DropdownMenuItem onClick={() => handleStatusUpdate(ad.id, true)}>
                                 تفعيل الإعلان
                               </DropdownMenuItem>
                             )}
                             {ad.is_active && (
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => handleStatusUpdate(ad.id, 'stop')}
+                                onClick={() => handleStatusUpdate(ad.id, false)}
                               >
                                 إيقاف الإعلان
                               </DropdownMenuItem>
