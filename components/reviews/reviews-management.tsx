@@ -543,12 +543,12 @@ export default function ReviewsManagement() {
                               <DropdownMenuItem onClick={() => handleToggleReviewStatus(review, 'is_visible')}>
                                 {!review.is_visible ? 'إظهار التقييم' : 'إخفاء التقييم'}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleReplyReview(review)}>
+                              {/* <DropdownMenuItem onClick={() => handleReplyReview(review)}>
                                 الرد على التقييم
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleReportReview(review)}>
                                 الإبلاغ عن التقييم
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteReview(review.id)}>
                                 حذف التقييم
