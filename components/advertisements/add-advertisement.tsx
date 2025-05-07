@@ -127,8 +127,8 @@ export default function AddAdvertisement() {
       // Set multilingual content
       formData.set('title[ar]', formData.get('title_ar') as string);
       formData.set('title[en]', formData.get('title_en') as string);
-      formData.set('description[ar]', formData.get('description_ar') as string);
-      formData.set('description[en]', formData.get('title_en') as string);
+      formData.set('button_text[ar]', formData.get('description_ar') as string);
+      formData.set('button_text[en]', formData.get('title_en') as string);
       formData.set('is_active', isActive ? '1' : '0');
       if (uploadedImageName) {
         formData.set('image', uploadedImageName);
@@ -230,28 +230,28 @@ export default function AddAdvertisement() {
           </div>
 
           {/* Update description fields */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="description_ar">وصف الإعلان (عربي)</Label>
+              <Label htmlFor="description_ar">نص زر الإعلان (عربي)</Label>
               <Textarea
                 id="description_ar"
                 name="description_ar"
-                placeholder="أدخل وصف الإعلان بالعربية"
+                placeholder="أدخل نص زر الإعلان بالعربية"
                 rows={4}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description_en">Advertisement Description (English)</Label>
+              <Label htmlFor="description_en">Advertisement Text Button (English)</Label>
               <Textarea
                 id="description_en"
                 name="description_en"
-                placeholder="Enter advertisement description in English"
+                placeholder="Enter advertisement  Text Button in English"
                 rows={4}
                 required
               />
             </div>
-          </div> */}
+          </div>
           <div className="space-y-4">
             <h3 className="text-lg font-medium">تفاصيل العرض</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

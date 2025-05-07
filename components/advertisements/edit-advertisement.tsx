@@ -31,7 +31,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: { ar: '', en: '' },
-    description: { ar: '', en: '' },
+    button_text: { ar: '', en: '' },
     salon_id: '',
   });
   const [uploadedImageName, setUploadedImageName] = useState<string>("");
@@ -67,7 +67,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
         setIsActive(ad.is_active);
         setFormData({
           title: ad.title,
-          description: ad.description,
+          button_text: ad.button_text,
           salon_id: ad.salon_id ? String(ad.salon_id) : '',
         });
       }
@@ -139,9 +139,9 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
           ar: formData.title.ar,
           en: formData.title.en,
         },
-        description: {
-          ar: formData.description.ar,
-          en: formData.description.en,
+        button_text: {
+          ar: formData.button_text.ar,
+          en: formData.button_text.en,
         },
         salon_id: formData.salon_id ? Number(formData.salon_id) : null,
         is_active: isActive ? 1 : 0,
@@ -263,39 +263,39 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                 </Select>
               </div>
 
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="description_ar">وصف الإعلان (عربي)</Label>
+                  <Label htmlFor="description_ar">نص زر الإعلان (عربي)</Label>
                   <Textarea
                     id="description_ar"
                     name="description_ar"
-                    value={formData.description?.ar || " "}
+                    value={formData.button_text?.ar || " "}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      description: { ...prev.description, ar: e.target.value }
+                      button_text: { ...prev.button_text, ar: e.target.value }
                     }))}
-                    placeholder="أدخل وصف الإعلان بالعربية"
+                    placeholder="أدخل نص زر الإعلان بالعربية"
                     rows={4}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description_en">Advertisement Description (English)</Label>
+                  <Label htmlFor="description_en">Advertisement  Text Button (English)</Label>
                   <Textarea
                     id="description_en"
                     name="description_en"
-                    value={formData.description?.en || ""}
+                    value={formData.button_text?.en || ""}
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
-                      description: { ...prev.description, en: e.target.value }
+                      button_text: { ...prev.button_text, en: e.target.value }
                     }))}
-                    placeholder="Enter advertisement description in English"
+                    placeholder="Enter advertisement  Text Button in English"
                     rows={4}
                     required
                   />
 
                 </div>
-              </div> */}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="image">صورة الإعلان</Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">

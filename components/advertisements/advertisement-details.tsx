@@ -178,11 +178,11 @@ export default function AdvertisementDetails({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                {/* <div className="space-y-2">
-                  <h3 className="text-lg font-medium">وصف الإعلان</h3>
-                  <p>{advertisement.title?.ar || ""}</p>
-                  <p className="text-muted-foreground">{advertisement.title?.en || ""}</p>
-                </div> */}
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">نص زر الإعلان</h3>
+                  <p>{advertisement.button_text?.ar || ""}</p>
+                  <p className="text-muted-foreground">{advertisement.button_text?.en || ""}</p>
+                </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">فترة العرض</h3>
                   <div className="space-y-2">
