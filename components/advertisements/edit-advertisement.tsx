@@ -31,6 +31,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: { ar: '', en: '' },
+    status: 'draft',
     button_text: { ar: '', en: '' },
     salon_id: '',
   });
@@ -68,6 +69,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
         setFormData({
           title: ad.title,
           button_text: ad.button_text,
+          status: ad.status,
           salon_id: ad.salon_id ? String(ad.salon_id) : '',
         });
       }
@@ -145,7 +147,8 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
         },
         salon_id: formData.salon_id ? Number(formData.salon_id) : null,
         is_active: isActive ? 1 : 0,
-        image: uploadedImageName || null
+        image: uploadedImageName || null,
+        status: formData.status,
       };
       console.log(submitData);
 
@@ -360,20 +363,42 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="is_active" className="me-2">حالة الإعلان</Label>
-                <Select
-                  value={isActive ? "1" : "0"}
-                  onValueChange={(value) => setIsActive(value === "1")}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="اختر الحالة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">نشط</SelectItem>
-                    <SelectItem value="0">غير نشط</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="is_active" className="me-2">تفعيل الإعلان</Label>
+                  <Select
+                    value={isActive ? "1" : "0"}
+                    onValueChange={(value) => setIsActive(value === "1")}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="اختر التفعيل" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">نشط</SelectItem>
+                      <SelectItem value="0">غير نشط</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="status" className="me-2">حالة الإعلان</Label>
+                  <Select
+                    value={status}
+                    onValueChange={(value) => setFormData({
+                      ...formData,
+                      status: value,
+                    })}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="اختر الحالة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">مسودة</SelectItem>
+                      <SelectItem value="in_review">قيد المراجعة</SelectItem>
+                      <SelectItem value="approved">موافق عليه</SelectItem>
+                      <SelectItem value="rejected">مرفوض</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </>)}
           </CardContent>

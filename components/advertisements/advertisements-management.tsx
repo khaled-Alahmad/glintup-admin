@@ -25,6 +25,7 @@ import { PaginationWithInfo } from "../ui/pagination-with-info"
 interface Advertisement {
   id: number;
   salon_id: number | null;
+  status: string;
   title: {
     en: string;
     ar: string;
@@ -312,7 +313,9 @@ export default function AdvertisementsManagement() {
                     <TableHead>الفترة</TableHead>
                     <TableHead>المشاهدات</TableHead>
                     <TableHead>النقرات</TableHead>
-                    <TableHead>الحالة</TableHead>
+                    <TableHead>تفعيل الاعلان</TableHead>
+                    <TableHead>حالة الاعلان</TableHead>
+
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -403,6 +406,33 @@ export default function AdvertisementsManagement() {
                       <TableCell>
                         {getStatusBadge(ad.is_active)}
                       </TableCell>
+                      {/*      $table->enum('status', ['draft', 'in_review', 'approved', 'rejected'])->default('in_review'); اعرضهم بالعربي */}
+                      <TableCell>
+                        {ad.status === "draft" ? (
+                          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                            مسودة
+                          </Badge>
+
+                        ) :
+                          ad.status === "in_review" ? (
+                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                              قيد المراجعة
+                            </Badge>
+                          ) :
+                            ad.status === "approved" ? (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                تم الموافقة
+                              </Badge>
+                            ) :
+                              ad.status === "rejected" ? (
+                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                  تم الرفض
+                                </Badge>
+                              ) :
+                                <></>
+                        }
+                      </TableCell>
+
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

@@ -44,6 +44,7 @@ export default function AddAdvertisement() {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [status, setStatus] = useState('in_review');
 
   // Add fetch salons function
   const [salonSearchTerm, setSalonSearchTerm] = useState("");
@@ -130,6 +131,7 @@ export default function AddAdvertisement() {
       formData.set('button_text[ar]', formData.get('description_ar') as string);
       formData.set('button_text[en]', formData.get('title_en') as string);
       formData.set('is_active', isActive ? '1' : '0');
+      formData.set('status', status);
       if (uploadedImageName) {
         formData.set('image', uploadedImageName);
       }
@@ -237,8 +239,10 @@ export default function AddAdvertisement() {
                 id="description_ar"
                 name="description_ar"
                 placeholder="أدخل نص زر الإعلان بالعربية"
-                rows={4}
+                rows={1}
                 required
+                minLength={3}
+                maxLength={15}
               />
             </div>
             <div className="space-y-2">
@@ -246,9 +250,12 @@ export default function AddAdvertisement() {
               <Textarea
                 id="description_en"
                 name="description_en"
-                placeholder="Enter advertisement  Text Button in English"
-                rows={4}
+                placeholder="Enter advertisement Text Button in English"
+                rows={1}
                 required
+                minLength={3}
+                
+                maxLength={15}
               />
             </div>
           </div>
@@ -323,20 +330,39 @@ export default function AddAdvertisement() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="is_active" className="me-2">حالة الإعلان</Label>
-            <Select
-              value={isActive ? "1" : "0"}
-              onValueChange={(value) => setIsActive(value === "1")}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="اختر الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">نشط</SelectItem>
-                <SelectItem value="0">غير نشط</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="is_active" className="me-2">تفعيل الإعلان</Label>
+              <Select
+                value={isActive ? "1" : "0"}
+                onValueChange={(value) => setIsActive(value === "1")}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="اختر التفعيل" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">نشط</SelectItem>
+                  <SelectItem value="0">غير نشط</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="status" className="me-2">حالة الإعلان</Label>
+              <Select
+                value={status}
+                onValueChange={(value) => setStatus(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="اختر الحالة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">مسودة</SelectItem>
+                  <SelectItem value="in_review">قيد المراجعة</SelectItem>
+                  <SelectItem value="approved">موافق عليه</SelectItem>
+                  <SelectItem value="rejected">مرفوض</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           {/* Keep existing date pickers */}
         </CardContent>
