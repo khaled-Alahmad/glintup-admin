@@ -82,10 +82,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { addData, deleteData, fetchData, updateData } from "@/lib/apiHelper";
-import { useToast } from "../ui/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
 import { Checkbox } from "../ui/checkbox";
 import Image from "next/image";
+import SalonCoupons from "./salon-coupons";
+import { useToast } from "@/hooks/use-toast";
 interface SalonPermission {
   id: number;
   name: {
@@ -257,6 +258,7 @@ interface Image {
 }
 interface SalonData {
   type: string;
+  types: string;
   id: number;
   images: Image[];
   name: string;
@@ -306,6 +308,7 @@ interface SalonData {
 
 interface Service {
   id: number;
+  capacity: number;
   name: {
     en: string;
     ar: string;
@@ -1984,6 +1987,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         en: formData.get("description_en") as string,
         ar: formData.get("description_ar") as string,
       },
+      capacity: Number(formData.get("capacity")),
       icon: uploadedIcon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
@@ -2043,6 +2047,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         en: formData.get("description_en") as string,
         ar: formData.get("description_ar") as string,
       },
+      capacity: Number(formData.get("capacity")),
       icon: uploadedIcon || editingService.icon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
@@ -2333,6 +2338,26 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     ? "خدمة منزلية"
                     : salonData.type}
                 </Badge>
+                {/*  salonData.types */}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                {salonData.types.split(",").map((type, idx) => (
+                  <Badge
+                    key={idx}
+                    variant="outline"
+                    className="bg-purple-50 text-amber-700 border-amber-200"
+                  >
+                    {type === "salon"
+                      ? "صالون"
+                      : type === "clinic"
+                      ? "عيادة"
+                      : type === "home_service"
+                      ? "خدمة منزلية"
+                      : type === "beautician"
+                      ? "خبيرة تجميل"
+                      : type}
+                  </Badge>
+                ))}
               </div>
               <div className="flex items-center gap-1 mt-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
@@ -2868,7 +2893,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             onValueChange={setActiveTab}
           >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-8">
+              <TabsList className="grid w-full grid-cols-9">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -2883,6 +2908,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </TabsTrigger>
                 <TabsTrigger value="staff">الموظفين</TabsTrigger>
                 <TabsTrigger value="customers">العملاء</TabsTrigger>
+                <TabsTrigger value="coupons">الكوبونات</TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
@@ -3482,6 +3508,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </>
                 )}
               </TabsContent>
+              <TabsContent value="coupons" className="space-y-4">
+                <SalonCoupons salonId={salonId} />
+              </TabsContent>
             </CardContent>
           </Tabs>
         </Card>
@@ -3580,6 +3609,17 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     required
                   />
                 </div>
+              </div>
+              {/* capacity */}
+              <div className="space-y-2">
+                <Label htmlFor="capacity">عدد المقاعد</Label>
+                <Input
+                  id="capacity"
+                  name="capacity"
+                  type="number"
+                  min="1"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="gender">الفئة المستهدفة</Label>
@@ -3749,6 +3789,18 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       required
                     />
                   </div>
+                </div>
+                {/* capacity */}
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">عدد المقاعد</Label>
+                  <Input
+                    id="capacity"
+                    name="capacity"
+                    type="number"
+                    min="1"
+                    defaultValue={editingService.capacity}
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -3944,6 +3996,11 @@ function ServiceCard({
             <div className="space-y-1">
               <p className="text-xs font-medium">الفئة:</p>
               <Badge variant="outline">{getGenderText(service.gender)}</Badge>
+            </div>
+            {/* capacity */}
+            <div className="space-y-1">
+              <p className="text-xs font-medium">عدد المقاعد:</p>
+              <Badge variant="outline">{service.capacity}</Badge>
             </div>
             {showSalonId && (
               <div className="space-y-1">
