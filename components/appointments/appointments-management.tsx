@@ -551,6 +551,11 @@ export default function AppointmentsManagement() {
                 totalItems={total}
                 itemsPerPage={perPage}
                 onPageChange={setPage}
+                onItemsPerPageChange={(value) => {
+                  setPerPage(value);
+                  setPage(1);
+                }}
+                showItemsPerPageSelect
               />
             </div>
           )}

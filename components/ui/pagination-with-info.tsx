@@ -6,11 +6,15 @@ interface PaginationWithInfoProps {
     totalItems?: number
     itemsPerPage?: number
     onPageChange: (page: number) => void
+    onItemsPerPageChange?: (itemsPerPage: number) => void
     className?: string
     showFirstLast?: boolean
     maxPageButtons?: number
     showItemsInfo?: boolean
+    showItemsPerPageSelect?: boolean
 }
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export function PaginationWithInfo({
     currentPage,
@@ -18,10 +22,12 @@ export function PaginationWithInfo({
     totalItems,
     itemsPerPage,
     onPageChange,
+    onItemsPerPageChange,
     className = "",
     showFirstLast = true,
     maxPageButtons = 5,
     showItemsInfo = true,
+    showItemsPerPageSelect = false,
 }: PaginationWithInfoProps) {
     // حساب معلومات العناصر الحالية
     const calculateItemsInfo = () => {
@@ -39,7 +45,26 @@ export function PaginationWithInfo({
 
     return (
         <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
-            {showItemsInfo && calculateItemsInfo()}
+            <div className="flex items-center gap-4">
+                {showItemsInfo && calculateItemsInfo()}
+                {showItemsPerPageSelect && onItemsPerPageChange && (
+                    <Select
+                        value={itemsPerPage?.toString()}
+                        onValueChange={(value) => onItemsPerPageChange(parseInt(value))}
+                    >
+                        <SelectTrigger className="w-[120px]">
+                            <SelectValue placeholder="عدد العناصر" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="10">10 عناصر</SelectItem>
+                            <SelectItem value="20">20 عنصر</SelectItem>
+                            <SelectItem value="30">30 عنصر</SelectItem>
+                            <SelectItem value="50">50 عنصر</SelectItem>
+                            <SelectItem value="100">100 عنصر</SelectItem>
+                        </SelectContent>
+                    </Select>
+                )}
+            </div>
 
             <Pagination
                 currentPage={currentPage}
