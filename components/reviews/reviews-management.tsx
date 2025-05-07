@@ -517,11 +517,23 @@ export default function ReviewsManagement() {
                           </Avatar>
                           <div>
                             <p className="font-medium">{review.user.full_name}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="text-yellow-500">{review.stars}</div>
+                            <div className="flex items-center justify-between gap-2 mt-1">
                               <span className="text-xs text-muted-foreground">
                                 {new Date(review.created_at).toLocaleDateString("ar-EG")}
                               </span>
+                              <div className="flex items-center gap-2">
+                                <div className="text-yellow-500">{review.stars}</div>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="checkbox"
+                                    color="primary"
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                    checked={review.is_reviewed === 1}
+                                    onChange={() => handleToggleReviewStatus(review, 'is_reviewed')}
+                                  />
+                                  <span className="text-sm text-muted-foreground">{review.is_reviewed ? 'تمت المراجعة' : 'قيد المراجعة'}</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -537,9 +549,9 @@ export default function ReviewsManagement() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>خيارات</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleToggleReviewStatus(review, 'is_reviewed')}>
+                              {/* <DropdownMenuItem onClick={() => handleToggleReviewStatus(review, 'is_reviewed')}>
                                 {!review.is_reviewed ? 'تمت المراجعة' : 'إلغاء المراجعة'}
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
                               <DropdownMenuItem onClick={() => handleToggleReviewStatus(review, 'is_visible')}>
                                 {!review.is_visible ? 'إظهار التقييم' : 'إخفاء التقييم'}
                               </DropdownMenuItem>
