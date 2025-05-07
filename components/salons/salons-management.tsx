@@ -201,6 +201,9 @@ export default function SalonsManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>الصالون</TableHead>
+                    {/* نوع الصالون */}
+                    <TableHead>نوع الصالون</TableHead>
+
                     <TableHead>الموقع</TableHead>
                     <TableHead>التواصل</TableHead>
                     <TableHead>الحالة</TableHead>
@@ -247,6 +250,14 @@ export default function SalonsManagement() {
                             <span className="text-xs text-muted-foreground">{salon.owner?.full_name}</span>
                           </div>
                         </div>
+                      </TableCell>
+                      {/*  */}
+
+                      <TableCell>
+                        {salon.type === "clinic" ? "عيادة" :
+                          salon.type === "salon" ? "صالون" :
+                            salon.type === "home_service" ? "خدمة منزلية" :
+                              salon.type}
                       </TableCell>
                       <TableCell>{salon.city_street_name || salon.address}</TableCell>
                       <TableCell>

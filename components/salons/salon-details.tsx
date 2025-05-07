@@ -226,6 +226,7 @@ const DAYS_IN_ARABIC: Record<string, string> = {
   'saturday': 'السبت'
 };
 interface SalonData {
+  type: string;
   id: number;
   name: string;
   icon_url: string;
@@ -1842,6 +1843,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     موثق
                   </Badge>
                 )}
+                {/* type */}
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  {salonData.type === "clinic" ? "عيادة" :
+                    salonData.type === "salon" ? "صالون" :
+                      salonData.type === "home_service" ? "خدمة منزلية" :
+                        salonData.type}
+                </Badge>
               </div>
               <div className="flex items-center gap-1 mt-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
@@ -2178,6 +2186,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     className="w-full h-full object-contain"
                   />
                 </div>
+                {/* type */}
 
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">عن الصالون</h3>
