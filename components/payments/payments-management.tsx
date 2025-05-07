@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,12 +8,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,18 +34,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowUpDown, Calendar, Check, Filter, MoreHorizontal, Search, X } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DatePicker } from "@/components/ui/date-picker"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Link from "next/link"
-import { fetchData } from "@/lib/apiHelper"
-import { useToast } from "../ui/use-toast"
-import { PaginationWithInfo } from "../ui/pagination-with-info"
-
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ArrowUpDown,
+  Calendar,
+  Check,
+  Filter,
+  MoreHorizontal,
+  Search,
+  X,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import { fetchData } from "@/lib/apiHelper";
+import { useToast } from "../ui/use-toast";
+import { PaginationWithInfo } from "../ui/pagination-with-info";
 
 const refunds = [
   {
@@ -61,7 +87,7 @@ const refunds = [
     status: "قيد المراجعة",
     bookingId: "B-1240",
   },
-]
+];
 interface Transaction {
   id: number;
   user_id: number;
@@ -72,17 +98,16 @@ interface Transaction {
     en: string;
     ar: string;
   };
-  status: 'pending' | 'completed' | 'failed';
-  type: 'deposit' | 'withdrawal' | 'ad' | 'booking' | 'gift_card';
+  status: "pending" | "completed" | "failed";
+  type: "deposit" | "withdrawal" | "ad" | "booking" | "gift_card";
   is_refund: boolean;
   transactionable_id: number;
   transactionable_type: string;
-  direction: 'in' | 'out';
+  direction: "in" | "out";
   created_at: string;
   updated_at: string;
 }
 export default function PaymentsManagement() {
-
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,10 +118,11 @@ export default function PaymentsManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [perPage, setPerPage] = useState(20);
-  const { toast } = useToast()
+  const { toast } = useToast();
   // Add fetch function
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
 
   const fetchTransactions = async () => {
     try {
@@ -105,10 +131,12 @@ export default function PaymentsManagement() {
         page: currentPage.toString(),
         limit: perPage.toString(),
         ...(searchQuery && { search: searchQuery }),
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(typeFilter !== 'all' && { type: typeFilter }),
+        ...(statusFilter !== "all" && { status: statusFilter }),
+        ...(typeFilter !== "all" && { type: typeFilter }),
         ...(dateFilter && {
-          created_at: new Date(dateFilter.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          created_at: new Date(dateFilter.getTime() + 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0],
         }),
       });
 
@@ -139,11 +167,11 @@ export default function PaymentsManagement() {
   // Add helper function for transaction type
   function getTransactionType(type: string) {
     const types = {
-      deposit: 'إيداع',
-      withdrawal: 'سحب',
-      ad: 'إعلان',
-      booking: 'حجز',
-      gift_card: 'بطاقة هدية'
+      deposit: "إيداع",
+      withdrawal: "سحب",
+      ad: "إعلان",
+      booking: "حجز",
+      gift_card: "بطاقة هدية",
     };
     return types[type as keyof typeof types] || type;
   }
@@ -151,19 +179,43 @@ export default function PaymentsManagement() {
   // Update status badge function
   function getStatusBadge(status: string) {
     const badges = {
-      completed: <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">مكتمل</Badge>,
-      pending: <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">معلق</Badge>,
-      failed: <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">فشل</Badge>
+      completed: (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
+          مكتمل
+        </Badge>
+      ),
+      pending: (
+        <Badge
+          variant="outline"
+          className="bg-amber-50 text-amber-700 border-amber-200"
+        >
+          معلق
+        </Badge>
+      ),
+      failed: (
+        <Badge
+          variant="outline"
+          className="bg-red-50 text-red-700 border-red-200"
+        >
+          فشل
+        </Badge>
+      ),
     };
-    return badges[status as keyof typeof badges] || <Badge variant="outline">{status}</Badge>;
+    return (
+      badges[status as keyof typeof badges] || (
+        <Badge variant="outline">{status}</Badge>
+      )
+    );
   }
-
-
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">إدارة المعاملات المالية
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          إدارة المعاملات المالية
         </h1>
         {/* <div className="flex gap-2">
           <Button asChild>
@@ -178,7 +230,9 @@ export default function PaymentsManagement() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المدفوعات</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              إجمالي المدفوعات
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">22,458 د.إ</div>
@@ -188,7 +242,9 @@ export default function PaymentsManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي العمولات</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              إجمالي العمولات
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">2,245 د.إ</div>
@@ -198,7 +254,9 @@ export default function PaymentsManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">عمليات الاسترجاع</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              عمليات الاسترجاع
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">450 د.إ</div>
@@ -208,7 +266,9 @@ export default function PaymentsManagement() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">طلبات استرجاع معلقة</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              طلبات استرجاع معلقة
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">3</div>
@@ -296,44 +356,90 @@ export default function PaymentsManagement() {
                   <TableBody>
                     {isLoading ? (
                       Array.from({ length: 5 }).map((_, index) => (
-                        <TableRow key={`loading-${index}`} className="animate-pulse">
-                          <TableCell><div className="h-4 w-16 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-4 w-24 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-4 w-48 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-4 w-24 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-4 w-20 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-4 w-16 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-4 w-16 bg-muted rounded"></div></TableCell>
-                          <TableCell><div className="h-6 w-24 bg-muted rounded-full"></div></TableCell>
-                          <TableCell><div className="h-8 w-8 bg-muted rounded"></div></TableCell>
+                        <TableRow
+                          key={`loading-${index}`}
+                          className="animate-pulse"
+                        >
+                          <TableCell>
+                            <div className="h-4 w-16 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-48 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-24 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-20 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-16 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-4 w-16 bg-muted rounded"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-6 w-24 bg-muted rounded-full"></div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="h-8 w-8 bg-muted rounded"></div>
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : transactions.length > 0 ? (
                       transactions.map((transaction) => (
                         <TableRow key={transaction.id}>
                           <TableCell>#{transaction.id}</TableCell>
-                          <TableCell>{getTransactionType(transaction.type)}</TableCell>
-                          <TableCell className="max-w-[200px]">{transaction.description.ar}</TableCell>
+                          <TableCell>
+                            {getTransactionType(transaction.type)}
+                          </TableCell>
+                          <TableCell className="max-w-[200px]">
+                            {transaction.description.ar}
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center">
                               <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
                               <span className="text-sm">
-                                {new Date(transaction.created_at).toLocaleDateString("en-US")}
+                                {new Date(
+                                  transaction.created_at
+                                ).toLocaleDateString("en-US")}
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell>{transaction.formatted_amount} {transaction.currency}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={transaction.direction === 'in' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}>
-                              {transaction.direction === 'in' ? 'وارد' : 'صادر'}
+                            {transaction.formatted_amount}{" "}
+                            {transaction.currency}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                transaction.direction === "in"
+                                  ? "bg-green-50 text-green-700"
+                                  : "bg-red-50 text-red-700"
+                              }
+                            >
+                              {transaction.direction === "in" ? "وارد" : "صادر"}
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={transaction.is_refund ? 'bg-amber-50 text-amber-700' : ''}>
-                              {transaction.is_refund ? 'استرجاع' : '-'}
+                            <Badge
+                              variant="outline"
+                              className={
+                                transaction.is_refund
+                                  ? "bg-amber-50 text-amber-700"
+                                  : ""
+                              }
+                            >
+                              {transaction.is_refund ? "استرجاع" : "-"}
                             </Badge>
                           </TableCell>
-                          <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                          <TableCell>
+                            {getStatusBadge(transaction.status)}
+                          </TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -342,10 +448,12 @@ export default function PaymentsManagement() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => {
-                                  setSelectedTransaction(transaction);
-                                  setIsDetailsOpen(true);
-                                }}>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedTransaction(transaction);
+                                    setIsDetailsOpen(true);
+                                  }}
+                                >
                                   عرض التفاصيل
                                 </DropdownMenuItem>
                                 {/* {transaction.type === 'booking' && (
@@ -481,53 +589,80 @@ export default function PaymentsManagement() {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>تفاصيل المعاملة #{selectedTransaction?.id}</DialogTitle>
+            <DialogTitle>
+              تفاصيل المعاملة #{selectedTransaction?.id}
+            </DialogTitle>
             <DialogDescription>عرض تفاصيل المعاملة المالية</DialogDescription>
           </DialogHeader>
           {selectedTransaction && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">رقم العملية</Label>
-                <div className="col-span-2 font-medium">#{selectedTransaction.id}</div>
+                <div className="col-span-2 font-medium">
+                  #{selectedTransaction.id}
+                </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">نوع المعاملة</Label>
-                <div className="col-span-2">{getTransactionType(selectedTransaction.type)}</div>
+                <div className="col-span-2">
+                  {getTransactionType(selectedTransaction.type)}
+                </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">الوصف</Label>
-                <div className="col-span-2">{selectedTransaction.description.ar}</div>
+                <div className="col-span-2">
+                  {selectedTransaction.description.ar}
+                </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">المبلغ</Label>
                 <div className="col-span-2 font-medium">
-                  {selectedTransaction.formatted_amount} {selectedTransaction.currency}
+                  {selectedTransaction.formatted_amount}{" "}
+                  {selectedTransaction.currency}
                 </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">الاتجاه</Label>
                 <div className="col-span-2">
-                  <Badge variant="outline" className={selectedTransaction.direction === 'in' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}>
-                    {selectedTransaction.direction === 'in' ? 'وارد' : 'صادر'}
+                  <Badge
+                    variant="outline"
+                    className={
+                      selectedTransaction.direction === "in"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-red-50 text-red-700"
+                    }
+                  >
+                    {selectedTransaction.direction === "in" ? "وارد" : "صادر"}
                   </Badge>
                 </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">الحالة</Label>
-                <div className="col-span-2">{getStatusBadge(selectedTransaction.status)}</div>
+                <div className="col-span-2">
+                  {getStatusBadge(selectedTransaction.status)}
+                </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">استرجاع</Label>
                 <div className="col-span-2">
-                  <Badge variant="outline" className={selectedTransaction.is_refund ? 'bg-amber-50 text-amber-700' : ''}>
-                    {selectedTransaction.is_refund ? 'استرجاع' : '-'}
+                  <Badge
+                    variant="outline"
+                    className={
+                      selectedTransaction.is_refund
+                        ? "bg-amber-50 text-amber-700"
+                        : ""
+                    }
+                  >
+                    {selectedTransaction.is_refund ? "استرجاع" : "-"}
                   </Badge>
                 </div>
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-right">تاريخ المعاملة</Label>
                 <div className="col-span-2">
-                  {new Date(selectedTransaction.created_at).toLocaleDateString("en-US")}
+                  {new Date(selectedTransaction.created_at).toLocaleDateString(
+                    "en-US"
+                  )}
                 </div>
               </div>
             </div>
@@ -540,6 +675,5 @@ export default function PaymentsManagement() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
-

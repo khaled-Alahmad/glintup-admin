@@ -72,7 +72,6 @@ interface BookingService {
   booking_id: number;
   service_id: number;
   service: Service;
-
 }
 
 interface User {
@@ -119,8 +118,12 @@ export default function AppointmentsManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
-  const [selectedDateFrom, setSelectedDateFrom] = useState<Date | undefined>(undefined);
-  const [selectedDateTo, setSelectedDateTo] = useState<Date | undefined>(undefined);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Date | undefined>(
+    undefined
+  );
+  const [selectedDateTo, setSelectedDateTo] = useState<Date | undefined>(
+    undefined
+  );
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -128,7 +131,14 @@ export default function AppointmentsManagement() {
 
   useEffect(() => {
     fetchBookings();
-  }, [page, statusFilter, dateFilter, selectedDateFrom,selectedDateTo]); // Add dependencies
+  }, [
+    page,
+    perPage,
+    statusFilter,
+    dateFilter,
+    selectedDateFrom,
+    selectedDateTo,
+  ]); // Add dependencies
 
   const fetchBookings = async () => {
     try {
@@ -137,12 +147,17 @@ export default function AppointmentsManagement() {
         page: page.toString(),
         limit: perPage.toString(),
         ...(statusFilter !== "all" && { status: statusFilter }),
-        ...(selectedDateFrom && selectedDateTo && {
-          date_from: new Date(selectedDateFrom.getTime() + 86400000).toISOString().split('T')[0],
-          date_to: new Date(selectedDateTo.getTime() + 86400000).toISOString().split('T')[0]
-        }),
+        ...(selectedDateFrom &&
+          selectedDateTo && {
+            date_from: new Date(selectedDateFrom.getTime() + 86400000)
+              .toISOString()
+              .split("T")[0],
+            date_to: new Date(selectedDateTo.getTime() + 86400000)
+              .toISOString()
+              .split("T")[0],
+          }),
         ...(searchQuery && { search: searchQuery }),
-      })
+      });
 
       const response = await fetchData(`admin/bookings?${queryParams}`);
       if (response.success) {
@@ -168,7 +183,7 @@ export default function AppointmentsManagement() {
   const handleStatusChange = async (bookingId: number, newStatus: string) => {
     try {
       const response = await updateData(`admin/bookings/${bookingId}`, {
-        status: newStatus
+        status: newStatus,
       });
       console.log(response);
 
@@ -209,25 +224,37 @@ export default function AppointmentsManagement() {
     switch (status) {
       case "confirmed":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             مؤكد
           </Badge>
         );
       case "pending":
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
             معلق
           </Badge>
         );
       case "cancelled":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
             ملغي
           </Badge>
         );
       case "completed":
         return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Badge
+            variant="outline"
+            className="bg-blue-50 text-blue-700 border-blue-200"
+          >
             مكتمل
           </Badge>
         );
@@ -235,7 +262,6 @@ export default function AppointmentsManagement() {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
-
 
   return (
     <div className="flex flex-col gap-6">
@@ -250,10 +276,14 @@ export default function AppointmentsManagement() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              إجمالي الحجوزات
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookingInfo?.all_count || 0}</div>
+            <div className="text-2xl font-bold">
+              {bookingInfo?.all_count || 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">في النظام</p>
           </CardContent>
         </Card>
@@ -263,8 +293,12 @@ export default function AppointmentsManagement() {
             <CardTitle className="text-sm font-medium">حجوزات معلقة</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookingInfo?.pending_count || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">بانتظار التأكيد</p>
+            <div className="text-2xl font-bold">
+              {bookingInfo?.pending_count || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              بانتظار التأكيد
+            </p>
           </CardContent>
         </Card>
 
@@ -273,7 +307,9 @@ export default function AppointmentsManagement() {
             <CardTitle className="text-sm font-medium">حجوزات مؤكدة</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookingInfo?.confirmed_count || 0}</div>
+            <div className="text-2xl font-bold">
+              {bookingInfo?.confirmed_count || 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">تم تأكيدها</p>
           </CardContent>
         </Card>
@@ -283,7 +319,9 @@ export default function AppointmentsManagement() {
             <CardTitle className="text-sm font-medium">حجوزات مكتملة</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookingInfo?.completed_count || 0}</div>
+            <div className="text-2xl font-bold">
+              {bookingInfo?.completed_count || 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">تم إكمالها</p>
           </CardContent>
         </Card>
@@ -293,7 +331,9 @@ export default function AppointmentsManagement() {
             <CardTitle className="text-sm font-medium">حجوزات ملغية</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookingInfo?.cancelled_count || 0}</div>
+            <div className="text-2xl font-bold">
+              {bookingInfo?.cancelled_count || 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">تم إلغاؤها</p>
           </CardContent>
         </Card>
@@ -321,7 +361,9 @@ export default function AppointmentsManagement() {
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     variant="outline"
-                    onClick={() => generateMonthlyBookingReport(bookings, selectedDateFrom)}
+                    onClick={() =>
+                      generateMonthlyBookingReport(bookings, selectedDateFrom)
+                    }
                     className="flex items-center gap-1"
                   >
                     <FileText className="h-4 w-4" />
@@ -334,7 +376,7 @@ export default function AppointmentsManagement() {
                       setPage(1);
                     }}
                     placeholder="بداية تاريخ الحجز"
-                  // mode="single"
+                    // mode="single"
                   />
                   <DatePicker
                     selected={selectedDateTo}
@@ -344,7 +386,7 @@ export default function AppointmentsManagement() {
                     }}
                     placeholder="نهاية تاريخ الحجز"
                     minDate={selectedDateFrom}
-                  // mode="single"
+                    // mode="single"
                   />
                   <Select
                     value={statusFilter}
@@ -431,10 +473,14 @@ export default function AppointmentsManagement() {
                                 alt={booking.salon.merchant_commercial_name}
                               />
                               <AvatarFallback>
-                                {booking.salon.merchant_commercial_name.charAt(0)}
+                                {booking.salon.merchant_commercial_name.charAt(
+                                  0
+                                )}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{booking.salon.merchant_commercial_name}</span>
+                            <span>
+                              {booking.salon.merchant_commercial_name}
+                            </span>
                           </div>
                         </TableCell>
 
@@ -448,20 +494,32 @@ export default function AppointmentsManagement() {
                                 {booking.booking_services.length > 1 && (
                                   <Popover>
                                     <PopoverTrigger className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                                      +{booking.booking_services.length - 1} more
+                                      +{booking.booking_services.length - 1}{" "}
+                                      more
                                     </PopoverTrigger>
                                     <PopoverContent className="w-60">
                                       <div className="flex flex-col gap-2">
-                                        {booking.booking_services.slice(1).map((service) => (
-                                          <div key={service.id} className="flex flex-col">
-                                            <span className="text-sm font-medium">
-                                              {service.service.name.ar}
-                                            </span>
-                                            <span className="text-xs text-muted-foreground">
-                                              {service.service.final_price} {service.service.currency} • {service.service.duration_minutes} minutes
-                                            </span>
-                                          </div>
-                                        ))}
+                                        {booking.booking_services
+                                          .slice(1)
+                                          .map((service) => (
+                                            <div
+                                              key={service.id}
+                                              className="flex flex-col"
+                                            >
+                                              <span className="text-sm font-medium">
+                                                {service.service.name.ar}
+                                              </span>
+                                              <span className="text-xs text-muted-foreground">
+                                                {service.service.final_price}{" "}
+                                                {service.service.currency} •{" "}
+                                                {
+                                                  service.service
+                                                    .duration_minutes
+                                                }{" "}
+                                                minutes
+                                              </span>
+                                            </div>
+                                          ))}
                                       </div>
                                     </PopoverContent>
                                   </Popover>
@@ -475,7 +533,9 @@ export default function AppointmentsManagement() {
                             <div className="flex items-center">
                               <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
                               <span className="text-sm">
-                                {new Date(booking.date).toLocaleDateString("en-US")}
+                                {new Date(booking.date).toLocaleDateString(
+                                  "en-US"
+                                )}
                               </span>
                             </div>
                             <div className="flex items-center">
@@ -513,21 +573,29 @@ export default function AppointmentsManagement() {
                               <DropdownMenuLabel>خيارات</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem asChild>
-                                <Link href={`/appointments/${booking.id}`} className="cursor-pointer w-full">
+                                <Link
+                                  href={`/appointments/${booking.id}`}
+                                  className="cursor-pointer w-full"
+                                >
                                   عرض التفاصيل
                                 </Link>
                               </DropdownMenuItem>
                               {booking.status === "pending" && (
                                 <DropdownMenuItem
-                                  onClick={() => handleStatusChange(booking.id, "confirmed")}
+                                  onClick={() =>
+                                    handleStatusChange(booking.id, "confirmed")
+                                  }
                                   className="text-green-600"
                                 >
                                   تأكيد الحجز
                                 </DropdownMenuItem>
                               )}
-                              {(booking.status === "pending" || booking.status === "confirmed") && (
+                              {(booking.status === "pending" ||
+                                booking.status === "confirmed") && (
                                 <DropdownMenuItem
-                                  onClick={() => handleStatusChange(booking.id, "cancelled")}
+                                  onClick={() =>
+                                    handleStatusChange(booking.id, "cancelled")
+                                  }
                                   className="text-red-600"
                                 >
                                   إلغاء الحجز
