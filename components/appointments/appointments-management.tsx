@@ -442,7 +442,7 @@ export default function AppointmentsManagement() {
                           <div className="flex flex-col gap-1.5">
                             {booking.booking_services.length > 0 && (
                               <>
-                                <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary inline-flex">
+                                <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary flex justify-center">
                                   {booking.booking_services[0].service.name.ar}
                                 </span>
                                 {booking.booking_services.length > 1 && (

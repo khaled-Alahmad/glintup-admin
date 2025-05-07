@@ -41,6 +41,7 @@ import { Plus, Search, Trash2, Copy, Eye } from "lucide-react";
 import { fetchData } from "@/lib/apiHelper";
 import { useToast } from "../ui/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 interface GiftCard {
   id: number;
   code: string;
@@ -56,6 +57,7 @@ interface GiftCard {
   services: number[];
   services_data: {
     id: number;
+    currency: string;
     name: {
       en: string;
       ar: string;
@@ -418,7 +420,7 @@ export default function GiftCardsManagement() {
                   <TableHead>نوع البطاقة</TableHead>
 
                   <TableHead>تفاصيل</TableHead>
-                  <TableHead>الحالة</TableHead>
+                  <TableHead>تاريخ الاستلام</TableHead>
                   <TableHead>تاريخ الانشاء</TableHead>
                   <TableHead>المرسل</TableHead>
                   <TableHead>المستلم</TableHead>
@@ -477,7 +479,45 @@ export default function GiftCardsManagement() {
                       </TableCell>
                       <TableCell>{card.type == "services" ? "خدمات" : card.type == "amount" ? "مبلغ مالي " : ""} </TableCell>
 
-                      <TableCell>{card.amount} د.إ</TableCell>
+                      <TableCell>
+                        {card.type == "services" ? <>
+                          <div className="flex flex-col gap-1.5">
+                            {card.services_data.length > 0 && (
+                              <>
+                                <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary flex justify-center">
+                                  {card.services_data[0].name.ar}
+                                </span>
+                                {card.services_data.length > 1 && (
+                                  <Popover>
+                                    <PopoverTrigger className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                                      +{card.services_data.length - 1} more
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-60">
+                                      <div className="flex flex-col gap-2">
+                                        {card.services_data.slice(1).map((service) => (
+                                          <div key={service.id} className="flex flex-col">
+                                            <span className="text-sm font-medium">
+                                              {service.name.ar}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                              {service.final_price} {service.currency} | {service.duration_minutes} minutes
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                )}
+                              </>
+                            )}
+                          </div>
+
+                        </> : <>
+
+                          {card.amount} د.إ
+                        </>}
+
+                      </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(card.received_at)}>
                           {getStatusName(card.received_at)}
@@ -571,12 +611,7 @@ export default function GiftCardsManagement() {
                     </Button> */}
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    تفاصيل
-                  </h3>
-                  <p className="font-medium">{currentGiftCard.amount} د.إ</p>
-                </div>
+
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">
                     الحالة
@@ -606,7 +641,42 @@ export default function GiftCardsManagement() {
                   </div>
                 )} */}
               </div>
-
+              {currentGiftCard.type != "services" ? <>
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    تفاصيل
+                  </h3>
+                  <p className="font-medium">{currentGiftCard.amount} د.إ</p>
+                </div>
+              </> :
+                <>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                      تفاصيل الخدمات
+                    </h3>
+                    <div className="border rounded-md overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-muted/50">
+                          <tr>
+                            <th className="py-2 px-3 text-right text-sm font-medium">اسم الخدمة</th>
+                            <th className="py-2 px-3 text-right text-sm font-medium">السعر</th>
+                            <th className="py-2 px-3 text-right text-sm font-medium">المدة</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentGiftCard.services_data.map((service) => (
+                            <tr key={service.id} className="border-t">
+                              <td className="py-2 px-3 text-sm">{service.name.ar}</td>
+                              <td className="py-2 px-3 text-sm">{service.final_price} {service.currency}</td>
+                              <td className="py-2 px-3 text-sm">{service.duration_minutes} دقيقة</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              }
               <div className="border-t pt-4 mt-2">
                 <h3 className="font-medium mb-2">معلومات المستلم والمرسل</h3>
                 <div className="grid grid-cols-2 gap-4">
