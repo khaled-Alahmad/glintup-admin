@@ -10,7 +10,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle, CalendarIcon, Eye, Pencil, Copy } from 'lucide-react';
+import {
+  MoreVertical,
+  MessageSquare,
+  Flag,
+  CheckCheck,
+  CheckCircle,
+  CalendarIcon,
+  Eye,
+  Pencil,
+  Copy,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +85,7 @@ import { addData, deleteData, fetchData, updateData } from "@/lib/apiHelper";
 import { useToast } from "../ui/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
 import { Checkbox } from "../ui/checkbox";
+import Image from "next/image";
 interface SalonPermission {
   id: number;
   name: {
@@ -166,7 +177,6 @@ interface GiftCard {
   message: string;
   is_used: boolean;
   sender: {
-
     id: number;
     full_phone: string;
     full_name: string;
@@ -186,8 +196,6 @@ interface BookingService {
   booking_id: number;
   service_id: number;
   service: Service;
-
-
 }
 
 interface User {
@@ -235,32 +243,37 @@ interface Payment {
   updated_at: string;
 }
 const DAYS_IN_ARABIC: Record<string, string> = {
-  'sunday': 'الأحد',
-  'monday': 'الإثنين',
-  'tuesday': 'الثلاثاء',
-  'wednesday': 'الأربعاء',
-  'thursday': 'الخميس',
-  'friday': 'الجمعة',
-  'saturday': 'السبت'
+  sunday: "الأحد",
+  monday: "الإثنين",
+  tuesday: "الثلاثاء",
+  wednesday: "الأربعاء",
+  thursday: "الخميس",
+  friday: "الجمعة",
+  saturday: "السبت",
 };
+interface Image {
+  id: number;
+  url: string;
+}
 interface SalonData {
   type: string;
   id: number;
+  images: Image[];
   name: string;
   icon_url: string;
   description: string;
   is_active: boolean;
-  merchant_legal_name: "",
-  merchant_commercial_name: "",
-  address: "",
-  city_street_name: "",
-  contact_name: "",
-  contact_number: "",
-  contact_email: "",
-  business_contact_name: "",
-  business_contact_number: "",
-  business_contact_email: "",
-  bio: "",
+  merchant_legal_name: "";
+  merchant_commercial_name: "";
+  address: "";
+  city_street_name: "";
+  contact_name: "";
+  contact_number: "";
+  contact_email: "";
+  business_contact_name: "";
+  business_contact_number: "";
+  business_contact_email: "";
+  bio: "";
   is_approved: boolean;
   average_rating: number;
   total_reviews: number;
@@ -291,7 +304,6 @@ interface SalonData {
   }>;
 }
 
-
 interface Service {
   id: number;
   name: {
@@ -308,7 +320,7 @@ interface Service {
   final_price: number;
   currency: string;
   icon_url: string;
-  gender: 'male' | 'female' | 'both';
+  gender: "male" | "female" | "both";
   is_active: number;
   salon_id: number;
 }
@@ -341,8 +353,8 @@ interface Review {
   salon_report: string | null;
   reason_for_report: string | null;
   salon_reported_at: string | null;
-  created_at: Date,
-  updated_at: Date,
+  created_at: Date;
+  updated_at: Date;
   user: {
     id: number;
     first_name: string;
@@ -389,8 +401,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [customersTotalPages, setCustomersTotalPages] = useState(1);
   const [customersPerPage, setCustomersPerPage] = useState(10);
   const [customersTotalItems, setCustomersTotalItems] = useState(0);
-  const [editingCustomer, setEditingCustomer] = useState<SalonCustomer | null>(null);
-  const [isEditCustomerDialogOpen, setIsEditCustomerDialogOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<SalonCustomer | null>(
+    null
+  );
+  const [isEditCustomerDialogOpen, setIsEditCustomerDialogOpen] =
+    useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -426,7 +441,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [isLoadingPayments, setIsLoadingPayments] = useState(false);
   const fetchStaff = async () => {
     try {
-      const response = await fetchData(`admin/salon-staff?salon_id=${salonId}&page=${staffCurrentPage}`);
+      const response = await fetchData(
+        `admin/salon-staff?salon_id=${salonId}&page=${staffCurrentPage}`
+      );
       if (response.success) {
         setStaff(response.data);
         setStaffTotalPages(response.meta.last_page);
@@ -435,7 +452,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setStaffTotalItems(response.meta.total);
       }
     } catch (error) {
-      console.error('Error fetching staff:', error);
+      console.error("Error fetching staff:", error);
       toast({
         title: "خطأ",
         description: "فشل في جلب الموظفين",
@@ -446,19 +463,21 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
   const fetchPermissions = async () => {
     try {
-      const response = await fetchData('admin/salon-permissions');
+      const response = await fetchData("admin/salon-permissions");
       if (response.success) {
         setPermissions(response.data);
       }
     } catch (error) {
-      console.error('Error fetching permissions:', error);
+      console.error("Error fetching permissions:", error);
     }
   };
 
   // Add useEffect for staff
   const fetchCustomers = async () => {
     try {
-      const response = await fetchData(`admin/salon-customers?salon_id=${salonId}&page=${customersCurrentPage}`);
+      const response = await fetchData(
+        `admin/salon-customers?salon_id=${salonId}&page=${customersCurrentPage}`
+      );
       if (response.success) {
         setCustomers(response.data);
         setCustomersTotalPages(response.meta.last_page);
@@ -467,7 +486,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setCustomersTotalItems(response.meta.total);
       }
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      console.error("Error fetching customers:", error);
       toast({
         title: "خطأ",
         description: "فشل في جلب بيانات العملاء",
@@ -477,17 +496,23 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   };
 
   useEffect(() => {
-    if (activeTab === 'staff') {
+    if (activeTab === "staff") {
       fetchStaff();
       fetchPermissions();
-    } else if (activeTab === 'customers') {
+    } else if (activeTab === "customers") {
       fetchCustomers();
     }
   }, [activeTab, staffCurrentPage, customersCurrentPage, salonId]);
 
-  const handleCustomerUpdate = async (customerId: number, data: { is_banned?: boolean; notes?: string }) => {
+  const handleCustomerUpdate = async (
+    customerId: number,
+    data: { is_banned?: boolean; notes?: string }
+  ) => {
     try {
-      const response = await updateData(`admin/salon-customers/${customerId}`, data);
+      const response = await updateData(
+        `admin/salon-customers/${customerId}`,
+        data
+      );
       if (response.success) {
         toast({
           title: "تم",
@@ -497,7 +522,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setIsEditCustomerDialogOpen(false);
       }
     } catch (error) {
-      console.error('Error updating customer:', error);
+      console.error("Error updating customer:", error);
       toast({
         title: "خطأ",
         description: "فشل في تحديث بيانات العميل",
@@ -531,23 +556,41 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarFallback>{customer.user.full_name[0]}</AvatarFallback>
+                          <AvatarFallback>
+                            {customer.user.full_name[0]}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{customer.user.full_name}</p>
+                          <p className="font-medium">
+                            {customer.user.full_name}
+                          </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell style={{ unicodeBidi: "plaintext" }}>{customer.user.full_phone}</TableCell>
+                    <TableCell style={{ unicodeBidi: "plaintext" }}>
+                      {customer.user.full_phone}
+                    </TableCell>
                     <TableCell>
-                      <span className={customer.is_banned ? 'px-2 py-1 rounded-md text-sm font-medium  bg-red-50 text-red-700' : 'px-2 py-1 rounded-md text-sm font-medium  bg-green-50 text-green-700'}>
-                        {customer.is_banned ? 'محظور' : 'نشط'}
+                      <span
+                        className={
+                          customer.is_banned
+                            ? "px-2 py-1 rounded-md text-sm font-medium  bg-red-50 text-red-700"
+                            : "px-2 py-1 rounded-md text-sm font-medium  bg-green-50 text-green-700"
+                        }
+                      >
+                        {customer.is_banned ? "محظور" : "نشط"}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <p className="max-w-[200px] truncate">{customer.notes || '-'}</p>
+                      <p className="max-w-[200px] truncate">
+                        {customer.notes || "-"}
+                      </p>
                     </TableCell>
-                    <TableCell>{new Date(customer.created_at).toLocaleDateString('ar-EG')}</TableCell>
+                    <TableCell>
+                      {new Date(customer.created_at).toLocaleDateString(
+                        "ar-EG"
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
@@ -578,7 +621,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           </CardFooter>
         </Card>
 
-        <Dialog open={isEditCustomerDialogOpen} onOpenChange={setIsEditCustomerDialogOpen}>
+        <Dialog
+          open={isEditCustomerDialogOpen}
+          onOpenChange={setIsEditCustomerDialogOpen}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>تعديل بيانات العميل</DialogTitle>
@@ -587,23 +633,32 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               <div className="flex items-center gap-4">
                 <Label>حالة الحظر</Label>
                 <Button
-                  variant={editingCustomer?.is_banned ? 'default' : 'destructive'}
+                  variant={
+                    editingCustomer?.is_banned ? "default" : "destructive"
+                  }
                   onClick={() => {
                     if (editingCustomer) {
-                      handleCustomerUpdate(editingCustomer.id, { is_banned: !editingCustomer.is_banned });
+                      handleCustomerUpdate(editingCustomer.id, {
+                        is_banned: !editingCustomer.is_banned,
+                      });
                     }
                   }}
                 >
-                  {editingCustomer?.is_banned ? 'إلغاء الحظر' : 'حظر العميل'}
+                  {editingCustomer?.is_banned ? "إلغاء الحظر" : "حظر العميل"}
                 </Button>
               </div>
               <div className="grid gap-2">
                 <Label>الملاحظات</Label>
                 <Textarea
-                  defaultValue={editingCustomer?.notes || ''}
+                  defaultValue={editingCustomer?.notes || ""}
                   onBlur={(e) => {
-                    if (editingCustomer && e.target.value !== editingCustomer.notes) {
-                      handleCustomerUpdate(editingCustomer.id, { notes: e.target.value });
+                    if (
+                      editingCustomer &&
+                      e.target.value !== editingCustomer.notes
+                    ) {
+                      handleCustomerUpdate(editingCustomer.id, {
+                        notes: e.target.value,
+                      });
                     }
                   }}
                 />
@@ -621,21 +676,19 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       const formData = new FormData(e.currentTarget);
 
       try {
-        const response = await addData('admin/salon-staff',
-          {
-            salon_id: salonId,
-            first_name: formData.get('first_name'),
-            last_name: formData.get('last_name'),
-            phone_code: formData.get('phone_code'),
-            phone: formData.get('phone'),
-            gender: formData.get('gender'),
-            birth_date: formData.get('birth_date'),
-            password: formData.get('password'),
-            position: formData.get('position'),
-            is_active: formData.get('is_active') === '1',
-            permissions: Array.from(formData.getAll('permissions')).map(Number),
-          }
-        );
+        const response = await addData("admin/salon-staff", {
+          salon_id: salonId,
+          first_name: formData.get("first_name"),
+          last_name: formData.get("last_name"),
+          phone_code: formData.get("phone_code"),
+          phone: formData.get("phone"),
+          gender: formData.get("gender"),
+          birth_date: formData.get("birth_date"),
+          password: formData.get("password"),
+          position: formData.get("position"),
+          is_active: formData.get("is_active") === "1",
+          permissions: Array.from(formData.getAll("permissions")).map(Number),
+        });
 
         if (response.success) {
           toast({
@@ -646,7 +699,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           fetchStaff();
         }
       } catch (error) {
-        console.error('Error adding staff:', error);
+        console.error("Error adding staff:", error);
         toast({
           title: "خطأ",
           description: "فشل في إضافة الموظف",
@@ -655,8 +708,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       }
     };
 
-
-
     const handleEditStaff = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!editingStaff) return;
@@ -664,18 +715,21 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       const formData = new FormData(e.currentTarget);
 
       try {
-        const response = await updateData(`admin/salon-staff/${editingStaff.id}`, {
-          salon_id: salonId,
-          first_name: formData.get('first_name'),
-          last_name: formData.get('last_name'),
-          phone_code: formData.get('phone_code'),
-          phone: formData.get('phone'),
-          gender: formData.get('gender'),
-          birth_date: formData.get('birth_date'),
-          position: formData.get('position'),
-          is_active: formData.get('is_active') === '1',
-          permissions: Array.from(formData.getAll('permissions')).map(Number),
-        });
+        const response = await updateData(
+          `admin/salon-staff/${editingStaff.id}`,
+          {
+            salon_id: salonId,
+            first_name: formData.get("first_name"),
+            last_name: formData.get("last_name"),
+            phone_code: formData.get("phone_code"),
+            phone: formData.get("phone"),
+            gender: formData.get("gender"),
+            birth_date: formData.get("birth_date"),
+            position: formData.get("position"),
+            is_active: formData.get("is_active") === "1",
+            permissions: Array.from(formData.getAll("permissions")).map(Number),
+          }
+        );
 
         if (response.success) {
           toast({
@@ -686,7 +740,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           fetchStaff();
         }
       } catch (error) {
-        console.error('Error updating staff:', error);
+        console.error("Error updating staff:", error);
         toast({
           title: "خطأ",
           description: "فشل في تحديث بيانات الموظف",
@@ -699,7 +753,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       if (!editingStaff) return;
 
       try {
-        const response = await deleteData(`admin/salon-staff/${editingStaff.id}`);
+        const response = await deleteData(
+          `admin/salon-staff/${editingStaff.id}`
+        );
 
         if (response.success) {
           toast({
@@ -710,7 +766,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           fetchStaff();
         }
       } catch (error) {
-        console.error('Error deleting staff:', error);
+        console.error("Error deleting staff:", error);
         toast({
           title: "خطأ",
           description: "فشل في حذف الموظف",
@@ -748,16 +804,22 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarFallback>{member.user.first_name[0]}</AvatarFallback>
+                          <AvatarFallback>
+                            {member.user.first_name[0]}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-medium">{member.user.full_name}</p>
-                          <p className="text-sm text-muted-foreground">{member.user.gender === 'male' ? 'ذكر' : 'أنثى'}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {member.user.gender === "male" ? "ذكر" : "أنثى"}
+                          </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>{member.position}</TableCell>
-                    <TableCell style={{ unicodeBidi: "plaintext" }}>{member.user.full_phone}</TableCell>
+                    <TableCell style={{ unicodeBidi: "plaintext" }}>
+                      {member.user.full_phone}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {member.user.salon_permissions.map((p) => (
@@ -768,8 +830,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={member.is_active ? 'success' : 'secondary'}>
-                        {member.is_active ? 'نشط' : 'غير نشط'}
+                      <Badge
+                        variant={member.is_active ? "success" : "secondary"}
+                      >
+                        {member.is_active ? "نشط" : "غير نشط"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -813,7 +877,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         </Card>
 
         {/* Add Staff Dialog */}
-        <Dialog open={isAddStaffDialogOpen} onOpenChange={setIsAddStaffDialogOpen} >
+        <Dialog
+          open={isAddStaffDialogOpen}
+          onOpenChange={setIsAddStaffDialogOpen}
+        >
           <DialogPortal>
             {/* <DialogOverlay /> */}
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -836,7 +903,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="phone_code">رمز الدولة</Label>
-                      <Input id="phone_code" name="phone_code" defaultValue="+961" required />
+                      <Input
+                        id="phone_code"
+                        name="phone_code"
+                        defaultValue="+961"
+                        required
+                      />
                     </div>
                     <div>
                       <Label htmlFor="phone">رقم الهاتف</Label>
@@ -859,13 +931,23 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </div>
                     <div>
                       <Label htmlFor="birth_date">تاريخ الميلاد</Label>
-                      <Input id="birth_date" name="birth_date" type="date" required />
+                      <Input
+                        id="birth_date"
+                        name="birth_date"
+                        type="date"
+                        required
+                      />
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="password">كلمة المرور</Label>
-                    <Input id="password" name="password" type="password" required />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                    />
                   </div>
 
                   <div>
@@ -877,7 +959,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <Label htmlFor="permissions">الصلاحيات</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {permissions.map((permission) => (
-                        <label key={permission.id} className="flex items-center gap-2">
+                        <label
+                          key={permission.id}
+                          className="flex items-center gap-2"
+                        >
                           <Checkbox name="permissions" value={permission.id} />
                           <span>{permission.name.ar}</span>
                         </label>
@@ -899,19 +984,25 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsAddStaffDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddStaffDialogOpen(false)}
+                  >
                     إلغاء
                   </Button>
                   <Button type="submit">إضافة</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
-
           </DialogPortal>
         </Dialog>
 
         {/* Edit Staff Dialog */}
-        <Dialog open={isEditStaffDialogOpen} onOpenChange={setIsEditStaffDialogOpen}>
+        <Dialog
+          open={isEditStaffDialogOpen}
+          onOpenChange={setIsEditStaffDialogOpen}
+        >
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>تعديل بيانات الموظف</DialogTitle>
@@ -964,7 +1055,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="gender">الجنس</Label>
-                      <Select name="gender" defaultValue={editingStaff.user.gender}>
+                      <Select
+                        name="gender"
+                        defaultValue={editingStaff.user.gender}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر الجنس" />
                         </SelectTrigger>
@@ -1000,12 +1094,15 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <Label htmlFor="permissions">الصلاحيات</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {permissions.map((permission) => (
-                        <label key={permission.id} className="flex items-center gap-2">
+                        <label
+                          key={permission.id}
+                          className="flex items-center gap-2"
+                        >
                           <Checkbox
                             name="permissions"
                             value={permission.id}
                             defaultChecked={editingStaff.user.salon_permissions.some(
-                              p => p.permission.id === permission.id
+                              (p) => p.permission.id === permission.id
                             )}
                           />
                           <span>{permission.name.ar}</span>
@@ -1016,7 +1113,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
                   <div>
                     <Label htmlFor="is_active">الحالة</Label>
-                    <Select name="is_active" defaultValue={editingStaff.is_active ? "1" : "0"}>
+                    <Select
+                      name="is_active"
+                      defaultValue={editingStaff.is_active ? "1" : "0"}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="اختر الحالة" />
                       </SelectTrigger>
@@ -1028,7 +1128,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsEditStaffDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditStaffDialogOpen(false)}
+                  >
                     إلغاء
                   </Button>
                   <Button type="submit">حفظ التغييرات</Button>
@@ -1039,16 +1143,23 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         </Dialog>
 
         {/* Delete Staff Dialog */}
-        <Dialog open={isDeleteStaffDialogOpen} onOpenChange={setIsDeleteStaffDialogOpen}>
+        <Dialog
+          open={isDeleteStaffDialogOpen}
+          onOpenChange={setIsDeleteStaffDialogOpen}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>حذف موظف</DialogTitle>
               <DialogDescription>
-                هل أنت متأكد من رغبتك في حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.
+                هل أنت متأكد من رغبتك في حذف هذا الموظف؟ لا يمكن التراجع عن هذا
+                الإجراء.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteStaffDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteStaffDialogOpen(false)}
+              >
                 إلغاء
               </Button>
               <Button variant="destructive" onClick={handleDeleteStaff}>
@@ -1057,8 +1168,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
-
       </div>
     );
   };
@@ -1066,7 +1175,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const fetchPayments = async () => {
     try {
       setIsLoadingPayments(true);
-      const response = await fetchData(`admin/salon-payments?salon_id=${salonId}&page=${paymentsCurrentPage}`);
+      const response = await fetchData(
+        `admin/salon-payments?salon_id=${salonId}&page=${paymentsCurrentPage}`
+      );
       if (response.success) {
         setPayments(response.data);
         setPaymentsTotalPages(response.meta.last_page);
@@ -1074,10 +1185,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setPaymentsPerPage(response.meta.per_page);
         setPaymentsTotalItems(response.meta.total);
         setIsLoadingPayments(false);
-
       }
     } catch (error) {
-      console.error('Error fetching payments:', error);
+      console.error("Error fetching payments:", error);
       toast({
         title: "خطأ",
         description: "فشل في جلب المدفوعات",
@@ -1088,7 +1198,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
   // Add useEffect for payments
   useEffect(() => {
-    if (activeTab === 'payments') {
+    if (activeTab === "payments") {
       fetchPayments();
     }
   }, [activeTab, paymentsCurrentPage, salonId]);
@@ -1123,86 +1233,114 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <TableCell colSpan={7} className="text-center py-8">
                     <div className="flex flex-col items-center gap-2">
                       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                      <p className="text-sm text-muted-foreground">جاري تحميل المدفوعات...</p>
+                      <p className="text-sm text-muted-foreground">
+                        جاري تحميل المدفوعات...
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : payments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    <p className="text-sm text-muted-foreground">لا توجد مدفوعات</p>
+                    <p className="text-sm text-muted-foreground">
+                      لا توجد مدفوعات
+                    </p>
                   </TableCell>
                 </TableRow>
-              ) : payments.map((payment) => (
-                <TableRow key={payment.id}>
-                  {/* <TableCell>#{payment.id}</TableCell> */}
-                  <TableCell>{payment.code}</TableCell>
+              ) : (
+                payments.map((payment) => (
+                  <TableRow key={payment.id}>
+                    {/* <TableCell>#{payment.id}</TableCell> */}
+                    <TableCell>{payment.code}</TableCell>
 
-                  <TableCell className="text-nowrap">{payment.amount} {payment.currency}</TableCell>
-                  <TableCell>
-                    {payment.method === 'wallet' ? 'المحفظة' :
-                      payment.method === 'stripe' ? 'بطاقة ائتمان' :
-                        payment.method === 'cash' ? 'نقداً' :
-                          payment.method}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-md text-sm font-medium ${payment.status === 'confirm' ? 'bg-green-50 text-green-700' :
-                      payment.status === 'pending' ? 'bg-amber-50 text-amber-700' :
-                        payment.status === 'canceled' ? 'bg-red-50 text-red-700' :
-                          payment.status === 'rejected' ? 'bg-red-50 text-red-700' :
-                            'bg-gray-50 text-gray-700'
-                      }`}>
-                      {payment.status === 'confirm' ? 'مؤكد' :
-                        payment.status === 'pending' ? 'قيد الانتظار' :
-                          payment.status === 'canceled' ? 'ملغي' :
-                            payment.status === 'rejected' ? 'مرفوض' :
-                              payment.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-nowrap">
-                    {payment.paymentable_type.includes('Booking') ? 'حجز' : <span
-                      className="cursor-pointer text-blue-500 underline"
-                      onClick={() => {
-                        setIsViewDialogOpen(true);
-                        console.log("clicked", isViewDialogOpen);
-                        console.log(payment);
+                    <TableCell className="text-nowrap">
+                      {payment.amount} {payment.currency}
+                    </TableCell>
+                    <TableCell>
+                      {payment.method === "wallet"
+                        ? "المحفظة"
+                        : payment.method === "stripe"
+                        ? "بطاقة ائتمان"
+                        : payment.method === "cash"
+                        ? "نقداً"
+                        : payment.method}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-md text-sm font-medium ${
+                          payment.status === "confirm"
+                            ? "bg-green-50 text-green-700"
+                            : payment.status === "pending"
+                            ? "bg-amber-50 text-amber-700"
+                            : payment.status === "canceled"
+                            ? "bg-red-50 text-red-700"
+                            : payment.status === "rejected"
+                            ? "bg-red-50 text-red-700"
+                            : "bg-gray-50 text-gray-700"
+                        }`}
+                      >
+                        {payment.status === "confirm"
+                          ? "مؤكد"
+                          : payment.status === "pending"
+                          ? "قيد الانتظار"
+                          : payment.status === "canceled"
+                          ? "ملغي"
+                          : payment.status === "rejected"
+                          ? "مرفوض"
+                          : payment.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-nowrap">
+                      {payment.paymentable_type.includes("Booking") ? (
+                        "حجز"
+                      ) : (
+                        <span
+                          className="cursor-pointer text-blue-500 underline"
+                          onClick={() => {
+                            setIsViewDialogOpen(true);
+                            console.log("clicked", isViewDialogOpen);
+                            console.log(payment);
 
-                        setCurrentGiftCard(payment.gift_card || null);
-                      }}
-                    >
-                      بطاقة هدية
-                    </span>}
-                  </TableCell>
-                  <TableCell>{new Date(payment.created_at).toLocaleDateString('ar-EG')}</TableCell>
-                  <TableCell className="flex gap-1 px-2">
-                    {payment.paymentable_type.includes('Booking') && (
-                      <>
-                        <Link href={`/appointments/${payment.paymentable_id}`}>
-                          <Button variant="outline" size="sm">
-                            <Calendar className="h-4 w-4" />
-                            <span className="ms-1">عرض الحجوزات</span>
-                          </Button>
-                        </Link>
+                            setCurrentGiftCard(payment.gift_card || null);
+                          }}
+                        >
+                          بطاقة هدية
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(payment.created_at).toLocaleDateString("ar-EG")}
+                    </TableCell>
+                    <TableCell className="flex gap-1 px-2">
+                      {payment.paymentable_type.includes("Booking") && (
+                        <>
+                          <Link
+                            href={`/appointments/${payment.paymentable_id}`}
+                          >
+                            <Button variant="outline" size="sm">
+                              <Calendar className="h-4 w-4" />
+                              <span className="ms-1">عرض الحجوزات</span>
+                            </Button>
+                          </Link>
+                        </>
+                      )}
 
-                      </>)}
-
-                    <Button
-                      variant="outline"
-                      className="mx-2"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedPayment(payment);
-                        setShowPaymentDetails(true);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="ms-1">عرض التفاصيل</span>
-
-                    </Button>
-
-                  </TableCell>
-                </TableRow>
-              ))}
+                      <Button
+                        variant="outline"
+                        className="mx-2"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPayment(payment);
+                          setShowPaymentDetails(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="ms-1">عرض التفاصيل</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -1226,7 +1364,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>المبلغ</Label>
-                <p className="text-lg font-medium">{selectedPayment?.amount} {selectedPayment?.currency}</p>
+                <p className="text-lg font-medium">
+                  {selectedPayment?.amount} {selectedPayment?.currency}
+                </p>
               </div>
               <div>
                 <Label>طريقة الدفع</Label>
@@ -1234,79 +1374,108 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               </div>
               <div>
                 <Label>الحالة</Label>
-                <Badge variant={selectedPayment?.status === 'confirm' ? 'success' : 'secondary'}>
+                <Badge
+                  variant={
+                    selectedPayment?.status === "confirm"
+                      ? "success"
+                      : "secondary"
+                  }
+                >
                   {selectedPayment?.status}
                 </Badge>
               </div>
               <div>
                 <Label>نسبة النظام</Label>
-                <p className="text-lg font-medium">{selectedPayment?.system_percentage}%</p>
+                <p className="text-lg font-medium">
+                  {selectedPayment?.system_percentage}%
+                </p>
               </div>
             </div>
 
-            {selectedPayment?.paymentable_type.includes('Booking') && selectedPayment?.booking && (
-              <div className="space-y-4">
-                <Separator />
-                <h4 className="font-medium">تفاصيل الحجز</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>رقم الحجز</Label>
-                    <p className="text-lg font-medium">{selectedPayment.booking.code}</p>
-                  </div>
-                  <div>
-                    <Label>التاريخ والوقت</Label>
-                    <p className="text-lg font-medium">
-                      {new Date(selectedPayment.booking.date).toLocaleDateString('ar-EG')} - {selectedPayment.booking.time}
-                    </p>
-                  </div>
-                  <div>
-                    <Label>الحالة</Label>
-                    <div className="mt-1">
-                      {getAppointmentStatusBadge(selectedPayment.booking.status)}
+            {selectedPayment?.paymentable_type.includes("Booking") &&
+              selectedPayment?.booking && (
+                <div className="space-y-4">
+                  <Separator />
+                  <h4 className="font-medium">تفاصيل الحجز</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>رقم الحجز</Label>
+                      <p className="text-lg font-medium">
+                        {selectedPayment.booking.code}
+                      </p>
+                    </div>
+                    <div>
+                      <Label>التاريخ والوقت</Label>
+                      <p className="text-lg font-medium">
+                        {new Date(
+                          selectedPayment.booking.date
+                        ).toLocaleDateString("ar-EG")}{" "}
+                        - {selectedPayment.booking.time}
+                      </p>
+                    </div>
+                    <div>
+                      <Label>الحالة</Label>
+                      <div className="mt-1">
+                        {getAppointmentStatusBadge(
+                          selectedPayment.booking.status
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>المبلغ الإجمالي</Label>
+                      <p className="text-lg font-medium">
+                        {selectedPayment.booking.total_price}{" "}
+                        {selectedPayment.currency}
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    <Label>المبلغ الإجمالي</Label>
-                    <p className="text-lg font-medium">{selectedPayment.booking.total_price} {selectedPayment.currency}</p>
+                  <div className="space-y-2">
+                    <Label>الخدمات</Label>
+                    {selectedPayment.booking.booking_services.map(
+                      (bookingService) => (
+                        <div
+                          key={bookingService.id}
+                          className="flex justify-between items-center p-2 border rounded"
+                        >
+                          <span>{bookingService.service.name.ar}</span>
+                          <span>
+                            {bookingService.service.final_price}{" "}
+                            {bookingService.service.currency}
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>الخدمات</Label>
-                  {selectedPayment.booking.booking_services.map((bookingService) => (
-                    <div key={bookingService.id} className="flex justify-between items-center p-2 border rounded">
-                      <span>{bookingService.service.name.ar}</span>
-                      <span>{bookingService.service.final_price} {bookingService.service.currency}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
 
-            {selectedPayment?.paymentable_type.includes('GiftCard') && selectedPayment?.gift_card && (
-              <div className="space-y-4">
-                <Separator />
-                <h4 className="font-medium">تفاصيل بطاقة الهدية</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>الكود</Label>
-                    <p className="text-lg font-medium">{selectedPayment.gift_card.code}</p>
-                  </div>
-                  <div>
-                    <Label>القيمة</Label>
-                    <p className="text-lg font-medium">{selectedPayment.gift_card.amount} {selectedPayment.currency}</p>
+            {selectedPayment?.paymentable_type.includes("GiftCard") &&
+              selectedPayment?.gift_card && (
+                <div className="space-y-4">
+                  <Separator />
+                  <h4 className="font-medium">تفاصيل بطاقة الهدية</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>الكود</Label>
+                      <p className="text-lg font-medium">
+                        {selectedPayment.gift_card.code}
+                      </p>
+                    </div>
+                    <div>
+                      <Label>القيمة</Label>
+                      <p className="text-lg font-medium">
+                        {selectedPayment.gift_card.amount}{" "}
+                        {selectedPayment.currency}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </DialogContent>
       </Dialog>
     </div>
   );
-
-
-
-
 
   // Add this function to fetch holidays
   const [isLoadingHolidays, setIsLoadingHolidays] = useState(false);
@@ -1314,7 +1483,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const fetchHolidays = async () => {
     try {
       setIsLoadingHolidays(true);
-      const response = await fetchData(`admin/salon-holidays?salon_id=${salonId}&page=${holidaysCurrentPage}`);
+      const response = await fetchData(
+        `admin/salon-holidays?salon_id=${salonId}&page=${holidaysCurrentPage}`
+      );
       if (response.success) {
         setHolidays(response.data);
         setHolidaysTotalPages(response.meta.last_page);
@@ -1322,10 +1493,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setHolidaysPerPage(response.meta.per_page);
         setHolidaysTotalItems(response.meta.total);
         setIsLoadingHolidays(false);
-
       }
     } catch (error) {
-      console.error('Error fetching holidays:', error);
+      console.error("Error fetching holidays:", error);
       toast({
         title: "خطأ",
         description: "فشل في جلب العطلات",
@@ -1336,7 +1506,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
   // Add useEffect for holidays
   useEffect(() => {
-    if (activeTab === 'holidays') {
+    if (activeTab === "holidays") {
       fetchHolidays();
     }
   }, [activeTab, holidaysCurrentPage, salonId]);
@@ -1345,10 +1515,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">العطلات والإجازات</h3>
-        <Button onClick={() => {
-          setEditingHoliday(null);
-          setIsHolidayDialogOpen(true);
-        }}>
+        <Button
+          onClick={() => {
+            setEditingHoliday(null);
+            setIsHolidayDialogOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4 ml-2" />
           إضافة عطلة
         </Button>
@@ -1372,67 +1544,81 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <TableCell colSpan={5} className="text-center py-8">
                     <div className="flex flex-col items-center gap-2">
                       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                      <p className="text-sm text-muted-foreground">جاري تحميل العطلات...</p>
+                      <p className="text-sm text-muted-foreground">
+                        جاري تحميل العطلات...
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : holidays.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
-                    <p className="text-sm text-muted-foreground">لا توجد عطلات</p>
+                    <p className="text-sm text-muted-foreground">
+                      لا توجد عطلات
+                    </p>
                   </TableCell>
                 </TableRow>
-              ) : holidays.map((holiday) => (
-                <TableRow key={holiday.id}>
-                  <TableCell>{new Date(holiday.holiday_date).toLocaleDateString('ar-EG')}</TableCell>
-                  <TableCell>{holiday.reason}</TableCell>
-                  <TableCell>
-                    {holiday.is_full_day ? 'يوم كامل' : 'جزئي'}
-                  </TableCell>
-                  <TableCell>
-                    {holiday.is_partial ? `${holiday.start_time} - ${holiday.end_time}` : 'طوال اليوم'}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setEditingHoliday(holiday);
-                          setIsHolidayDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={async () => {
-                          if (confirm('هل أنت متأكد من حذف هذه العطلة؟')) {
-                            try {
-                              await deleteData(`admin/salon-holidays/${holiday.id}`);
-                              toast({
-                                title: "تم بنجاح",
-                                description: "تم حذف العطلة بنجاح",
-                              });
-                              fetchHolidays();
-                            } catch (error) {
-                              console.error('Error deleting holiday:', error);
-                              toast({
-                                title: "خطأ",
-                                description: "فشل في حذف العطلة",
-                                variant: "destructive",
-                              });
+              ) : (
+                holidays.map((holiday) => (
+                  <TableRow key={holiday.id}>
+                    <TableCell>
+                      {new Date(holiday.holiday_date).toLocaleDateString(
+                        "ar-EG"
+                      )}
+                    </TableCell>
+                    <TableCell>{holiday.reason}</TableCell>
+                    <TableCell>
+                      {holiday.is_full_day ? "يوم كامل" : "جزئي"}
+                    </TableCell>
+                    <TableCell>
+                      {holiday.is_partial
+                        ? `${holiday.start_time} - ${holiday.end_time}`
+                        : "طوال اليوم"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingHoliday(holiday);
+                            setIsHolidayDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={async () => {
+                            if (confirm("هل أنت متأكد من حذف هذه العطلة؟")) {
+                              try {
+                                await deleteData(
+                                  `admin/salon-holidays/${holiday.id}`
+                                );
+                                toast({
+                                  title: "تم بنجاح",
+                                  description: "تم حذف العطلة بنجاح",
+                                });
+                                fetchHolidays();
+                              } catch (error) {
+                                console.error("Error deleting holiday:", error);
+                                toast({
+                                  title: "خطأ",
+                                  description: "فشل في حذف العطلة",
+                                  variant: "destructive",
+                                });
+                              }
                             }
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -1450,47 +1636,55 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       <Dialog open={isHolidayDialogOpen} onOpenChange={setIsHolidayDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingHoliday ? 'تعديل عطلة' : 'إضافة عطلة جديدة'}</DialogTitle>
+            <DialogTitle>
+              {editingHoliday ? "تعديل عطلة" : "إضافة عطلة جديدة"}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const isPartial = formData.get('is_partial') === 'true';
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const isPartial = formData.get("is_partial") === "true";
 
-            const holidayData = {
-              salon_id: Number(salonId),
-              holiday_date: formData.get('holiday_date'),
-              reason: formData.get('reason'),
-              is_full_day: !isPartial,
-              is_partial: isPartial,
-              ...(isPartial && {
-                start_time: formData.get('start_time'),
-                end_time: formData.get('end_time')
-              })
-            };
+              const holidayData = {
+                salon_id: Number(salonId),
+                holiday_date: formData.get("holiday_date"),
+                reason: formData.get("reason"),
+                is_full_day: !isPartial,
+                is_partial: isPartial,
+                ...(isPartial && {
+                  start_time: formData.get("start_time"),
+                  end_time: formData.get("end_time"),
+                }),
+              };
 
-
-            try {
-              if (editingHoliday) {
-                await updateData(`admin/salon-holidays/${editingHoliday.id}`, holidayData);
-              } else {
-                await addData('admin/salon-holidays', holidayData);
+              try {
+                if (editingHoliday) {
+                  await updateData(
+                    `admin/salon-holidays/${editingHoliday.id}`,
+                    holidayData
+                  );
+                } else {
+                  await addData("admin/salon-holidays", holidayData);
+                }
+                toast({
+                  title: "تم بنجاح",
+                  description: editingHoliday
+                    ? "تم تعديل العطلة بنجاح"
+                    : "تمت إضافة العطلة بنجاح",
+                });
+                setIsHolidayDialogOpen(false);
+                fetchHolidays();
+              } catch (error) {
+                console.error("Error saving holiday:", error);
+                toast({
+                  title: "خطأ",
+                  description: "فشل في حفظ العطلة",
+                  variant: "destructive",
+                });
               }
-              toast({
-                title: "تم بنجاح",
-                description: editingHoliday ? "تم تعديل العطلة بنجاح" : "تمت إضافة العطلة بنجاح",
-              });
-              setIsHolidayDialogOpen(false);
-              fetchHolidays();
-            } catch (error) {
-              console.error('Error saving holiday:', error);
-              toast({
-                title: "خطأ",
-                description: "فشل في حفظ العطلة",
-                variant: "destructive",
-              });
-            }
-          }}>
+            }}
+          >
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="holiday_date">التاريخ</Label>
@@ -1515,12 +1709,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Label>نوع العطلة</Label>
                 <Select
                   name="is_partial"
-                  defaultValue={editingHoliday?.is_partial ? 'true' : 'false'}
+                  defaultValue={editingHoliday?.is_partial ? "true" : "false"}
                   onValueChange={(value) => {
-                    const form = document.querySelector('form');
-                    const timeInputs = form?.querySelector('.time-inputs');
+                    const form = document.querySelector("form");
+                    const timeInputs = form?.querySelector(".time-inputs");
                     if (timeInputs) {
-                      (timeInputs as HTMLElement).style.display = value === 'true' ? 'grid' : 'none';
+                      (timeInputs as HTMLElement).style.display =
+                        value === "true" ? "grid" : "none";
                     }
                   }}
                 >
@@ -1533,14 +1728,19 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="time-inputs grid gap-4" style={{ display: editingHoliday?.is_partial ? 'grid' : 'none' }}>
+              <div
+                className="time-inputs grid gap-4"
+                style={{
+                  display: editingHoliday?.is_partial ? "grid" : "none",
+                }}
+              >
                 <div className="grid gap-2">
                   <Label htmlFor="start_time">وقت البداية</Label>
                   <Input
                     id="start_time"
                     name="start_time"
                     type="time"
-                    defaultValue={editingHoliday?.start_time || ''}
+                    defaultValue={editingHoliday?.start_time || ""}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -1549,17 +1749,21 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     id="end_time"
                     name="end_time"
                     type="time"
-                    defaultValue={editingHoliday?.end_time || ''}
+                    defaultValue={editingHoliday?.end_time || ""}
                   />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsHolidayDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsHolidayDialogOpen(false)}
+              >
                 إلغاء
               </Button>
               <Button type="submit">
-                {editingHoliday ? 'تعديل' : 'إضافة'}
+                {editingHoliday ? "تعديل" : "إضافة"}
               </Button>
             </DialogFooter>
           </form>
@@ -1568,14 +1772,20 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     </div>
   );
 
-
   const fetchServices = async () => {
     try {
       // setIsLoading(true);
-      const activeFilter = selectedStatus !== 'all' ? `&is_active=${selectedStatus === 'active' ? 1 : 0}` : '';
-      const categoryFilter = selectedCategory ? `&gender=${selectedCategory}` : '';
+      const activeFilter =
+        selectedStatus !== "all"
+          ? `&is_active=${selectedStatus === "active" ? 1 : 0}`
+          : "";
+      const categoryFilter = selectedCategory
+        ? `&gender=${selectedCategory}`
+        : "";
 
-      const response = await fetchData(`admin/services?page=${currentPage}&limit=${perPage}&salon_id=${salonId}`);
+      const response = await fetchData(
+        `admin/services?page=${currentPage}&limit=${perPage}&salon_id=${salonId}`
+      );
       if (response.success) {
         setServices(response.data || []);
         setTotalPages(response.meta.last_page);
@@ -1583,7 +1793,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setPerPage(response.meta.per_page);
         setTotalItems(response.meta.total);
         // setActiveTab("services"); // Ensure we stay on services tab
-
       }
     } catch (error) {
       console.error("Failed to fetch services:", error);
@@ -1604,7 +1813,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const fetchReviews = async () => {
     try {
       setIsLoadingReviews(true);
-      const response = await fetchData(`admin/reviews?salon_id=${salonId}&page=${reviewsCurrentPage}&limit=${reviewsPerPage}`);
+      const response = await fetchData(
+        `admin/reviews?salon_id=${salonId}&page=${reviewsCurrentPage}&limit=${reviewsPerPage}`
+      );
       if (response.success) {
         setReviews(response.data);
         calculateReviewStats(response.data);
@@ -1613,10 +1824,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setReviewsPerPage(response.meta.per_page);
         setReviewsTotalItems(response.meta.total);
         setIsLoadingReviews(false);
-
       }
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      console.error("Error fetching reviews:", error);
     }
   };
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -1637,7 +1847,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const fetchAppointments = async () => {
     try {
       setIsLoadingAppointments(true);
-      const response = await fetchData(`admin/bookings?salon_id=${salonId}&page=${appointmentsCurrentPage}&limit=${appointmentsPerPage}`);
+      const response = await fetchData(
+        `admin/bookings?salon_id=${salonId}&page=${appointmentsCurrentPage}&limit=${appointmentsPerPage}`
+      );
       if (response.success) {
         setAppointments(response.data);
         setAppointmentsTotalPages(response.meta.last_page);
@@ -1647,7 +1859,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setAppointmentsStats(response.info);
       }
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error("Error fetching appointments:", error);
       toast({
         title: "Error",
         description: "Failed to fetch appointments",
@@ -1660,7 +1872,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
   // Add this useEffect
   useEffect(() => {
-    if (activeTab === 'appointments') {
+    if (activeTab === "appointments") {
       fetchAppointments();
     }
   }, [activeTab, appointmentsCurrentPage]);
@@ -1679,18 +1891,22 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
     // Convert to percentages
     const percentages: Record<number, number> = {};
-    Object.keys(stats).forEach(rating => {
-      percentages[Number(rating)] = Math.round((stats[Number(rating)] / total) * 100);
+    Object.keys(stats).forEach((rating) => {
+      percentages[Number(rating)] = Math.round(
+        (stats[Number(rating)] / total) * 100
+      );
     });
 
     setReviewStats(percentages);
   };
   const handleReplyReview = async (review: Review) => {
-    const reply = await prompt('أدخل ردك على التقييم:');
+    const reply = await prompt("أدخل ردك على التقييم:");
     if (!reply) return;
 
     try {
-      const response = await addData(`admin/reviews/${review.id}/reply`, { reply });
+      const response = await addData(`admin/reviews/${review.id}/reply`, {
+        reply,
+      });
       if (response.success) {
         toast({
           title: "تم بنجاح",
@@ -1699,7 +1915,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         fetchReviews();
       }
     } catch (error) {
-      console.error('Error replying to review:', error);
+      console.error("Error replying to review:", error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء إضافة الرد",
@@ -1709,11 +1925,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   };
 
   const handleReportReview = async (review: Review) => {
-    const reason = await prompt('أدخل سبب الإبلاغ عن التقييم:');
+    const reason = await prompt("أدخل سبب الإبلاغ عن التقييم:");
     if (!reason) return;
 
     try {
-      const response = await addData(`admin/reviews/${review.id}/report`, { reason });
+      const response = await addData(`admin/reviews/${review.id}/report`, {
+        reason,
+      });
       if (response.success) {
         toast({
           title: "تم بنجاح",
@@ -1722,7 +1940,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         fetchReviews();
       }
     } catch (error) {
-      console.error('Error reporting review:', error);
+      console.error("Error reporting review:", error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء الإبلاغ عن التقييم",
@@ -1732,7 +1950,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   };
 
   const handleDeleteReview = async (reviewId: Review) => {
-    if (!confirm('هل أنت متأكد من حذف هذا التقييم؟')) return;
+    if (!confirm("هل أنت متأكد من حذف هذا التقييم؟")) return;
 
     try {
       const response = await deleteData(`admin/reviews/${reviewId}`);
@@ -1744,7 +1962,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         fetchReviews();
       }
     } catch (error) {
-      console.error('Error deleting review:', error);
+      console.error("Error deleting review:", error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء حذف التقييم",
@@ -1769,9 +1987,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       icon: uploadedIcon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
-      gender: formData.get("gender") as 'male' | 'female' | 'both',
+      gender: formData.get("gender") as "male" | "female" | "both",
       is_active: 1,
-      currency: "AED"
+      currency: "AED",
     };
 
     try {
@@ -1785,8 +2003,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           description: "تمت إضافة الخدمة بنجاح",
           variant: "default",
         });
-        setUploadedIcon('');
-        setIconPreview('');
+        setUploadedIcon("");
+        setIconPreview("");
       }
     } catch (error) {
       console.error("Failed to add service:", error);
@@ -1795,10 +2013,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
   const handleIconUpload = async (file: File) => {
     const formData = new FormData();
-    formData.append('image', file);
-    formData.append('folder', 'services');
+    formData.append("image", file);
+    formData.append("folder", "services");
     try {
-      const response = await addData('general/upload-image', formData);
+      const response = await addData("general/upload-image", formData);
       // const data = await response.json();
       if (response.success) {
         console.log(response);
@@ -1806,7 +2024,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setIconPreview(URL.createObjectURL(file));
       }
     } catch (error) {
-      console.error('Failed to upload image:', error);
+      console.error("Failed to upload image:", error);
     }
   };
   // تعديل خدمة
@@ -1828,13 +2046,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       icon: uploadedIcon || editingService.icon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
-      gender: formData.get("gender") as 'male' | 'female' | 'both',
+      gender: formData.get("gender") as "male" | "female" | "both",
       is_active: Number(formData.get("is_active")),
     };
     console.log("updatedService", updatedService);
 
     try {
-      const response = await updateData(`admin/services/${editingService.id}`, updatedService);
+      const response = await updateData(
+        `admin/services/${editingService.id}`,
+        updatedService
+      );
       if (response.success) {
         await fetchServices();
         setIsEditDialogOpen(false);
@@ -1844,8 +2065,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           description: "تم تعديل الخدمة بنجاح",
           variant: "default",
         });
-        setUploadedIcon('');
-        setIconPreview('');
+        setUploadedIcon("");
+        setIconPreview("");
       }
     } catch (error) {
       console.error("Failed to update service:", error);
@@ -1894,7 +2115,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           setSalonData(response.data);
         }
       } catch (error) {
-        console.error('Failed to fetch salon data:', error);
+        console.error("Failed to fetch salon data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -1906,25 +2127,37 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
             قيد الانتظار
           </Badge>
         );
       case "confirmed":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             مؤكد
           </Badge>
         );
       case "completed":
         return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Badge
+            variant="outline"
+            className="bg-blue-50 text-blue-700 border-blue-200"
+          >
             مكتمل
           </Badge>
         );
       case "cancelled":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
             ملغي
           </Badge>
         );
@@ -1938,10 +2171,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${i < rating
-              ? "text-yellow-500 fill-yellow-500"
-              : "text-gray-300 fill-gray-300"
-              }`}
+            className={`h-4 w-4 ${
+              i < rating
+                ? "text-yellow-500 fill-yellow-500"
+                : "text-gray-300 fill-gray-300"
+            }`}
           />
         ))}
       </div>
@@ -2010,7 +2244,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               <div className="h-48 w-full bg-muted animate-pulse rounded-lg" />
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 w-full bg-muted/50 animate-pulse rounded-lg" />
+                  <div
+                    key={i}
+                    className="h-16 w-full bg-muted/50 animate-pulse rounded-lg"
+                  />
                 ))}
               </div>
             </CardContent>
@@ -2026,7 +2263,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         <AlertTriangle className="h-12 w-12 text-muted-foreground" />
         <div className="text-center">
           <h3 className="text-lg font-medium">لا توجد بيانات</h3>
-          <p className="text-sm text-muted-foreground">لم يتم العثور على بيانات الصالون</p>
+          <p className="text-sm text-muted-foreground">
+            لم يتم العثور على بيانات الصالون
+          </p>
         </div>
         <Button variant="outline" asChild>
           <Link href="/salons">العودة للصالونات</Link>
@@ -2054,29 +2293,45 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage className="object-contain" src={salonData.icon_url} alt={salonData.name} />
+                <AvatarImage
+                  className="object-contain"
+                  src={salonData.icon_url}
+                  alt={salonData.name}
+                />
                 <AvatarFallback>{salonData.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-bold">{salonData.name}</h2>
               <div className="flex items-center gap-2 mt-2">
-                <Badge variant="outline" className={
-                  salonData.is_active
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : "bg-red-50 text-red-700 border-red-200"
-                }>
+                <Badge
+                  variant="outline"
+                  className={
+                    salonData.is_active
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : "bg-red-50 text-red-700 border-red-200"
+                  }
+                >
                   {salonData.is_active ? "نشط" : "غير نشط"}
                 </Badge>
                 {salonData.is_approved && (
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-50 text-blue-700 border-blue-200"
+                  >
                     موثق
                   </Badge>
                 )}
                 {/* type */}
-                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                  {salonData.type === "clinic" ? "عيادة" :
-                    salonData.type === "salon" ? "صالون" :
-                      salonData.type === "home_service" ? "خدمة منزلية" :
-                        salonData.type}
+                <Badge
+                  variant="outline"
+                  className="bg-purple-50 text-purple-700 border-purple-200"
+                >
+                  {salonData.type === "clinic"
+                    ? "عيادة"
+                    : salonData.type === "salon"
+                    ? "صالون"
+                    : salonData.type === "home_service"
+                    ? "خدمة منزلية"
+                    : salonData.type}
                 </Badge>
               </div>
               <div className="flex items-center gap-1 mt-2">
@@ -2087,7 +2342,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                عضو منذ {new Date(salonData.created_at).toLocaleDateString('ar-EG', {})}
+                عضو منذ{" "}
+                {new Date(salonData.created_at).toLocaleDateString("ar-EG", {})}
               </p>
               <div className="flex gap-2 mt-4 w-full">
                 <Button variant="outline" className="flex-1" asChild>
@@ -2107,32 +2363,37 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <form onSubmit={async (e) => {
-                      e.preventDefault();
-                      const formData = new FormData(e.currentTarget);
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
 
-                      try {
-                        const response = await addData(`admin/salons/${salonId}/send-notification`, {
-                          title: formData.get('title'),
-                          message: formData.get('message')
-                        });
+                        try {
+                          const response = await addData(
+                            `admin/salons/${salonId}/send-notification`,
+                            {
+                              title: formData.get("title"),
+                              message: formData.get("message"),
+                            }
+                          );
 
-                        if (response.success) {
+                          if (response.success) {
+                            toast({
+                              title: "تم بنجاح",
+                              description: "تم إرسال الإشعار بنجاح",
+                            });
+                            setShowSendNotificationDialog(false);
+                          }
+                        } catch (error) {
+                          console.error("Failed to send notification:", error);
                           toast({
-                            title: "تم بنجاح",
-                            description: "تم إرسال الإشعار بنجاح",
+                            title: "خطأ",
+                            description: "حدث خطأ أثناء إرسال الإشعار",
+                            variant: "destructive",
                           });
-                          setShowSendNotificationDialog(false);
                         }
-                      } catch (error) {
-                        console.error('Failed to send notification:', error);
-                        toast({
-                          title: "خطأ",
-                          description: "حدث خطأ أثناء إرسال الإشعار",
-                          variant: "destructive",
-                        });
-                      }
-                    }}>
+                      }}
+                    >
                       <DialogHeader>
                         <DialogTitle>إرسال إشعار للصالون</DialogTitle>
                         <DialogDescription>
@@ -2168,9 +2429,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         >
                           إلغاء
                         </Button>
-                        <Button type="submit">
-                          إرسال الإشعار
-                        </Button>
+                        <Button type="submit">إرسال الإشعار</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -2283,11 +2542,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </DialogContent>
                 </Dialog>
               </div> */}
-              <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+              <Dialog
+                open={isViewDialogOpen}
+                onOpenChange={setIsViewDialogOpen}
+              >
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
                     <DialogTitle>تفاصيل بطاقة الهدية</DialogTitle>
-                    <DialogDescription>عرض جميع تفاصيل بطاقة الهدية</DialogDescription>
+                    <DialogDescription>
+                      عرض جميع تفاصيل بطاقة الهدية
+                    </DialogDescription>
                   </DialogHeader>
                   {currentGiftCard && (
                     <div className="grid gap-4 py-4">
@@ -2297,12 +2561,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                             كود البطاقة
                           </h3>
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">{currentGiftCard.code}</p>
+                            <p className="font-medium">
+                              {currentGiftCard.code}
+                            </p>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6"
-                              onClick={() => copyGiftCardCode(currentGiftCard.code)}
+                              onClick={() =>
+                                copyGiftCardCode(currentGiftCard.code)
+                              }
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
@@ -2313,7 +2581,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                             نوع البطاقة
                           </h3>
                           <div className="flex items-center gap-2">
-                            <p className="font-medium">{currentGiftCard.type == "services" ? "خدمات" : currentGiftCard.type == "amount" ? "مبلغ مالي " : ""}</p>
+                            <p className="font-medium">
+                              {currentGiftCard.type == "services"
+                                ? "خدمات"
+                                : currentGiftCard.type == "amount"
+                                ? "مبلغ مالي "
+                                : ""}
+                            </p>
                             {/* <Button
                       variant="ghost"
                       size="icon"
@@ -2329,7 +2603,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           <h3 className="text-sm font-medium text-muted-foreground mb-1">
                             الحالة
                           </h3>
-                          <Badge className={getStatusColor(currentGiftCard.received_at)}>
+                          <Badge
+                            className={getStatusColor(
+                              currentGiftCard.received_at
+                            )}
+                          >
                             {getStatusName(currentGiftCard.received_at)}
                           </Badge>
                         </div>
@@ -2354,14 +2632,18 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </div>
                 )} */}
                       </div>
-                      {currentGiftCard.type != "services" ? <>
-                        <div>
-                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                            تفاصيل
-                          </h3>
-                          <p className="font-medium">{currentGiftCard.amount} د.إ</p>
-                        </div>
-                      </> :
+                      {currentGiftCard.type != "services" ? (
+                        <>
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                              تفاصيل
+                            </h3>
+                            <p className="font-medium">
+                              {currentGiftCard.amount} د.إ
+                            </p>
+                          </div>
+                        </>
+                      ) : (
                         <>
                           <div>
                             <h3 className="text-sm font-medium text-muted-foreground mb-3">
@@ -2371,51 +2653,87 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               <table className="w-full">
                                 <thead className="bg-muted/50">
                                   <tr>
-                                    <th className="py-2 px-3 text-right text-sm font-medium">اسم الخدمة</th>
-                                    <th className="py-2 px-3 text-right text-sm font-medium">السعر</th>
-                                    <th className="py-2 px-3 text-right text-sm font-medium">المدة</th>
+                                    <th className="py-2 px-3 text-right text-sm font-medium">
+                                      اسم الخدمة
+                                    </th>
+                                    <th className="py-2 px-3 text-right text-sm font-medium">
+                                      السعر
+                                    </th>
+                                    <th className="py-2 px-3 text-right text-sm font-medium">
+                                      المدة
+                                    </th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {currentGiftCard.services_data.map((service) => (
-                                    <tr key={service.id} className="border-t">
-                                      <td className="py-2 px-3 text-sm">{service.name.ar}</td>
-                                      <td className="py-2 px-3 text-sm">{service.final_price} {service.currency}</td>
-                                      <td className="py-2 px-3 text-sm">{service.duration_minutes} دقيقة</td>
-                                    </tr>
-                                  ))}
+                                  {currentGiftCard.services_data.map(
+                                    (service) => (
+                                      <tr key={service.id} className="border-t">
+                                        <td className="py-2 px-3 text-sm">
+                                          {service.name.ar}
+                                        </td>
+                                        <td className="py-2 px-3 text-sm">
+                                          {service.final_price}{" "}
+                                          {service.currency}
+                                        </td>
+                                        <td className="py-2 px-3 text-sm">
+                                          {service.duration_minutes} دقيقة
+                                        </td>
+                                      </tr>
+                                    )
+                                  )}
                                 </tbody>
                               </table>
                             </div>
                           </div>
                         </>
-                      }
+                      )}
                       <div className="border-t pt-4 mt-2">
-                        <h3 className="font-medium mb-2">معلومات المستلم والمرسل</h3>
+                        <h3 className="font-medium mb-2">
+                          معلومات المستلم والمرسل
+                        </h3>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <h3 className="text-sm font-medium text-muted-foreground mb-1">
                               اسم المستلم
                             </h3>
-                            <p>{currentGiftCard.recipient?.full_name || "غير مسجل"}</p>
+                            <p>
+                              {currentGiftCard.recipient?.full_name ||
+                                "غير مسجل"}
+                            </p>
                           </div>
                           <div>
                             <h3 className="text-sm font-medium text-muted-foreground mb-1">
                               رقم المستلم
                             </h3>
-                            <p style={{ unicodeBidi: "plaintext", textAlign: 'right' }}>{currentGiftCard.recipient?.email || "غير مسجل"}</p>
+                            <p
+                              style={{
+                                unicodeBidi: "plaintext",
+                                textAlign: "right",
+                              }}
+                            >
+                              {currentGiftCard.recipient?.email || "غير مسجل"}
+                            </p>
                           </div>
                           <div>
                             <h3 className="text-sm font-medium text-muted-foreground mb-1">
                               اسم المرسل
                             </h3>
-                            <p>{currentGiftCard.sender?.full_name || "غير مسجل"}</p>
+                            <p>
+                              {currentGiftCard.sender?.full_name || "غير مسجل"}
+                            </p>
                           </div>
                           <div>
                             <h3 className="text-sm font-medium text-muted-foreground mb-1">
                               رقم المرسل
                             </h3>
-                            <p style={{ unicodeBidi: "plaintext", textAlign: "right" }}>{currentGiftCard.sender?.full_phone || "غير مسجل"}</p>
+                            <p
+                              style={{
+                                unicodeBidi: "plaintext",
+                                textAlign: "right",
+                              }}
+                            >
+                              {currentGiftCard.sender?.full_phone || "غير مسجل"}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -2443,7 +2761,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">المالك</p>
-                  <p className="text-sm text-muted-foreground">{salonData.owner?.full_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {salonData.owner?.full_name}
+                  </p>
                 </div>
               </div>
 
@@ -2451,7 +2771,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">رقم الهاتف</p>
-                  <p className="text-sm text-muted-foreground">{salonData.owner?.full_phone}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {salonData.owner?.full_phone}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -2474,7 +2796,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <div className="text-sm text-muted-foreground space-y-1 mt-1">
                     {salonData.working_hours.map((hours, idx) => (
                       <p key={idx}>
-                        {DAYS_IN_ARABIC[hours.day_of_week.toLowerCase()]}: {" "}
+                        {DAYS_IN_ARABIC[hours.day_of_week.toLowerCase()]}:{" "}
                         {hours.is_closed ? (
                           <span className="text-red-500">مغلق</span>
                         ) : (
@@ -2482,7 +2804,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                             {hours.opening_time} - {hours.closing_time}
                             {hours.break_start && hours.break_end && (
                               <span className="text-amber-600">
-                                {" "}(استراحة: {hours.break_start} - {hours.break_end})
+                                {" "}
+                                (استراحة: {hours.break_start} -{" "}
+                                {hours.break_end})
                               </span>
                             )}
                           </>
@@ -2504,23 +2828,32 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>إجمالي الحجوزات</span>
-                    <span className="font-medium">{salonData.bookings_count}</span>
+                    <span className="font-medium">
+                      {salonData.bookings_count}
+                    </span>
                   </div>
                   <Progress value={salonData.bookings_count} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>إجمالي الإيرادات</span>
-                    <span className="font-medium">{salonData.total_revenue}</span>
+                    <span className="font-medium">
+                      {salonData.total_revenue}
+                    </span>
                   </div>
                   <Progress value={salonData.total_revenue} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>متوسط التقييم</span>
-                    <span className="font-medium">{salonData.average_rating}/5</span>
+                    <span className="font-medium">
+                      {salonData.average_rating}/5
+                    </span>
                   </div>
-                  <Progress value={salonData.average_rating * 20} className="h-2" />
+                  <Progress
+                    value={salonData.average_rating * 20}
+                    className="h-2"
+                  />
                 </div>
               </div>
             </div>
@@ -2528,7 +2861,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         </Card>
 
         <Card className="md:col-span-2">
-          <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab} >
+          <Tabs
+            defaultValue="overview"
+            className="w-full"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
             <CardHeader className="w-full overflow-x-auto">
               <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
@@ -2572,68 +2910,120 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">عن الصالون</h3>
-                  <p className="text-muted-foreground">{salonData.description}</p>
+                  <p className="text-muted-foreground">
+                    {salonData.description}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">الاسم القانوني للتاجر</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      الاسم القانوني للتاجر
+                    </h3>
                     <p>{salonData.merchant_legal_name}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">الاسم التجاري للتاجر</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      الاسم التجاري للتاجر
+                    </h3>
                     <p>{salonData.merchant_commercial_name}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">العنوان</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      العنوان
+                    </h3>
                     <p>{salonData.address}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">الشارع والمدينة</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      الشارع والمدينة
+                    </h3>
                     <p>{salonData.city_street_name}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">اسم جهة الاتصال</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      اسم جهة الاتصال
+                    </h3>
                     <p>{salonData.contact_name}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">رقم جهة الاتصال</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      رقم جهة الاتصال
+                    </h3>
                     <p>{salonData.contact_number}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">البريد الإلكتروني لجهة الاتصال</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      البريد الإلكتروني لجهة الاتصال
+                    </h3>
                     <p>{salonData.contact_email}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">الاسم التجاري لجهة الأعمال</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      الاسم التجاري لجهة الأعمال
+                    </h3>
                     <p>{salonData.business_contact_name}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">رقم جهة الأعمال</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      رقم جهة الأعمال
+                    </h3>
                     <p>{salonData.business_contact_number}</p>
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium text-muted-foreground">البريد الإلكتروني لجهة الأعمال</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      البريد الإلكتروني لجهة الأعمال
+                    </h3>
                     <p>{salonData.business_contact_email}</p>
                   </div>
 
                   <div className="space-y-1 md:col-span-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">الوصف</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      الوصف
+                    </h3>
                     <p>{salonData.description}</p>
                   </div>
 
                   <div className="space-y-1 md:col-span-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">نبذة</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      نبذة
+                    </h3>
                     <p>{salonData.bio}</p>
+                  </div>
+                </div>
+                <Separator />
+                {/* gelary images  */}
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">معرض الصور</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {salonData.images.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">
+                          لا توجد صور في المعرض
+                        </p>
+                      </div>
+                    ) : (
+                      salonData.images.map((image, index) => (
+                        <div key={index} className="rounded-lg overflow-hidden">
+                          <Image
+                            width={500}
+                            height={500}
+                            src={image.url}
+                            alt={`Gallery Image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
                 <Separator />
@@ -2641,31 +3031,34 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">الخدمات الأكثر حجزاً</h3>
                   <div className="space-y-3">
-                    {
-                      services.length === 0 ? (
-                        <div className="text-center py-12">
-                          <p className="text-muted-foreground">لا توجد خدمات</p>
-                        </div>
-                      ) :
-                        services.slice(0, 3).map((service) => (
-                          <div
-                            key={service.id}
-                            className="flex justify-between items-center p-3 border rounded-lg"
-                          >
-                            <div>
-                              <p className="font-medium">{service.name.ar}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {service.duration_minutes}  دقيقة
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium"> {service.price + " د.إ"}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {service.duration_minutes} حجز
-                              </p>
-                            </div>
+                    {services.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">لا توجد خدمات</p>
+                      </div>
+                    ) : (
+                      services.slice(0, 3).map((service) => (
+                        <div
+                          key={service.id}
+                          className="flex justify-between items-center p-3 border rounded-lg"
+                        >
+                          <div>
+                            <p className="font-medium">{service.name.ar}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {service.duration_minutes} دقيقة
+                            </p>
                           </div>
-                        ))}
+                          <div className="text-right">
+                            <p className="font-medium">
+                              {" "}
+                              {service.price + " د.إ"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {service.duration_minutes} حجز
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -2674,53 +3067,50 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">أحدث التقييمات</h3>
                   <div className="space-y-4">
-                    {
-                      reviews.length === 0 ? (
-                        <div className="text-center py-12">
-                          <p className="text-muted-foreground">لا توجد تقييمات</p>
-                        </div>
-                      ) :
-
-                        reviews.slice(0, 2).map((review) => (
-                          <div key={review.id} className="p-4 border rounded-lg">
-                            <div className="flex justify-between items-start">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10">
-                                  <AvatarImage
-                                    src={review.user.avatar}
-                                    alt={review.user.full_name}
-                                  />
-                                  <AvatarFallback>
-                                    {review.user.first_name.charAt(0)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-medium">
-                                    {review.user.full_name}
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    {renderStars(review.rating)}
-                                    <span className="text-xs text-muted-foreground">
-                                      {new Date(review.created_at).toLocaleDateString(
-                                        "en-US"
-                                      )}
-                                    </span>
-                                  </div>
+                    {reviews.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">لا توجد تقييمات</p>
+                      </div>
+                    ) : (
+                      reviews.slice(0, 2).map((review) => (
+                        <div key={review.id} className="p-4 border rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage
+                                  src={review.user.avatar}
+                                  alt={review.user.full_name}
+                                />
+                                <AvatarFallback>
+                                  {review.user.first_name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">
+                                  {review.user.full_name}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  {renderStars(review.rating)}
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(
+                                      review.created_at
+                                    ).toLocaleDateString("en-US")}
+                                  </span>
                                 </div>
                               </div>
                             </div>
-                            <p className="mt-3 text-sm">{review.comment}</p>
                           </div>
-                        ))}
+                          <p className="mt-3 text-sm">{review.comment}</p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </TabsContent>
               <TabsContent value="services" className="space-y-6">
                 <Button
-
                   className="text-left"
-                  onClick={() => setIsAddDialogOpen(true)
-                  }
+                  onClick={() => setIsAddDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4 ml-2" />
                   {"إضافة خدمة"}
@@ -2728,7 +3118,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 {isLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">جاري تحميل الخدمات...</p>
+                    <p className="text-muted-foreground">
+                      جاري تحميل الخدمات...
+                    </p>
                   </div>
                 ) : services.length === 0 ? (
                   <div className="text-center py-12">
@@ -2811,17 +3203,19 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Separator />
 
                 <div className="space-y-4">
-                  {isLoadingReviews
-                    ? (
-                      <div className="text-center py-12">
-                        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">جاري تحميل التقييمات...</p>
-                      </div>
-                    ) : reviews.length === 0 ? (
-                      <div className="text-center py-12">
-                        <p className="text-muted-foreground">لا توجد تقييمات</p>
-                      </div>
-                    ) : reviews.map((review) => (
+                  {isLoadingReviews ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">
+                        جاري تحميل التقييمات...
+                      </p>
+                    </div>
+                  ) : reviews.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">لا توجد تقييمات</p>
+                    </div>
+                  ) : (
+                    reviews.map((review) => (
                       <div key={review.id} className="p-4 border rounded-lg">
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-3">
@@ -2835,11 +3229,17 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{review.user.full_name}</p>
+                              <p className="font-medium">
+                                {review.user.full_name}
+                              </p>
                               <div className="flex items-center gap-2 mt-1">
-                                <div className="text-yellow-500">{review.stars}</div>
+                                <div className="text-yellow-500">
+                                  {review.stars}
+                                </div>
                                 <span className="text-xs text-muted-foreground">
-                                  {new Date(review.created_at).toLocaleDateString("en-US")}
+                                  {new Date(
+                                    review.created_at
+                                  ).toLocaleDateString("en-US")}
                                 </span>
                               </div>
                             </div>
@@ -2878,7 +3278,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           </div>
                         )}
                       </div>
-                    ))}
+                    ))
+                  )}
                   {/* Add pagination component */}
                   {reviewsTotalPages > 1 && (
                     <div className="mt-4">
@@ -2908,55 +3309,75 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                     <Card className="stats-card">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">إجمالي الحجوزات</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          إجمالي الحجوزات
+                        </CardTitle>
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{appointmentsStats.all_count}</div>
+                        <div className="text-2xl font-bold">
+                          {appointmentsStats.all_count}
+                        </div>
                         <p className="text-xs text-muted-foreground">حجز</p>
                       </CardContent>
                     </Card>
 
                     <Card className="stats-card">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">قيد الانتظار</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          قيد الانتظار
+                        </CardTitle>
                         <Clock className="h-4 w-4 text-amber-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-amber-600">{appointmentsStats.pending_count}</div>
+                        <div className="text-2xl font-bold text-amber-600">
+                          {appointmentsStats.pending_count}
+                        </div>
                         <p className="text-xs text-muted-foreground">حجز</p>
                       </CardContent>
                     </Card>
 
                     <Card className="stats-card">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">مؤكد</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          مؤكد
+                        </CardTitle>
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-green-600">{appointmentsStats.confirmed_count}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {appointmentsStats.confirmed_count}
+                        </div>
                         <p className="text-xs text-muted-foreground">حجز</p>
                       </CardContent>
                     </Card>
 
                     <Card className="stats-card">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">مكتمل</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          مكتمل
+                        </CardTitle>
                         <CheckCheck className="h-4 w-4 text-blue-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-blue-600">{appointmentsStats.completed_count}</div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {appointmentsStats.completed_count}
+                        </div>
                         <p className="text-xs text-muted-foreground">حجز</p>
                       </CardContent>
                     </Card>
 
                     <Card className="stats-card">
                       <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">ملغي</CardTitle>
+                        <CardTitle className="text-sm font-medium">
+                          ملغي
+                        </CardTitle>
                         <X className="h-4 w-4 text-red-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-red-600">{appointmentsStats.cancelled_count}</div>
+                        <div className="text-2xl font-bold text-red-600">
+                          {appointmentsStats.cancelled_count}
+                        </div>
                         <p className="text-xs text-muted-foreground">حجز</p>
                       </CardContent>
                     </Card>
@@ -2966,7 +3387,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 {isLoadingAppointments ? (
                   <div className="text-center py-12">
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">جاري تحميل الحجوزات...</p>
+                    <p className="text-muted-foreground">
+                      جاري تحميل الحجوزات...
+                    </p>
                   </div>
                 ) : appointments.length === 0 ? (
                   <div className="text-center py-12">
@@ -2993,8 +3416,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               <TableCell>
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8">
-                                    <AvatarImage src={appointment.user.avatar || ""} alt={appointment.user.full_name} />
-                                    <AvatarFallback>{appointment.user.full_name.charAt(0)}</AvatarFallback>
+                                    <AvatarImage
+                                      src={appointment.user.avatar || ""}
+                                      alt={appointment.user.full_name}
+                                    />
+                                    <AvatarFallback>
+                                      {appointment.user.full_name.charAt(0)}
+                                    </AvatarFallback>
                                   </Avatar>
                                   <span>{appointment.user.full_name}</span>
                                 </div>
@@ -3003,20 +3431,33 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                                 <div className="flex flex-col">
                                   <div className="flex items-center">
                                     <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{new Date(appointment.date).toLocaleDateString("ar-EG")}</span>
+                                    <span className="text-sm">
+                                      {new Date(
+                                        appointment.date
+                                      ).toLocaleDateString("ar-EG")}
+                                    </span>
                                   </div>
                                   <div className="flex items-center">
                                     <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{appointment.time} - {appointment.end_time}</span>
+                                    <span className="text-sm">
+                                      {appointment.time} -{" "}
+                                      {appointment.end_time}
+                                    </span>
                                   </div>
                                 </div>
                               </TableCell>
-                              <TableCell>{getAppointmentStatusBadge(appointment.status)}</TableCell>
-                              <TableCell>{appointment.total_price} د.إ</TableCell>
+                              <TableCell>
+                                {getAppointmentStatusBadge(appointment.status)}
+                              </TableCell>
+                              <TableCell>
+                                {appointment.total_price} د.إ
+                              </TableCell>
                               <TableCell>
                                 <div className="flex justify-end">
                                   <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/appointments/${appointment.id}`}>
+                                    <Link
+                                      href={`/appointments/${appointment.id}`}
+                                    >
                                       عرض التفاصيل
                                     </Link>
                                   </Button>
@@ -3084,9 +3525,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </Select>
               </div> */}
 
-
               <div className="grid grid-cols-2 gap-4">
-
                 <div className="space-y-2">
                   <Label htmlFor="name_ar">اسم الخدمة (عربي)</Label>
                   <Input id="name_ar" name="name_ar" required />
@@ -3097,15 +3536,22 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </div>
               </div>
 
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="description_ar">وصف الخدمة (عربي)</Label>
-                  <Textarea id="description_ar" name="description_ar" required />
+                  <Textarea
+                    id="description_ar"
+                    name="description_ar"
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description_en">Description (English)</Label>
-                  <Textarea id="description_en" name="description_en" required />
+                  <Textarea
+                    id="description_en"
+                    name="description_en"
+                    required
+                  />
                 </div>
               </div>
               {/* <div className="space-y-2">
@@ -3172,15 +3618,15 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </div>
                   )}
                 </div>
-                <Input
-                  type="hidden"
-                  name="icon"
-                  value={uploadedIcon}
-                />
+                <Input type="hidden" name="icon" value={uploadedIcon} />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddDialogOpen(false)}
+              >
                 إلغاء
               </Button>
               <Button type="submit">إضافة الخدمة</Button>
@@ -3259,7 +3705,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description_en">Description (English)</Label>
+                    <Label htmlFor="description_en">
+                      Description (English)
+                    </Label>
                     <Textarea
                       id="description_en"
                       name="description_en"
@@ -3318,8 +3766,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="is_active">حالة الخدمة</Label>
-                    <Select name="is_active" defaultValue={editingService.is_active ? "1" : "0"}>
-                      <SelectTrigger id="is_active" >
+                    <Select
+                      name="is_active"
+                      defaultValue={editingService.is_active ? "1" : "0"}
+                    >
+                      <SelectTrigger id="is_active">
                         <SelectValue placeholder="اختر حالة الخدمة" />
                       </SelectTrigger>
                       <SelectContent>
@@ -3359,7 +3810,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     value={uploadedIcon || editingService.icon}
                   />
                 </div>
-
               </div>
               <DialogFooter>
                 <Button
@@ -3414,11 +3864,14 @@ interface ServiceCardProps {
   onEdit: () => void;
   onDelete: () => void;
   showSalonId?: boolean;
-
 }
 
-
-function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: ServiceCardProps) {
+function ServiceCard({
+  service,
+  onEdit,
+  onDelete,
+  showSalonId = false,
+}: ServiceCardProps) {
   const renderIcon = () => {
     return (
       <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary overflow-hidden">
@@ -3439,15 +3892,15 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
   const getGenderText = (gender: "male" | "female" | "both") => {
     switch (gender) {
       case "male":
-        return "رجال"
+        return "رجال";
       case "female":
-        return "نساء"
+        return "نساء";
       case "both":
-        return "الجميع"
+        return "الجميع";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   return (
     <Card className="h-full flex flex-col">
@@ -3457,18 +3910,26 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
             {renderIcon()}
             <div>
               <CardTitle className="text-lg">{service.name.ar}</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-1">{service.name.en}</CardDescription>
+              <CardDescription className="text-xs text-muted-foreground mt-1">
+                {service.name.en}
+              </CardDescription>
             </div>
           </div>
-          <Badge variant={service.is_active ? "default" : "secondary"}>{service.is_active ? "نشط" : "غير نشط"}</Badge>
+          <Badge variant={service.is_active ? "default" : "secondary"}>
+            {service.is_active ? "نشط" : "غير نشط"}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium mb-1">الوصف:</p>
-            <p className="text-sm text-muted-foreground">{service.description.ar}</p>
-            <p className="text-xs text-muted-foreground mt-1 opacity-70">{service.description.en}</p>
+            <p className="text-sm text-muted-foreground">
+              {service.description.ar}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 opacity-70">
+              {service.description.en}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -3509,7 +3970,5 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
         </Button>
       </CardFooter>
     </Card>
-
-  )
+  );
 }
-
