@@ -95,6 +95,25 @@ export default function GiftCardsManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  // info
+  const [info, setInfo] = useState({
+    total: {
+      value: 0,
+      label: "إجمالي البطاقات",
+    },
+    not_registered: {
+      value: 0,
+      label: "غير مسجلين",
+    },
+    registered: {
+      value: 0,
+      label: "مسجلين بعد الحصول على الهدية",
+    },
+    registered_before: {
+      value: 0,
+      label: "مسجلين قبل الحصول على الهدية",
+    }
+  })
   const [perPage, setPerPage] = useState(20);
 
   // Update the fetchGiftCards function
@@ -115,6 +134,24 @@ export default function GiftCardsManagement() {
         setTotalPages(response.meta.last_page);
         setCurrentPage(response.meta.current_page);
         setTotalItems(response.meta.total);
+        setInfo({
+          total: {
+            value: response.info.total?.value,
+            label: response.info.total?.label,
+          },
+          not_registered: {
+            value: response.info.not_registered?.value,
+            label: response.info.not_registered?.label,
+          },
+          registered: {
+            value: response.info.registered?.value,
+            label: response.info.registered?.label,
+          },
+          registered_before: {
+            value: response.info.registered_before?.value,
+            label: response.info.registered_before?.label,
+          }
+        })
         setPerPage(response.meta.per_page);
       }
     } catch (error) {
@@ -161,12 +198,58 @@ export default function GiftCardsManagement() {
     }
   };
 
-  console.log(giftCards);
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">إدارة بطاقات الهدايا</h1>
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي البطاقات</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{info?.total?.value || 0}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">غير مسجلين</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{info?.not_registered?.value || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {info?.total?.value ? `${((info?.not_registered?.value / info?.total?.value) * 100).toFixed(1)}% من إجمالي البطاقات` : ''}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">مسجلين بعد الحصول على الهدية</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{info?.registered?.value || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {info?.total?.value ? `${((info?.registered?.value / info?.total?.value) * 100).toFixed(1)}% من إجمالي البطاقات` : ''}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">مسجلين قبل الحصول على الهدية</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{info?.registered_before?.value || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {info?.total?.value ? `${((info?.registered_before?.value / info?.total?.value) * 100).toFixed(1)}% من إجمالي البطاقات` : ''}
+            </p>
+          </CardContent>
+        </Card>
+
         {/* <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}> */}
         {/* <DialogTrigger asChild>
             <Button>
@@ -334,7 +417,7 @@ export default function GiftCardsManagement() {
                   <TableHead>كود البطاقة</TableHead>
                   <TableHead>نوع البطاقة</TableHead>
 
-                  <TableHead>المبلغ</TableHead>
+                  <TableHead>تفاصيل</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead>تاريخ الانشاء</TableHead>
                   <TableHead>المرسل</TableHead>
@@ -490,7 +573,7 @@ export default function GiftCardsManagement() {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    المبلغ
+                    تفاصيل
                   </h3>
                   <p className="font-medium">{currentGiftCard.amount} د.إ</p>
                 </div>
