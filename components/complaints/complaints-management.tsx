@@ -636,15 +636,50 @@ export default function ComplaintsManagement() {
                         <div className="flex justify-end">
                           {!item.reviewed_by && (
                             <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-full"
-                                onClick={() => handleStatusUpdate(item.id)}
-                              >
-                                <CheckCircle2 className="h-4 w-4 ml-2" />
-                                مراجعة
-                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    className="rounded-full bg-green-600 hover:bg-green-700 text-white"
+                                    size="sm"
+                                  >
+                                    <CheckCircle2 className="h-4 w-4 ml-2" />
+                                    تمت المراجعة
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>تأكيد المراجعة</DialogTitle>
+                                    <DialogDescription>
+                                      هل أنت متأكد من أنك تريد تأكيد مراجعة هذه الشكوى؟
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <DialogFooter>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                        const dialogTrigger = document.querySelector('[data-state="open"]');
+                                        if (dialogTrigger instanceof HTMLElement) {
+                                          dialogTrigger.click();
+                                        }
+                                      }}
+                                    >
+                                      إلغاء
+                                    </Button>
+                                    <Button
+                                      className="bg-green-600 hover:bg-green-700 text-white"
+                                      onClick={() => {
+                                        handleStatusUpdate(item.id);
+                                        const dialogTrigger = document.querySelector('[data-state="open"]');
+                                        if (dialogTrigger instanceof HTMLElement) {
+                                          dialogTrigger.click();
+                                        }
+                                      }}
+                                    >
+                                      تأكيد
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
                             </>
                           )}
                         </div>
