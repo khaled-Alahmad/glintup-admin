@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Editor } from '@tinymce/tinymce-react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -281,6 +282,7 @@ export default function SettingsPage() {
                 <Settings className="h-4 w-4 ml-2" />
                 مواقع التواصل الاجتماعي
               </Button>
+
             </nav>
           </CardContent>
         </Card>
@@ -396,6 +398,214 @@ export default function SettingsPage() {
                       />
                     </div>
                   </div>
+                  <h3 className="text-lg font-medium">معلومات اساسية</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="about_app_ar">عن التطبيق (عربي)</Label>
+                      <Editor
+                        id="about_app_ar"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['about_app_ar'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'rtl',
+                          language: 'ar',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('about_app_ar', content)}
+                      />
+                    </div>
+                    {/* about_app_en */}
+                    <div className="space-y-2">
+                      <Label htmlFor="about_app_en">About App
+                        (English)</Label>
+                      <Editor
+                        id="about_app_en"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['about_app_en'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'ltr',
+                          language: 'en',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('about_app_en', content)}
+                      />
+                    </div>
+
+                    {/* privacy_policy_ar */}
+                    <div className="space-y-2">
+                      <Label htmlFor="privacy_policy_ar">سياسة الخصوصية (عربي)</Label>
+                      <Editor
+                        id="privacy_policy_ar"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['privacy_policy_ar'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'rtl',
+                          language: 'ar',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('privacy_policy_ar', content)}
+                      />
+                    </div>
+                    {/* privacy_policy_en */}
+                    <div className="space-y-2">
+                      <Label htmlFor="privacy_policy_en">Privacy Policy
+                        (English)</Label>
+                      <Editor
+                        id="privacy_policy_en"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['privacy_policy_en'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'ltr',
+                          language: 'en',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('privacy_policy_en', content)}
+                      />
+                    </div>
+                    {/* terms_and_condition_ar */}
+                    <div className="space-y-2">
+                      <Label htmlFor="terms_and_condition_ar">الشروط والأحكام (عربي)</Label>
+                      <Editor
+                        id="terms_and_condition_ar"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['terms_and_condition_ar'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'rtl',
+                          language: 'ar',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('terms_and_condition_ar', content)}
+                      />
+                    </div>
+                    {/* terms_and_condition_en */}
+                    <div className="space-y-2">
+                      <Label htmlFor="terms_and_condition_en">Terms and Conditions
+                        (English)</Label>
+                      <Editor
+                        id="terms_and_condition_en"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['terms_and_condition_en'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'ltr',
+                          language: 'en',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('terms_and_condition_en', content)}
+                      />
+                    </div>
+                    {/* help_ar */}
+                    <div className="space-y-2">
+                      <Label htmlFor="help_ar">مساعدة (عربي)</Label>
+                      <Editor
+                        id="help_ar"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['help_ar'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'rtl',
+                          language: 'ar',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('help_ar', content)}
+                      />
+                    </div>
+
+                    {/* help_en */}
+                    <div className="space-y-2">
+                      <Label htmlFor="help_en">Help (English)</Label>
+                      <Editor
+                        id="help_en"
+                        apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || ''}
+                        value={formData['help_en'] || ''}
+                        init={{
+                          height: 300,
+                          directionality: 'ltr',
+                          language: 'en',
+                          menubar: false,
+                          plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                          ],
+                          toolbar: 'undo redo | blocks | ' +
+                            'bold italic forecolor | alignright aligncenter alignleft alignjustify | ' +
+                            'bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        }}
+                        onEditorChange={(content) => handleInputChange('help_en', content)}
+                      />
+                    </div>
+                  </div>
+
                 </div>
               )}
             </CardContent>
@@ -437,13 +647,34 @@ export default function SettingsPage() {
                         onChange={(e) => handleInputChange('system_percentage_gift', e.target.value)}
                       />
                     </div>
+                    {/* //makeup_artists_provider_percentage */}
                     <div className="space-y-2">
-                      <Label htmlFor="system_percentage_booking">نسبة العمولة للحجز (%)</Label>
+                      <Label htmlFor="makeup_artists_provider_percentage">نسبة العمولة لمنتجات العينات (%)</Label>
                       <Input
-                        id="system_percentage_booking"
+                        id="makeup_artists_provider_percentage"
                         type="number"
-                        value={formData['system_percentage_booking'] || ''}
-                        onChange={(e) => handleInputChange('system_percentage_booking', e.target.value)}
+                        value={formData['makeup_artists_provider_percentage'] || ''}
+                        onChange={(e) => handleInputChange('makeup_artists_provider_percentage', e.target.value)}
+                      />
+                    </div>
+                    {/* //home_service_provider_percentage */}
+                    <div className="space-y-2">
+                      <Label htmlFor="home_service_provider_percentage">نسبة العمولة لخدمات المنزل (%)</Label>
+                      <Input
+                        id="home_service_provider_percentage"
+                        type="number"
+                        value={formData['home_service_provider_percentage'] || ''}
+                        onChange={(e) => handleInputChange('home_service_provider_percentage', e.target.value)}
+                      />
+                    </div>
+                    {/* clinics_provider_percentage */}
+                    <div className="space-y-2">
+                      <Label htmlFor="clinics_provider_percentage">نسبة العمولة لعيادات الصالونات (%)</Label>
+                      <Input
+                        id="clinics_provider_percentage"
+                        type="number"
+                        value={formData['clinics_provider_percentage'] || ''}
+                        onChange={(e) => handleInputChange('clinics_provider_percentage', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
@@ -453,6 +684,16 @@ export default function SettingsPage() {
                         type="number"
                         value={formData['tax'] || ''}
                         onChange={(e) => handleInputChange('tax', e.target.value)}
+                      />
+                    </div>
+                    {/* salons_provider_percentage */}
+                    <div className="space-y-2">
+                      <Label htmlFor="salons_provider_percentage">نسبة العمولة لصالونات العينات (%)</Label>
+                      <Input
+                        id="salons_provider_percentage"
+                        type="number"
+                        value={formData['salons_provider_percentage'] || ''}
+                        onChange={(e) => handleInputChange('salons_provider_percentage', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
