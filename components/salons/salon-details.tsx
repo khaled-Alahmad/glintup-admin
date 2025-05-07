@@ -308,6 +308,8 @@ interface SalonData {
 
 interface Service {
   id: number;
+  is_home_service: boolean;
+  is_beautician: boolean;
   capacity: number;
   name: {
     en: string;
@@ -396,6 +398,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [perPage, setPerPage] = useState(4);
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedCategory, setSelectedCategory] = useState<string>("both");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("overview");
@@ -442,6 +445,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+
+  // isHomeService
+  const [isHomeService, setIsHomeService] = useState(false);
+  // isBeautician
+  const [isBeautician, setIsBeautician] = useState(false);
+
   const fetchStaff = async () => {
     try {
       const response = await fetchData(
@@ -1778,16 +1787,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const fetchServices = async () => {
     try {
       // setIsLoading(true);
-      const activeFilter =
-        selectedStatus !== "all"
-          ? `&is_active=${selectedStatus === "active" ? 1 : 0}`
-          : "";
-      const categoryFilter = selectedCategory
-        ? `&gender=${selectedCategory}`
-        : "";
+      // filter is_home_service,is_beautician
 
       const response = await fetchData(
-        `admin/services?page=${currentPage}&limit=${perPage}&salon_id=${salonId}`
+        `admin/services?page=${currentPage}&limit=${perPage}&salon_id=${salonId}&is_home_service=${
+          isHomeService ? isHomeService : undefined
+        }&is_beautician=${isBeautician ? isBeautician : undefined}`
       );
       if (response.success) {
         setServices(response.data || []);
@@ -1983,10 +1988,14 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         en: formData.get("name_en") as string,
         ar: formData.get("name_ar") as string,
       },
+      is_home_service: formData.get("is_home_service") === "on" ? 1 : 0,
+      is_beautician: formData.get("is_beautician") === "on" ? 1 : 0,
+
       description: {
         en: formData.get("description_en") as string,
         ar: formData.get("description_ar") as string,
       },
+
       capacity: Number(formData.get("capacity")),
       icon: uploadedIcon,
       duration_minutes: Number(formData.get("duration_minutes")),
@@ -2051,6 +2060,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       icon: uploadedIcon || editingService.icon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
+      is_home_service: formData.get("is_home_service") === "on" ? 1 : 0,
+      is_beautician: formData.get("is_beautician") === "on" ? 1 : 0,
       gender: formData.get("gender") as "male" | "female" | "both",
       is_active: Number(formData.get("is_active")),
     };
@@ -2106,7 +2117,15 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
     fetchServices();
     // }
-  }, [salonId, currentPage, perPage, selectedCategory, selectedStatus]);
+  }, [
+    salonId,
+    currentPage,
+    perPage,
+    selectedCategory,
+    selectedStatus,
+    isHomeService,
+    isBeautician,
+  ]);
 
   const [salonData, setSalonData] = useState<SalonData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -3134,13 +3153,57 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </div>
               </TabsContent>
               <TabsContent value="services" className="space-y-6">
-                <Button
-                  className="text-left"
-                  onClick={() => setIsAddDialogOpen(true)}
-                >
-                  <Plus className="h-4 w-4 ml-2" />
-                  {"إضافة خدمة"}
-                </Button>
+                <div className="flex justify-between items-center">
+                  <Button
+                    className="text-left"
+                    onClick={() => setIsAddDialogOpen(true)}
+                  >
+                    <Plus className="h-4 w-4 ml-2" />
+                    {"إضافة خدمة"}
+                  </Button>
+                  {/* add filter by is_home_service,is_beautician */}
+                  <div className="flex gap-4">
+                    <div className="w-[200px]">
+                      <Select
+                        value={isHomeService ? "home" : "all"}
+                        onValueChange={(value) =>
+                          setIsHomeService(value === "home")
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="نوع الخدمة المنزلية" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">جميع الخدمات</SelectItem>
+                          <SelectItem value="home">
+                            الخدمات المنزلية فقط
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="w-[200px]">
+                      <Select
+                        value={isBeautician ? "beautician" : "all"}
+                        onValueChange={(value) =>
+                          setIsBeautician(value === "beautician")
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="نوع خدمة التجميل" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">جميع الخدمات</SelectItem>
+                          <SelectItem value="beautician">
+                            خدمات خبير التجميل فقط
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+
                 {isLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -3553,6 +3616,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </SelectContent>
                 </Select>
               </div> */}
+              {/* بخدمات الصالونات اذا كان الصالون يحتوي بشكل (فرعي) على خدمات منزلية ف هنا نضيف خيار ان الخدمة منزلية is_home_service */}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -3598,6 +3662,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="price">السعر (د.إ)</Label>
                   <Input
@@ -3633,6 +3698,35 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <SelectItem value="both">الجميع</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                {salonData.types.includes("home_service") && (
+                  <>
+                    <Checkbox
+                      id="is_home_service"
+                      name="is_home_service"
+                      className="ml-2 h-4 w-4 text-muted-foreground"
+                    />
+                    <Label htmlFor="is_home_service">
+                      خدمة منزلية (Home Service)
+                    </Label>
+                  </>
+                )}
+              </div>
+              {/* بخدمات الصالونات اذا كان الصالون يحتوي بشكل (فرعي) على خبيرة تجميل ف هنا نضيف خيار ان الخدمة لخبيرة تجميل is_beautician */}
+              <div className="space-y-2">
+                {salonData.types.includes("beautician") && (
+                  <>
+                    <Checkbox
+                      id="is_beautician"
+                      name="is_beautician"
+                      className="ml-2 h-4 w-4 text-muted-foreground"
+                    />
+                    <Label htmlFor="is_beautician">
+                      خدمة خبيرة تجميل (Beautician Service)
+                    </Label>
+                  </>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="icon">أيقونة الخدمة</Label>
@@ -3816,6 +3910,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="is_active">حالة الخدمة</Label>
                     <Select
@@ -3831,6 +3926,38 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  {salonData.types.includes("home_service") && (
+                    <>
+                      <Checkbox
+                        id="is_home_service"
+                        defaultChecked={editingService.is_home_service}
+                        name="is_home_service"
+                        className="ml-2 h-4 w-4 text-muted-foreground"
+                      />
+                      <Label htmlFor="is_home_service">
+                        خدمة منزلية (Home Service)
+                      </Label>
+                    </>
+                  )}
+                </div>
+                {/* بخدمات الصالونات اذا كان الصالون يحتوي بشكل (فرعي) على خبيرة تجميل ف هنا نضيف خيار ان الخدمة لخبيرة تجميل is_beautician */}
+                <div className="space-y-2">
+                  {salonData.types.includes("beautician") && (
+                    <>
+                      <Checkbox
+                        id="is_beautician"
+                        name="is_beautician"
+                        defaultChecked={editingService.is_beautician}
+                        className="ml-2 h-4 w-4 text-muted-foreground"
+                      />
+                      <Label htmlFor="is_beautician">
+                        خدمة خبيرة تجميل (Beautician Service)
+                      </Label>
+                    </>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="icon">أيقونة الخدمة</Label>
