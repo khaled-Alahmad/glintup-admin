@@ -382,7 +382,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                 <div className="flex items-center space-x-2">
                   <Label htmlFor="status" className="me-2">حالة الإعلان</Label>
                   <Select
-                    value={status}
+                    value={formData.status}
                     onValueChange={(value) => setFormData({
                       ...formData,
                       status: value,
