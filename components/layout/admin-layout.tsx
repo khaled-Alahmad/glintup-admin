@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Button } from "@/components/ui/button";
 import { Bell, Menu, Search } from "lucide-react";
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { addData, handleLogout } from "@/lib/apiHelper";
+import { addData, fetchData, handleLogout } from "@/lib/apiHelper";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Loading from "../ui/loading";
@@ -26,9 +26,96 @@ import Loading from "../ui/loading";
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchData("general/notifications");
+        if (response.success) {
+          console.log("Notifications response:", response);
+
+          setNotifications(response.data);
+          // general/notifications/unread-count
+          // Fetch unread count
+          const unreadResponse = await fetchData(
+            "general/notifications/unread-count"
+          );
+          if (unreadResponse.success) {
+            setUnreadCount(unreadResponse.data?.count);
+          } else {
+            setIsError(true);
+          }
+          // Set notifications and unread count
+          // setNotifications(response.data);
+        } else {
+          setIsError(true);
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
+  const handleMarkAsRead = async (notificationId: number): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const response: { success: boolean } = await addData(
+        `general/notifications/${notificationId}/read`,
+        {}
+      );
+      if (response.success) {
+        setNotifications((prev: Notification[]) =>
+          prev.map((n: Notification) =>
+            n.id === notificationId ? { ...n, is_read: true } : n
+          )
+        );
+        setUnreadCount((prev: number) => prev - 1);
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleMarkAllAsRead = async () => {
+    setIsLoading(true);
+    try {
+      const response = await addData("admin/notifications/read_all", {});
+      if (response.success) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+        setUnreadCount(0);
+      } else {
+        setIsError(true);
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const router = useRouter();
   const { toast } = useToast();
   const handleLogoutClick = async () => {
@@ -36,19 +123,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       // Call the handleLogout function from apiHelper
       const response = await addData("admin/auth/logout", {});
       // Handle the response as needed
-      console.log('Logout response:', response);
+      console.log("Logout response:", response);
       if (response.success) {
         toast({
-          title: 'تم تسجيل الخروج بنجاح',
-          description: 'شكرًا لك على استخدام خدمتنا. نتمنى لك يوماً رائعًا!',
-          variant: 'default',
+          title: "تم تسجيل الخروج بنجاح",
+          description: "شكرًا لك على استخدام خدمتنا. نتمنى لك يوماً رائعًا!",
+          variant: "default",
         });
         // Redirect to the login page or perform any other action
-        router.push('/auth/login');
+        router.push("/auth/login");
       }
       handleLogout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
   // ... in the dropdown menu section, replace the logout item with:
@@ -100,73 +187,87 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   className="relative rounded-full"
                 >
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 text-white h-4 w-4 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800">
+                      {unreadCount}
+                    </span>
+                  )}
+
                   <span className="sr-only">الإشعارات</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80 mt-1">
                 <DropdownMenuLabel className="flex items-center justify-between">
                   <span>الإشعارات</span>
-                  <Button
+                  {/* <Button
                     variant="ghost"
+                    onClick={handleMarkAllAsRead}
+                    disabled={isLoading}
                     size="sm"
                     className="h-auto p-1 text-xs text-primary"
                   >
                     تعيين الكل كمقروء
-                  </Button>
+                  </Button> */}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-
-                {/* إشعار جديد */}
-                <DropdownMenuItem className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent">
-                  <div className="flex w-full items-start gap-2">
-                    <div className="h-2 w-2 mt-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">حجز جديد</p>
-                      <p className="text-xs text-muted-foreground">
-                        تم حجز موعد جديد في صالون الأناقة
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        منذ 5 دقائق
-                      </p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-
-                {/* إشعار مقروء */}
-                <DropdownMenuItem className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent">
-                  <div className="flex w-full items-start gap-2">
-                    <div className="h-2 w-2 mt-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">تقييم جديد</p>
-                      <p className="text-xs text-muted-foreground">
-                        قام مستخدم بتقييم صالون الجمال
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        منذ ساعتين
-                      </p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-
-                {/* إشعار مقروء */}
-                <DropdownMenuItem className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent">
-                  <div className="flex w-full items-start gap-2">
-                    <div className="h-2 w-2 mt-1.5 rounded-full bg-gray-300 flex-shrink-0"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">دفع جديد</p>
-                      <p className="text-xs text-muted-foreground">
-                        تم استلام دفعة جديدة بقيمة 150 ريال
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        أمس، 14:30
-                      </p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
+                {notifications.length === 0 ? (
+                  <DropdownMenuItem className="text-center text-sm text-muted-foreground">
+                    لا توجد إشعارات جديدة
+                  </DropdownMenuItem>
+                ) : (
+                  notifications.map((notification, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent"
+                      onClick={() => handleMarkAsRead(notification.id)}
+                    >
+                      <div className="flex w-full items-start gap-2">
+                        <div
+                          className={`h-2 w-2 mt-1.5 rounded-full ${
+                            notification.is_read ? "bg-gray-300" : "bg-blue-500"
+                          } flex-shrink-0`}
+                        ></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            {notification.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(notification.created_at).toLocaleString(
+                              "ar-SA",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </DropdownMenuItem>
+                  ))
+                )}
+                {isLoading && (
+                  <DropdownMenuItem className="text-center text-sm text-muted-foreground">
+                    <Loading />
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="justify-center text-primary cursor-pointer">
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    // handl;e go to all notifications
+                    router.push("/notifications");
+                    setUnreadCount(0);
+                  }}
+                  className="justify-center text-primary cursor-pointer"
+                >
                   عرض جميع الإشعارات
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -213,9 +314,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         <main className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden">
-          <Suspense fallback={<Loading />}>
-            {children}
-          </Suspense>
+          <Suspense fallback={<Loading />}>{children}</Suspense>
         </main>
       </div>
     </div>
