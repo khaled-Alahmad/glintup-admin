@@ -661,7 +661,9 @@ export default function ComplaintsManagement() {
                 <DialogHeader>
                   <DialogTitle>تفاصيل الشكوى</DialogTitle>
                 </DialogHeader>
-                <ComplaintDetails complaint={selectedComplaint} />
+                {selectedComplaint && (
+                  <ComplaintDetails complaint={selectedComplaint} />
+                )}
               </DialogContent>
             </Dialog>
             {!isLoading && complaints.length > 0 && (
