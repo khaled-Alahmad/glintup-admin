@@ -1103,7 +1103,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       رقم جهة الأعمال
                     </Label>
                     <Input
-                      style={{ unicodeBidi: "plaintext" }}// eslint-disable-line
+                      style={{ unicodeBidi: "plaintext" }} // eslint-disable-line
                       id="business_contact_number"
                       name="business_contact_number"
                       defaultValue={salonData?.business_contact_number}

@@ -44,7 +44,7 @@ export default function AddSalon() {
       phone_code: "+352",
       phone: "",
       gender: "male",
-      birth_date: ""
+      birth_date: "",
     },
     merchant_legal_name: "",
     merchant_commercial_name: "",
@@ -70,20 +70,20 @@ export default function AddSalon() {
 
     try {
       const uploadFormData = new FormData();
-      uploadFormData.append('image', file);
-      uploadFormData.append('folder', "salons");
+      uploadFormData.append("image", file);
+      uploadFormData.append("folder", "salons");
 
-      const response = await addData('general/upload-image', uploadFormData);
+      const response = await addData("general/upload-image", uploadFormData);
 
       if (response.success) {
         setLogoPreview(response.data.image_url);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          icon: response.data.image_name
+          icon: response.data.image_name,
         }));
       }
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.error("Image upload failed:", error);
       toast({
         title: "خطأ في رفع الصورة",
         description: "تعذر رفع الصورة، الرجاء المحاولة مرة أخرى",
@@ -103,39 +103,48 @@ export default function AddSalon() {
     }
   };
   const [newImages, setNewImages] = useState<File[]>([]);
-  const [salonImages, setSalonImages] = useState<{ id: number; url: string }[]>([]);
+  const [salonImages, setSalonImages] = useState<{ id: number; url: string }[]>(
+    []
+  );
 
-  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGalleryChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files) {
       try {
         const files = Array.from(e.target.files);
-        setNewImages(prev => [...prev, ...files]);
+        setNewImages((prev) => [...prev, ...files]);
 
         // Upload each image and store their names and URLs
         const uploadPromises = files.map(async (file) => {
           const formData = new FormData();
-          formData.append('image', file);
-          formData.append('folder', "salons");
+          formData.append("image", file);
+          formData.append("folder", "salons");
 
-          const response = await addData('general/upload-image', formData);
+          const response = await addData("general/upload-image", formData);
           if (response.success) {
             return {
               name: response.data.image_name,
-              url: response.data.image_url
+              url: response.data.image_url,
             };
           }
           return null;
         });
 
         const imageResults = await Promise.all(uploadPromises);
-        const validResults = imageResults.filter((result): result is { name: string, url: string } => result !== null);
+        const validResults = imageResults.filter(
+          (result): result is { name: string; url: string } => result !== null
+        );
 
-        setSalonImages(prev => [...prev, ...validResults.map((r, index) => ({
-          id: Date.now() + index, // Convert to number
-          url: r.url
-        }))]);
+        setSalonImages((prev) => [
+          ...prev,
+          ...validResults.map((r, index) => ({
+            id: Date.now() + index, // Convert to number
+            url: r.url,
+          })),
+        ]);
       } catch (error) {
-        console.error('Error uploading images:', error);
+        console.error("Error uploading images:", error);
         toast({
           title: "خطأ في رفع الصور",
           description: "حدث خطأ أثناء رفع الصور",
@@ -155,15 +164,14 @@ export default function AddSalon() {
       const uploadedImages = await Promise.all(
         newImages.map(async (file) => {
           const imageFormData = new FormData();
-          imageFormData.append('image', file);
-          imageFormData.append('folder', "salons");
+          imageFormData.append("image", file);
+          imageFormData.append("folder", "salons");
 
-          const response = await addData('general/upload-image', imageFormData);
+          const response = await addData("general/upload-image", imageFormData);
           return response.data.image_name;
         })
       );
       const updateDataToSend = {
-
         ...formData,
         images: uploadedImages,
         // images_remove: imagesToRemove,
@@ -171,24 +179,33 @@ export default function AddSalon() {
       };
 
       // formData.images = uploadedImages
-      const response = await addData('admin/salons/register', updateDataToSend);
+      const response = await addData("admin/salons/register", updateDataToSend);
 
       if (response.success) {
         toast({
           title: "تمت الإضافة بنجاح",
           description: "تم إنشاء الصالون الجديد",
         });
-        window.location.href = '/salons';
+        window.location.href = "/salons";
       }
-    } catch (error : any) {
-      console.error('Error adding salon:', error);
+    } catch (error: any) {
+      console.error("Error adding salon:", error);
       toast({
         title: "خطأ",
-        description: error.respone.message ,
+        description: error.respone.message,
         variant: "destructive",
       });
     }
   };
+  //gulfPhoneCodes
+  const gulfPhoneCodes = [
+    { id: 1, code: "+965", name: "الكويت" }, // Kuwait
+    { id: 2, code: "+971", name: "الإمارات" }, // UAE
+    { id: 3, code: "+973", name: "البحرين" }, // Bahrain
+    { id: 4, code: "+966", name: "السعودية" }, // Saudi Arabia
+    { id: 5, code: "+968", name: "عمان" }, // Oman
+    { id: 6, code: "+974", name: "قطر" }, // Qatar
+  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -221,7 +238,12 @@ export default function AddSalon() {
                 <Input
                   id="first_name"
                   value={formData.user.first_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, first_name: e.target.value } }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, first_name: e.target.value },
+                    }))
+                  }
                   required
                 />
               </div>
@@ -232,7 +254,12 @@ export default function AddSalon() {
                 <Input
                   id="last_name"
                   value={formData.user.last_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, last_name: e.target.value } }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, last_name: e.target.value },
+                    }))
+                  }
                   required
                 />
               </div>
@@ -247,7 +274,12 @@ export default function AddSalon() {
                   id="password"
                   type="password"
                   value={formData.user.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, password: e.target.value } }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, password: e.target.value },
+                    }))
+                  }
                   required
                 />
               </div>
@@ -259,7 +291,15 @@ export default function AddSalon() {
                   id="password_confirmation"
                   type="password"
                   value={formData.user.password_confirmation}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, password_confirmation: e.target.value } }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: {
+                        ...prev.user,
+                        password_confirmation: e.target.value,
+                      },
+                    }))
+                  }
                   required
                 />
               </div>
@@ -267,26 +307,50 @@ export default function AddSalon() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="phone_code">
-                  رمز الهاتف <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="phone_code"
-                  value={formData.user.phone_code}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, phone_code: e.target.value } }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="phone">
                   رقم الهاتف <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="phone"
                   value={formData.user.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, phone: e.target.value } }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, phone: e.target.value },
+                    }))
+                  }
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone_code">
+                  رمز الهاتف <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.user.phone_code}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, phone_code: value },
+                    }))
+                  }
+                  required
+                >
+                  <SelectTrigger id="phone_code">
+                    <SelectValue placeholder="اختر رمز الهاتف" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gulfPhoneCodes.map((code) => (
+                      <SelectItem
+                        key={code.id}
+                        value={code.code}
+                        style={{ unicodeBidi: "plaintext" }}
+                      >
+                        {code.code} {code.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -297,7 +361,12 @@ export default function AddSalon() {
                 </Label>
                 <Select
                   value={formData.user.gender}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, user: { ...prev.user, gender: value } }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, gender: value },
+                    }))
+                  }
                 >
                   <SelectTrigger id="gender">
                     <SelectValue placeholder="اختر الجنس" />
@@ -316,7 +385,12 @@ export default function AddSalon() {
                   id="birth_date"
                   type="date"
                   value={formData.user.birth_date}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user: { ...prev.user, birth_date: e.target.value } }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: { ...prev.user, birth_date: e.target.value },
+                    }))
+                  }
                   required
                 />
               </div>
@@ -334,7 +408,12 @@ export default function AddSalon() {
                 <Input
                   id="merchant_legal_name"
                   value={formData.merchant_legal_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, merchant_legal_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      merchant_legal_name: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -345,7 +424,12 @@ export default function AddSalon() {
                 <Input
                   id="merchant_commercial_name"
                   value={formData.merchant_commercial_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, merchant_commercial_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      merchant_commercial_name: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -356,7 +440,12 @@ export default function AddSalon() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 placeholder="أدخل وصف الصالون"
                 rows={4}
               />
@@ -367,7 +456,9 @@ export default function AddSalon() {
               <Textarea
                 id="bio"
                 value={formData.bio}
-                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, bio: e.target.value }))
+                }
                 placeholder="أدخل نبذة عن الصالون"
                 rows={4}
               />
@@ -420,13 +511,19 @@ export default function AddSalon() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="contact_email">
-                  البريد الإلكتروني للتواصل <span className="text-red-500">*</span>
+                  البريد الإلكتروني للتواصل{" "}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="contact_email"
                   type="email"
                   value={formData.contact_email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact_email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      contact_email: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -437,7 +534,12 @@ export default function AddSalon() {
                 <Input
                   id="contact_number"
                   value={formData.contact_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact_number: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      contact_number: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -446,13 +548,19 @@ export default function AddSalon() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="business_contact_email">
-                  البريد الإلكتروني للأعمال <span className="text-red-500">*</span>
+                  البريد الإلكتروني للأعمال{" "}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="business_contact_email"
                   type="email"
                   value={formData.business_contact_email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, business_contact_email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      business_contact_email: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -463,7 +571,12 @@ export default function AddSalon() {
                 <Input
                   id="business_contact_number"
                   value={formData.business_contact_number}
-                  onChange={(e) => setFormData(prev => ({ ...prev, business_contact_number: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      business_contact_number: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -477,18 +590,29 @@ export default function AddSalon() {
                 <Input
                   id="contact_name"
                   value={formData.contact_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      contact_name: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="business_contact_name">
-                  اسم جهة الاتصال للأعمال <span className="text-red-500">*</span>
+                  اسم جهة الاتصال للأعمال{" "}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="business_contact_name"
                   value={formData.business_contact_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, business_contact_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      business_contact_name: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -501,7 +625,9 @@ export default function AddSalon() {
               <Textarea
                 id="address"
                 value={formData.address}
-                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, address: e.target.value }))
+                }
                 placeholder="العنوان التفصيلي"
                 className="min-h-[80px]"
                 required
@@ -515,7 +641,12 @@ export default function AddSalon() {
               <Input
                 id="city_street_name"
                 value={formData.city_street_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, city_street_name: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    city_street_name: e.target.value,
+                  }))
+                }
                 required
               />
             </div>
@@ -528,7 +659,12 @@ export default function AddSalon() {
                 <Input
                   id="latitude"
                   value={formData.latitude}
-                  onChange={(e) => setFormData(prev => ({ ...prev, latitude: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      latitude: e.target.value,
+                    }))
+                  }
                   placeholder="مثال: 24.431126"
                   required
                 />
@@ -540,7 +676,12 @@ export default function AddSalon() {
                 <Input
                   id="longitude"
                   value={formData.longitude}
-                  onChange={(e) => setFormData(prev => ({ ...prev, longitude: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      longitude: e.target.value,
+                    }))
+                  }
                   placeholder="مثال: 54.649244"
                   required
                 />
@@ -607,12 +748,14 @@ export default function AddSalon() {
                         حذف
                       </Button>
                     </div>
-                  ) :
+                  ) : (
                     !logoPreview && (
                       <Label htmlFor="logo" className="mt-4">
                         <div className="flex flex-col items-center">
                           <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600">اختر شعار الصالون</p>
+                          <p className="text-sm text-gray-600">
+                            اختر شعار الصالون
+                          </p>
                         </div>
                         {/* <Button type="button" variant="outline">
                           اختر شعار
@@ -626,10 +769,8 @@ export default function AddSalon() {
                           required
                         />
                       </Label>
-                    )}
-
-
-
+                    )
+                  )}
                 </div>
               </div>
               <div className="space-y-4">
@@ -768,6 +909,6 @@ export default function AddSalon() {
           </CardFooter>
         </Card>
       </form>
-    </div >
+    </div>
   );
 }
