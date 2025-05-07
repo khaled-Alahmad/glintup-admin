@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle, CalendarIcon, Eye, Pencil } from 'lucide-react';
+import { MoreVertical, MessageSquare, Flag, CheckCheck, CheckCircle, CalendarIcon, Eye, Pencil, Copy } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,6 +109,22 @@ interface StaffMember {
 interface SalonDetailsProps {
   salonId: string;
 }
+
+interface SalonCustomer {
+  id: number;
+  salon_id: number;
+  user_id: number;
+  is_banned: boolean;
+  notes: string;
+  user: {
+    id: number;
+    full_name: string;
+    avatar: string | null;
+    full_phone: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
 interface Appointment {
   id: number;
   code: string;
@@ -139,6 +155,7 @@ interface GiftCard {
   services: number[];
   services_data: {
     id: number;
+    currency: string;
     name: {
       en: string;
       ar: string;
@@ -202,6 +219,7 @@ interface Booking {
 }
 
 interface Payment {
+  code: string;
   id: number;
   amount: string;
   currency: string;
@@ -356,6 +374,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [uploadedIcon, setUploadedIcon] = useState<string>("");
   const [iconPreview, setIconPreview] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [currentGiftCard, setCurrentGiftCard] = useState<GiftCard | null>(null);
   const { toast } = useToast();
   const [totalPages, setTotalPages] = useState(1);
   const [perPage, setPerPage] = useState(4);
@@ -364,6 +384,13 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("both");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("overview");
+  const [customers, setCustomers] = useState<SalonCustomer[]>([]);
+  const [customersCurrentPage, setCustomersCurrentPage] = useState(1);
+  const [customersTotalPages, setCustomersTotalPages] = useState(1);
+  const [customersPerPage, setCustomersPerPage] = useState(10);
+  const [customersTotalItems, setCustomersTotalItems] = useState(0);
+  const [editingCustomer, setEditingCustomer] = useState<SalonCustomer | null>(null);
+  const [isEditCustomerDialogOpen, setIsEditCustomerDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -429,12 +456,165 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   };
 
   // Add useEffect for staff
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetchData(`admin/salon-customers?salon_id=${salonId}&page=${customersCurrentPage}`);
+      if (response.success) {
+        setCustomers(response.data);
+        setCustomersTotalPages(response.meta.last_page);
+        setCustomersCurrentPage(response.meta.current_page);
+        setCustomersPerPage(response.meta.per_page);
+        setCustomersTotalItems(response.meta.total);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب بيانات العملاء",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'staff') {
       fetchStaff();
       fetchPermissions();
+    } else if (activeTab === 'customers') {
+      fetchCustomers();
     }
-  }, [activeTab, staffCurrentPage, salonId]);
+  }, [activeTab, staffCurrentPage, customersCurrentPage, salonId]);
+
+  const handleCustomerUpdate = async (customerId: number, data: { is_banned?: boolean; notes?: string }) => {
+    try {
+      const response = await updateData(`admin/salon-customers/${customerId}`, data);
+      if (response.success) {
+        toast({
+          title: "تم",
+          description: "تم تحديث بيانات العميل بنجاح",
+        });
+        fetchCustomers();
+        setIsEditCustomerDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Error updating customer:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث بيانات العميل",
+        variant: "destructive",
+      });
+    }
+  };
+  const CustomersTab = () => {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">عملاء الصالون</h3>
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>العميل</TableHead>
+                  <TableHead>رقم الهاتف</TableHead>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead>الملاحظات</TableHead>
+                  <TableHead>تاريخ الإضافة</TableHead>
+                  <TableHead>الإجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{customer.user.full_name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{customer.user.full_name}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell style={{ unicodeBidi: "plaintext" }}>{customer.user.full_phone}</TableCell>
+                    <TableCell>
+                      <span className={customer.is_banned ? 'px-2 py-1 rounded-md text-sm font-medium  bg-red-50 text-red-700' : 'px-2 py-1 rounded-md text-sm font-medium  bg-green-50 text-green-700'}>
+                        {customer.is_banned ? 'محظور' : 'نشط'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <p className="max-w-[200px] truncate">{customer.notes || '-'}</p>
+                    </TableCell>
+                    <TableCell>{new Date(customer.created_at).toLocaleDateString('ar-EG')}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEditingCustomer(customer);
+                            setIsEditCustomerDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+          <CardFooter className="flex justify-center p-4">
+            <PaginationWithInfo
+              currentPage={customersCurrentPage}
+              totalPages={customersTotalPages}
+              totalItems={customersTotalItems}
+              itemsPerPage={customersPerPage}
+              onPageChange={setCustomersCurrentPage}
+            />
+          </CardFooter>
+        </Card>
+
+        <Dialog open={isEditCustomerDialogOpen} onOpenChange={setIsEditCustomerDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>تعديل بيانات العميل</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center gap-4">
+                <Label>حالة الحظر</Label>
+                <Button
+                  variant={editingCustomer?.is_banned ? 'default' : 'destructive'}
+                  onClick={() => {
+                    if (editingCustomer) {
+                      handleCustomerUpdate(editingCustomer.id, { is_banned: !editingCustomer.is_banned });
+                    }
+                  }}
+                >
+                  {editingCustomer?.is_banned ? 'إلغاء الحظر' : 'حظر العميل'}
+                </Button>
+              </div>
+              <div className="grid gap-2">
+                <Label>الملاحظات</Label>
+                <Textarea
+                  defaultValue={editingCustomer?.notes || ''}
+                  onBlur={(e) => {
+                    if (editingCustomer && e.target.value !== editingCustomer.notes) {
+                      handleCustomerUpdate(editingCustomer.id, { notes: e.target.value });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
+
   const StaffTab = () => {
     const handleAddStaff = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -474,6 +654,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         });
       }
     };
+
+
 
     const handleEditStaff = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -875,6 +1057,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+
       </div>
     );
   };
@@ -921,9 +1105,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>رقم العملية</TableHead>
+                {/* <TableHead className="text-nowrap">رقم العملية</TableHead> */}
+
+                <TableHead className="text-nowrap">كود العملية</TableHead>
+
                 <TableHead>المبلغ</TableHead>
-                <TableHead>طريقة الدفع</TableHead>
+                <TableHead className="text-nowrap">طريقة الدفع</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead>النوع</TableHead>
                 <TableHead>التاريخ</TableHead>
@@ -948,8 +1135,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </TableRow>
               ) : payments.map((payment) => (
                 <TableRow key={payment.id}>
-                  <TableCell>#{payment.id}</TableCell>
-                  <TableCell>{payment.amount} {payment.currency}</TableCell>
+                  {/* <TableCell>#{payment.id}</TableCell> */}
+                  <TableCell>{payment.code}</TableCell>
+
+                  <TableCell className="text-nowrap">{payment.amount} {payment.currency}</TableCell>
                   <TableCell>
                     {payment.method === 'wallet' ? 'المحفظة' :
                       payment.method === 'stripe' ? 'بطاقة ائتمان' :
@@ -970,30 +1159,45 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               payment.status}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    {payment.paymentable_type.includes('Booking') ? 'حجز' : 'بطاقة هدية'}
+                  <TableCell className="text-nowrap">
+                    {payment.paymentable_type.includes('Booking') ? 'حجز' : <span
+                      className="cursor-pointer text-blue-500 underline"
+                      onClick={() => {
+                        setIsViewDialogOpen(true);
+                        console.log("clicked", isViewDialogOpen);
+                        console.log(payment);
+
+                        setCurrentGiftCard(payment.gift_card || null);
+                      }}
+                    >
+                      بطاقة هدية
+                    </span>}
                   </TableCell>
                   <TableCell>{new Date(payment.created_at).toLocaleDateString('ar-EG')}</TableCell>
-                  <TableCell>
+                  <TableCell className="flex gap-1 px-2">
                     {payment.paymentable_type.includes('Booking') && (
                       <>
                         <Link href={`/appointments/${payment.paymentable_id}`}>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="outline" size="sm">
                             <Calendar className="h-4 w-4" />
+                            <span className="ms-1">عرض الحجوزات</span>
                           </Button>
                         </Link>
 
                       </>)}
 
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="outline"
+                      className="mx-2"
+                      size="sm"
                       onClick={() => {
                         setSelectedPayment(payment);
                         setShowPaymentDetails(true);
                       }}
                     >
                       <Eye className="h-4 w-4" />
+                      <span className="ms-1">عرض التفاصيل</span>
+
                     </Button>
 
                   </TableCell>
@@ -1743,6 +1947,30 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       </div>
     );
   };
+  // الحصول على اسم الحالة بالعربية
+  const getStatusName = (status: string | null | undefined) => {
+    if (status !== null && status !== undefined) {
+      return "مستخدمة";
+    } else if (status === null || status === undefined) {
+      return "غير مستخدمة";
+    } else {
+      return "غير معروف";
+    }
+  };
+  const copyGiftCardCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    alert("تم نسخ الكود: " + code);
+  };
+  const getStatusColor = (status: string | null | undefined) => {
+    if (status != null) {
+      return "bg-green-100 text-green-800";
+    } else if (status === null) {
+      return "bg-red-100 text-red-800";
+    } else {
+      return "bg-gray-100 text-gray-800";
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-3 w-full">
@@ -2055,6 +2283,157 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </DialogContent>
                 </Dialog>
               </div> */}
+              <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>تفاصيل بطاقة الهدية</DialogTitle>
+                    <DialogDescription>عرض جميع تفاصيل بطاقة الهدية</DialogDescription>
+                  </DialogHeader>
+                  {currentGiftCard && (
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                            كود البطاقة
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{currentGiftCard.code}</p>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => copyGiftCardCode(currentGiftCard.code)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                            نوع البطاقة
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{currentGiftCard.type == "services" ? "خدمات" : currentGiftCard.type == "amount" ? "مبلغ مالي " : ""}</p>
+                            {/* <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      //   onClick={() => copyGiftCardCode(currentGiftCard.code)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button> */}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                            الحالة
+                          </h3>
+                          <Badge className={getStatusColor(currentGiftCard.received_at)}>
+                            {getStatusName(currentGiftCard.received_at)}
+                          </Badge>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                            تاريخ الإنشاء
+                          </h3>
+                          <p>{currentGiftCard.created_at}</p>
+                        </div>
+                        {/* <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    تاريخ الانتهاء
+                  </h3>
+                  <p>{currentGiftCard.expiryDate}</p>
+                </div> */}
+                        {/* {currentGiftCard.usedAt && (
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      تاريخ الاستخدام
+                    </h3>
+                    <p>{currentGiftCard.usedAt}</p>
+                  </div>
+                )} */}
+                      </div>
+                      {currentGiftCard.type != "services" ? <>
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                            تفاصيل
+                          </h3>
+                          <p className="font-medium">{currentGiftCard.amount} د.إ</p>
+                        </div>
+                      </> :
+                        <>
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                              تفاصيل الخدمات
+                            </h3>
+                            <div className="border rounded-md overflow-hidden">
+                              <table className="w-full">
+                                <thead className="bg-muted/50">
+                                  <tr>
+                                    <th className="py-2 px-3 text-right text-sm font-medium">اسم الخدمة</th>
+                                    <th className="py-2 px-3 text-right text-sm font-medium">السعر</th>
+                                    <th className="py-2 px-3 text-right text-sm font-medium">المدة</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {currentGiftCard.services_data.map((service) => (
+                                    <tr key={service.id} className="border-t">
+                                      <td className="py-2 px-3 text-sm">{service.name.ar}</td>
+                                      <td className="py-2 px-3 text-sm">{service.final_price} {service.currency}</td>
+                                      <td className="py-2 px-3 text-sm">{service.duration_minutes} دقيقة</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </>
+                      }
+                      <div className="border-t pt-4 mt-2">
+                        <h3 className="font-medium mb-2">معلومات المستلم والمرسل</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                              اسم المستلم
+                            </h3>
+                            <p>{currentGiftCard.recipient?.full_name || "غير مسجل"}</p>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                              رقم المستلم
+                            </h3>
+                            <p style={{ unicodeBidi: "plaintext", textAlign: 'right' }}>{currentGiftCard.recipient?.email || "غير مسجل"}</p>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                              اسم المرسل
+                            </h3>
+                            <p>{currentGiftCard.sender?.full_name || "غير مسجل"}</p>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                              رقم المرسل
+                            </h3>
+                            <p style={{ unicodeBidi: "plaintext", textAlign: "right" }}>{currentGiftCard.sender?.full_phone || "غير مسجل"}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {currentGiftCard.message && (
+                        <div className="border-t pt-4 mt-2">
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                            الرسالة
+                          </h3>
+                          <p className="p-3 bg-muted rounded-md">
+                            {currentGiftCard.message}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
 
             <Separator className="my-6" />
@@ -2151,7 +2530,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         <Card className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full" value={activeTab} onValueChange={setActiveTab} >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -2160,12 +2539,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   {/* <CalendarIcon className="h-4 w-4 ml-2" /> */}
                   العطلات
                 </TabsTrigger>
-
                 <TabsTrigger value="payments">
                   {/* <CreditCard className="h-4 w-4 ml-2" /> */}
                   المدفوعات
                 </TabsTrigger>
                 <TabsTrigger value="staff">الموظفين</TabsTrigger>
+                <TabsTrigger value="customers">العملاء</TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
@@ -2177,6 +2556,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
               </TabsContent>
               <TabsContent value="holidays" className="space-y-6">
                 <HolidaysTab />
+              </TabsContent>
+              <TabsContent value="customers" className="space-y-6">
+                <CustomersTab />
               </TabsContent>
               <TabsContent value="overview" className="space-y-6">
                 <div className="rounded-lg overflow-hidden h-48 md:h-64">
@@ -3127,6 +3509,7 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
         </Button>
       </CardFooter>
     </Card>
+
   )
 }
 

@@ -33,8 +33,10 @@ export default function EditUser({ userId }: EditUserProps) {
     phone_code: '+966',
     phone: '',
     password: '',
+    notes: '',
     is_active: true,
     avatar: '',
+
 
     language: 'ar',
   });
@@ -98,6 +100,7 @@ export default function EditUser({ userId }: EditUserProps) {
         phone_code: formData.phone_code,
         phone: formData.phone,
         is_active: formData.is_active,
+        notes: formData.notes,
       };
 
       // فقط أرسل avatar إذا تم تغييره عن الأصل
@@ -127,6 +130,7 @@ export default function EditUser({ userId }: EditUserProps) {
           password: '',
           avatar: '',
           is_active: true,
+          notes: '',
           language: 'ar',
         });
         // Redirect or reset form
@@ -240,13 +244,23 @@ export default function EditUser({ userId }: EditUserProps) {
               // required
               />
             </div>
+            {/* add notes */}
+            <div className="space-y-2">
+              <Label htmlFor="notes">ملاحظات</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              />
+            </div>
+            <Separator />
             <div className="space-y-2">
               <Label htmlFor="avatar">صورة المستخدم</Label>
               <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                 {formData.avatar ? (
                   <div className="relative w-full">
                     <img
-                      src={formData.avatar}
+                      src={avatarPreview || formData.avatar }
                       alt="معاينة الصورة"
                       className="mx-auto max-h-32 rounded-full object-cover"
                     />

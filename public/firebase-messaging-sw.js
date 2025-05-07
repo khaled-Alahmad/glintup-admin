@@ -33,7 +33,7 @@ messaging.onBackgroundMessage((payload) => {
       body: payload.notification.body,
       icon: payload.notification.icon || '/logo.png',
       image: payload.notification.image,
-      badge: '/logo.png',
+      badge: '/logo (2).png',
       tag: payload.notification.tag || 'default',
       data: payload.data,
       actions: payload.notification.actions || [],
