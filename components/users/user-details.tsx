@@ -142,7 +142,12 @@ interface Review {
   salon_reply_at: string | null
   created_at: string
 }
-
+type MetaData = {
+  last_page: number;
+  current_page: number;
+  total: number;
+  per_page: number;
+};
 export default function UserDetails({ userId }: UserDetailsProps) {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [bookingsData, setBookingsData] = useState<Booking[]>([])
@@ -159,88 +164,101 @@ export default function UserDetails({ userId }: UserDetailsProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [perPage, setPerPage] = useState(20);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetchData(`admin/users/${userId}`)
+        if (response.success) {
+          setUserData(response.data)
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
+    }
+    fetchUserData()
+  }, [userId])
 
   useEffect(() => {
     const fetchUserDetails = async () => {
+      setLoading(true);
       try {
-        const [userRes, bookingsRes, paymentsRes, giftCardsRecoverRes, giftCardsRes, loyaltyPointsRes, reviewsRes] = await Promise.all([
-          fetchData(`admin/users/${userId}`),
-          fetchData(`admin/bookings?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
-          fetchData(`admin/transactions?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
-          fetchData(`admin/gift-cards?recipient_id=${userId}&page=${currentPage}&limit=${perPage}`),
+        // دائمًا جلب بيانات المستخدم
 
-          fetchData(`admin/gift-cards?sender_id=${userId}&page=${currentPage}&limit=${perPage}`),
-          fetchData(`admin/loyalty-points?user_id=${userId}&page=${currentPage}&limit=${perPage}`),
-          fetchData(`admin/reviews?user_id=${userId}&page=${currentPage}&limit=${perPage}`)
-        ])
 
-        if (userRes.success) setUserData(userRes.data)
-        if (bookingsRes.success) {
-          setBookingsData(bookingsRes.data)
-          setTotalPages(bookingsRes.meta.last_page)
-          setCurrentPage(bookingsRes.meta.current_page)
-          setTotalItems(bookingsRes.meta.total)
-          setPerPage(bookingsRes.meta.per_page)
-        }
-        if (paymentsRes.success) {
-          setPaymentsData(paymentsRes.data)
-          if (activeTab === 'payments') {
-            setTotalPages(paymentsRes.meta.last_page)
-            setCurrentPage(paymentsRes.meta.current_page)
-            setTotalItems(paymentsRes.meta.total)
-            setPerPage(paymentsRes.meta.per_page)
-          }
-        }
-        if (giftCardsRecoverRes.success) {
-          setGiftCardsDataRecover(giftCardsRecoverRes.data)
-          if (activeTab === 'gift-cards-recover') {
-            setTotalPages(giftCardsRecoverRes.meta.last_page)
-            setCurrentPage(giftCardsRecoverRes.meta.current_page)
-            setTotalItems(giftCardsRecoverRes.meta.total)
-            setPerPage(giftCardsRecoverRes.meta.per_page)
-          }
-        }
-        if (giftCardsRes.success) {
-          setGiftCardsData(giftCardsRes.data)
-          if (activeTab === 'gift-cards') {
-            setTotalPages(giftCardsRes.meta.last_page)
-            setCurrentPage(giftCardsRes.meta.current_page)
-            setTotalItems(giftCardsRes.meta.total)
-            setPerPage(giftCardsRes.meta.per_page)
-          }
-        }
+        // جلب البيانات حسب التبويب النشط فقط
+        let response;
+        switch (activeTab) {
+          case 'bookings':
+            response = await fetchData(`admin/bookings?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+            if (response.success) {
+              setBookingsData(response.data);
+              updatePagination(response.meta);
+            }
+            break;
 
-        if (loyaltyPointsRes.success) {
-          setLoyaltyPointsData(loyaltyPointsRes.data)
-          console.log(loyaltyPointsRes.data);
+          case 'payments':
+            response = await fetchData(`admin/transactions?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+            if (response.success) {
+              setPaymentsData(response.data);
+              updatePagination(response.meta);
+            }
+            break;
 
-          if (activeTab === 'loyalty-points') {
-            setTotalPages(loyaltyPointsRes.meta.last_page)
-            setCurrentPage(loyaltyPointsRes.meta.current_page)
-            setTotalItems(loyaltyPointsRes.meta.total)
-            setPerPage(loyaltyPointsRes.meta.per_page)
-          }
-        }
+          case 'gift-cards-recover':
+            response = await fetchData(`admin/gift-cards?recipient_id=${userId}&page=${currentPage}&limit=${perPage}`);
+            if (response.success) {
+              setGiftCardsDataRecover(response.data);
+              updatePagination(response.meta);
+            }
+            break;
 
-        if (reviewsRes.success) {
-          setReviewsData(reviewsRes.data)
-          if (activeTab === 'reviews') {
-            setTotalPages(reviewsRes.meta.last_page)
-            setCurrentPage(reviewsRes.meta.current_page)
-            setTotalItems(reviewsRes.meta.total)
-            setPerPage(reviewsRes.meta.per_page)
-          }
+          case 'gift-cards':
+            response = await fetchData(`admin/gift-cards?sender_id=${userId}&page=${currentPage}&limit=${perPage}`);
+            if (response.success) {
+              setGiftCardsData(response.data);
+              updatePagination(response.meta);
+            }
+            break;
+
+          case 'loyalty-points':
+            response = await fetchData(`admin/loyalty-points?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+            if (response.success) {
+              setLoyaltyPointsData(response.data);
+              updatePagination(response.meta);
+            }
+            break;
+
+          case 'reviews':
+            response = await fetchData(`admin/reviews?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+            if (response.success) {
+              setReviewsData(response.data);
+              updatePagination(response.meta);
+            }
+            break;
+
+          default:
+            break;
         }
 
-        setLoading(false)
+        setLoading(false);
       } catch (err) {
-        setError('فشل في تحميل بيانات المستخدم')
-        setLoading(false)
+        setError('فشل في تحميل بيانات المستخدم');
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUserDetails()
-  }, [userId, currentPage, activeTab])
+    const updatePagination = (meta: MetaData) => {
+      setTotalPages(meta.last_page);
+      setCurrentPage(meta.current_page);
+      setTotalItems(meta.total);
+      setPerPage(meta.per_page);
+    };
+
+    if (userId) {
+      fetchUserDetails();
+    }
+  }, [userId, currentPage, activeTab]);
+
 
   if (loading) {
     return (
