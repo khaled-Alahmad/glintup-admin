@@ -108,6 +108,23 @@ interface LoyaltyPoint {
   }
   taken_at: string | null
   used_at: string | null
+  free_service?: {
+    id: number
+    service_id: number
+    service: {
+      id: number
+      name: {
+        en: string
+        ar: string
+      }
+      duration_minutes: number
+      final_price: number
+      currency: string
+    }
+    is_used: boolean
+    created_at: string
+    updated_at: string
+  }
 }
 
 interface Review {
@@ -195,6 +212,8 @@ export default function UserDetails({ userId }: UserDetailsProps) {
 
         if (loyaltyPointsRes.success) {
           setLoyaltyPointsData(loyaltyPointsRes.data)
+          console.log(loyaltyPointsRes.data);
+
           if (activeTab === 'loyalty-points') {
             setTotalPages(loyaltyPointsRes.meta.last_page)
             setCurrentPage(loyaltyPointsRes.meta.current_page)
@@ -639,12 +658,13 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                         <TableHead>النقاط</TableHead>
                         <TableHead>تاريخ الاكتساب</TableHead>
                         <TableHead>تاريخ الاستخدام</TableHead>
+                        <TableHead>الخدمة </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loyaltyPointsData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center">لا يوجد نقاط ولاء</TableCell>
+                          <TableCell colSpan={5} className="text-center">لا يوجد نقاط ولاء</TableCell>
                         </TableRow>
                       ) : (
                         loyaltyPointsData.map((point) => (
@@ -661,6 +681,21 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                             <TableCell>{point.points}</TableCell>
                             <TableCell>{point.taken_at ? new Date(point.taken_at).toLocaleDateString("en-US") : "-"}</TableCell>
                             <TableCell>{point.used_at ? new Date(point.used_at).toLocaleDateString("en-US") : "-"}</TableCell>
+                            <TableCell>
+                              {point.points >= 5 && point.used_at && point.free_service ? (
+                                <div className="flex flex-col gap-1">
+                                  <span className="text-sm font-medium">{point.free_service.service.name.ar}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {point.free_service.service.final_price} {point.free_service.service.currency} • {point.free_service.service.duration_minutes} دقيقة
+                                  </span>
+                                  <Badge variant="outline" className={point.free_service.is_used ? "bg-green-50 text-green-700 border-green-200" : "bg-amber-50 text-amber-700 border-amber-200"}>
+                                    {point.free_service.is_used ? "مستخدمة" : "غير مستخدمة"}
+                                  </Badge>
+                                </div>
+                              ) : (
+                                "-"
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))
                       )}
