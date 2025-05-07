@@ -12,7 +12,7 @@ import { Bell, CheckCircle, CheckCircle2, Clock, Eye, Search, Trash, User } from
 import { format, formatDistanceToNow, parseISO } from "date-fns"
 import { ar } from "date-fns/locale"
 import { fetchData, updateData, deleteData } from "@/lib/apiHelper"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 
 interface Notification {
     id: number

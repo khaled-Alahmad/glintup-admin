@@ -119,7 +119,8 @@ export default function AppointmentsManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Date | undefined>(undefined);
+  const [selectedDateTo, setSelectedDateTo] = useState<Date | undefined>(undefined);
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -127,7 +128,7 @@ export default function AppointmentsManagement() {
 
   useEffect(() => {
     fetchBookings();
-  }, [page, statusFilter, dateFilter, selectedDate]); // Add dependencies
+  }, [page, statusFilter, dateFilter, selectedDateFrom,selectedDateTo]); // Add dependencies
 
   const fetchBookings = async () => {
     try {
@@ -135,9 +136,10 @@ export default function AppointmentsManagement() {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: perPage.toString(),
-        ...(selectedDate && {
-          date_from: new Date(selectedDate.getTime() + 86400000).toISOString().split('T')[0],
-          date_to: new Date(selectedDate.getTime() + 86400000).toISOString().split('T')[0]
+        ...(statusFilter !== "all" && { status: statusFilter }),
+        ...(selectedDateFrom && selectedDateTo && {
+          date_from: new Date(selectedDateFrom.getTime() + 86400000).toISOString().split('T')[0],
+          date_to: new Date(selectedDateTo.getTime() + 86400000).toISOString().split('T')[0]
         }),
         ...(searchQuery && { search: searchQuery }),
       })
@@ -146,7 +148,7 @@ export default function AppointmentsManagement() {
       if (response.success) {
         setBookings(response.data);
         setTotal(response.meta?.total);
-        
+
         // استخراج معلومات الإحصائيات من الاستجابة
         if (response.info) {
           setBookingInfo(response.info);
@@ -317,21 +319,31 @@ export default function AppointmentsManagement() {
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => generateMonthlyBookingReport(bookings, selectedDate)}
+                  <Button
+                    variant="outline"
+                    onClick={() => generateMonthlyBookingReport(bookings, selectedDateFrom)}
                     className="flex items-center gap-1"
                   >
                     <FileText className="h-4 w-4" />
                     تصدير PDF
                   </Button>
                   <DatePicker
-                    selected={selectedDate}
+                    selected={selectedDateFrom}
                     onSelect={(date) => {
-                      setSelectedDate(date);
+                      setSelectedDateFrom(date);
                       setPage(1);
                     }}
-                    placeholder="تاريخ الحجز"
+                    placeholder="بداية تاريخ الحجز"
+                  // mode="single"
+                  />
+                  <DatePicker
+                    selected={selectedDateTo}
+                    onSelect={(date) => {
+                      setSelectedDateTo(date);
+                      setPage(1);
+                    }}
+                    placeholder="نهاية تاريخ الحجز"
+                    minDate={selectedDateFrom}
                   // mode="single"
                   />
                   <Select

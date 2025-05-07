@@ -24,10 +24,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { fetchData, updateData } from "@/lib/apiHelper";
 import { Skeleton } from "../ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 interface AppointmentDetailsProps {
   appointmentId: string;
@@ -89,6 +89,7 @@ interface User {
 interface Salon {
   id: number;
   name: string;
+  merchant_commercial_name: string;
   icon_url: string;
   full_phone: string;
   email: string;
