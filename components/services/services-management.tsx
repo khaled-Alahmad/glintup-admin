@@ -44,6 +44,7 @@ import { addData, deleteData, fetchData, updateData } from "@/lib/apiHelper";
 import { useToast } from "@/hooks/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
 import { Pagination } from "../ui/pagination";
+import { se } from "date-fns/locale";
 
 interface Service {
   id: number;
@@ -59,7 +60,7 @@ interface Service {
   duration_minutes: number;
   price: number;
   icon_url: string;
-  gender: 'male' | 'female' | 'both';
+  gender: "male" | "female" | "both";
   is_active: number;
   salon_id: number;
 }
@@ -114,12 +115,13 @@ export default function ServicesManagement() {
   const [groupTotalPages, setGroupTotalPages] = useState(1);
   const [groupTotalItems, setGroupTotalItems] = useState(0);
 
-
   // Add this function to fetch groups
   const fetchGroups = async () => {
     try {
       setIsLoading(true);
-      const response = await fetchData(`admin/groups?page=${groupCurrentPage}&limit=${perPage}&search=${searchTerm}`);
+      const response = await fetchData(
+        `admin/groups?page=${groupCurrentPage}&limit=${perPage}&search=${searchTerm}`
+      );
       if (response.success) {
         setGroups(response.data || []);
         setGroupTotalPages(response.meta.last_page);
@@ -139,7 +141,7 @@ export default function ServicesManagement() {
     const formData = new FormData(e.currentTarget);
     const newGroup = {
       // salon_id: Number(formData.get("salon_id")),
-      salon_id: '',
+      salon_id: "",
       name: {
         en: formData.get("name_en") as string,
         ar: formData.get("name_ar") as string,
@@ -169,7 +171,7 @@ export default function ServicesManagement() {
     const formData = new FormData(e.currentTarget);
     const updatedGroup = {
       // salon_id: Number(formData.get("salon_id")),
-      salon_id: '',
+      salon_id: "",
       name: {
         en: formData.get("name_en") as string,
         ar: formData.get("name_ar") as string,
@@ -177,7 +179,10 @@ export default function ServicesManagement() {
     };
 
     try {
-      const response = await updateData(`admin/groups/${editingGroup.id}`, updatedGroup);
+      const response = await updateData(
+        `admin/groups/${editingGroup.id}`,
+        updatedGroup
+      );
       if (response.success) {
         await fetchGroups();
         setIsEditGroupDialogOpen(false);
@@ -216,15 +221,15 @@ export default function ServicesManagement() {
   // Update the useEffect to fetch groups
   useEffect(() => {
     fetchGroups();
-  }, [groupCurrentPage,]);
+  }, [groupCurrentPage]);
 
   // Add this function to handle image upload
   const handleIconUpload = async (file: File) => {
     const formData = new FormData();
-    formData.append('image', file);
-    formData.append('folder', 'services');
+    formData.append("image", file);
+    formData.append("folder", "services");
     try {
-      const response = await addData('general/upload-image', formData);
+      const response = await addData("general/upload-image", formData);
       // const data = await response.json();
       if (response.success) {
         console.log(response);
@@ -232,7 +237,7 @@ export default function ServicesManagement() {
         setIconPreview(URL.createObjectURL(file));
       }
     } catch (error) {
-      console.error('Failed to upload image:', error);
+      console.error("Failed to upload image:", error);
     }
   };
   // Add salon fetch function
@@ -240,10 +245,12 @@ export default function ServicesManagement() {
     try {
       const response = await fetchData(`admin/salons?search=${search}`);
       if (response.success) {
-        setSalons(response.data.map((salon: any) => ({
-          id: salon.id,
-          name: salon.merchant_commercial_name
-        })));
+        setSalons(
+          response.data.map((salon: any) => ({
+            id: salon.id,
+            name: salon.merchant_commercial_name,
+          }))
+        );
       }
     } catch (error) {
       console.error("Failed to fetch salons:", error);
@@ -258,10 +265,17 @@ export default function ServicesManagement() {
   const fetchServices = async () => {
     try {
       setIsLoading(true);
-      const activeFilter = selectedStatus !== 'all' ? `&is_active=${selectedStatus === 'active' ? 1 : 0}` : '';
-      const categoryFilter = selectedCategory ? `&gender=${selectedCategory}` : '';
+      const activeFilter =
+        selectedStatus !== "all"
+          ? `&is_active=${selectedStatus === "active" ? 1 : 0}`
+          : "";
+      const categoryFilter = selectedCategory
+        ? `&gender=${selectedCategory}`
+        : "";
 
-      const response = await fetchData(`admin/services?page=${currentPage}&limit=${perPage}&search=${searchTerm}${activeFilter}${categoryFilter}`);
+      const response = await fetchData(
+        `admin/services?page=${currentPage}&limit=${perPage}&search=${searchTerm}${activeFilter}${categoryFilter}`
+      );
       if (response.success) {
         setServices(response.data || []);
         setTotalPages(response.meta.last_page);
@@ -306,15 +320,16 @@ export default function ServicesManagement() {
       icon: uploadedIcon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
-      gender: formData.get("gender") as 'male' | 'female' | 'both',
+      gender: formData.get("gender") as "male" | "female" | "both",
       is_active: 1,
-      currency: "AED"
+      currency: "AED",
     };
 
     try {
       const response = await addData("admin/services", newService);
       if (response.success) {
-        await fetchServices();
+        setServices((prev) => [...prev, response.data]);
+        // await fetchServices();
         setIsAddDialogOpen(false);
         // e.currentTarget.reset();
         toast({
@@ -322,8 +337,8 @@ export default function ServicesManagement() {
           description: "تمت إضافة الخدمة بنجاح",
           variant: "default",
         });
-        setUploadedIcon('');
-        setIconPreview('');
+        setUploadedIcon("");
+        setIconPreview("");
       }
     } catch (error) {
       console.error("Failed to add service:", error);
@@ -348,13 +363,16 @@ export default function ServicesManagement() {
       icon: uploadedIcon || editingService.icon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
-      gender: formData.get("gender") as 'male' | 'female' | 'both',
+      gender: formData.get("gender") as "male" | "female" | "both",
       is_active: Number(formData.get("is_active")),
     };
     console.log("updatedService", updatedService);
 
     try {
-      const response = await updateData(`admin/services/${editingService.id}`, updatedService);
+      const response = await updateData(
+        `admin/services/${editingService.id}`,
+        updatedService
+      );
       if (response.success) {
         await fetchServices();
         setIsEditDialogOpen(false);
@@ -364,8 +382,8 @@ export default function ServicesManagement() {
           description: "تم تعديل الخدمة بنجاح",
           variant: "default",
         });
-        setUploadedIcon('');
-        setIconPreview('');
+        setUploadedIcon("");
+        setIconPreview("");
       }
     } catch (error) {
       console.error("Failed to update service:", error);
@@ -411,9 +429,10 @@ export default function ServicesManagement() {
           {activeTab === "groups" ? "إدارة المجموعات" : "إدارة الخدمات"}
         </h1>
         <Button
-          onClick={() => activeTab === "groups"
-            ? setIsAddGroupDialogOpen(true)
-            : setIsAddDialogOpen(true)
+          onClick={() =>
+            activeTab === "groups"
+              ? setIsAddGroupDialogOpen(true)
+              : setIsAddDialogOpen(true)
           }
         >
           <Plus className="h-4 w-4 ml-2" />
@@ -425,7 +444,9 @@ export default function ServicesManagement() {
         <div className="relative">
           <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder={activeTab === "groups" ? "بحث في المجموعات" : "بحث في الخدمات"}
+            placeholder={
+              activeTab === "groups" ? "بحث في المجموعات" : "بحث في الخدمات"
+            }
             className="pr-9"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -435,7 +456,10 @@ export default function ServicesManagement() {
           <>
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="تصفية حسب الفئة" />
                 </SelectTrigger>
@@ -443,7 +467,6 @@ export default function ServicesManagement() {
                   <SelectItem value="both"> كلاهما</SelectItem>
                   <SelectItem value="male">الرجال</SelectItem>
                   <SelectItem value="female">النساء </SelectItem>
-
                 </SelectContent>
               </Select>
             </div>
@@ -461,11 +484,14 @@ export default function ServicesManagement() {
               </Select>
             </div>
           </>
-        )
-        }
+        )}
       </div>
 
-      <Tabs defaultValue="groups" className="w-full" onValueChange={setActiveTab}>
+      <Tabs
+        defaultValue="groups"
+        className="w-full"
+        onValueChange={setActiveTab}
+      >
         {/* <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="all">
             الخدمات ({services.length})
@@ -639,7 +665,10 @@ export default function ServicesManagement() {
         </TabsContent> */}
       </Tabs>
       {/* Add Group Dialog */}
-      <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
+      <Dialog
+        open={isAddGroupDialogOpen}
+        onOpenChange={setIsAddGroupDialogOpen}
+      >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>إضافة مجموعة جديدة</DialogTitle>
@@ -676,7 +705,11 @@ export default function ServicesManagement() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsAddGroupDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddGroupDialogOpen(false)}
+              >
                 إلغاء
               </Button>
               <Button type="submit">إضافة المجموعة</Button>
@@ -686,7 +719,10 @@ export default function ServicesManagement() {
       </Dialog>
 
       {/* Edit Group Dialog */}
-      <Dialog open={isEditGroupDialogOpen} onOpenChange={setIsEditGroupDialogOpen}>
+      <Dialog
+        open={isEditGroupDialogOpen}
+        onOpenChange={setIsEditGroupDialogOpen}
+      >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>تعديل المجموعة</DialogTitle>
@@ -749,7 +785,10 @@ export default function ServicesManagement() {
       </Dialog>
 
       {/* Delete Group Dialog */}
-      <Dialog open={isDeleteGroupDialogOpen} onOpenChange={setIsDeleteGroupDialogOpen}>
+      <Dialog
+        open={isDeleteGroupDialogOpen}
+        onOpenChange={setIsDeleteGroupDialogOpen}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>حذف المجموعة</DialogTitle>
@@ -817,9 +856,7 @@ export default function ServicesManagement() {
                 </Select>
               </div>
 
-
               <div className="grid grid-cols-2 gap-4">
-
                 <div className="space-y-2">
                   <Label htmlFor="name_ar">اسم الخدمة (عربي)</Label>
                   <Input id="name_ar" name="name_ar" required />
@@ -830,15 +867,22 @@ export default function ServicesManagement() {
                 </div>
               </div>
 
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="description_ar">وصف الخدمة (عربي)</Label>
-                  <Textarea id="description_ar" name="description_ar" required />
+                  <Textarea
+                    id="description_ar"
+                    name="description_ar"
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description_en">Description (English)</Label>
-                  <Textarea id="description_en" name="description_en" required />
+                  <Textarea
+                    id="description_en"
+                    name="description_en"
+                    required
+                  />
                 </div>
               </div>
               {/* <div className="space-y-2">
@@ -905,15 +949,15 @@ export default function ServicesManagement() {
                     </div>
                   )}
                 </div>
-                <Input
-                  type="hidden"
-                  name="icon"
-                  value={uploadedIcon}
-                />
+                <Input type="hidden" name="icon" value={uploadedIcon} />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddDialogOpen(false)}
+              >
                 إلغاء
               </Button>
               <Button type="submit">إضافة الخدمة</Button>
@@ -934,7 +978,10 @@ export default function ServicesManagement() {
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="salon_id">الصالون</Label>
-                  <Select name="salon_id" defaultValue={editingService.salon_id.toString()}>
+                  <Select
+                    name="salon_id"
+                    defaultValue={editingService.salon_id.toString()}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="اختر الصالون" />
                     </SelectTrigger>
@@ -953,7 +1000,10 @@ export default function ServicesManagement() {
                       </div>
                       <SelectGroup>
                         {salons.map((salon) => (
-                          <SelectItem key={salon.id} value={salon.id.toString()}>
+                          <SelectItem
+                            key={salon.id}
+                            value={salon.id.toString()}
+                          >
                             {salon.merchant_commercial_name}
                           </SelectItem>
                         ))}
@@ -992,7 +1042,9 @@ export default function ServicesManagement() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description_en">Description (English)</Label>
+                    <Label htmlFor="description_en">
+                      Description (English)
+                    </Label>
                     <Textarea
                       id="description_en"
                       name="description_en"
@@ -1051,8 +1103,11 @@ export default function ServicesManagement() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="is_active">حالة الخدمة</Label>
-                    <Select name="is_active" defaultValue={editingService.is_active ? "1" : "0"}>
-                      <SelectTrigger id="is_active" >
+                    <Select
+                      name="is_active"
+                      defaultValue={editingService.is_active ? "1" : "0"}
+                    >
+                      <SelectTrigger id="is_active">
                         <SelectValue placeholder="اختر حالة الخدمة" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1092,7 +1147,6 @@ export default function ServicesManagement() {
                     value={uploadedIcon || editingService.icon}
                   />
                 </div>
-
               </div>
               <DialogFooter>
                 <Button
@@ -1149,10 +1203,14 @@ interface ServiceCardProps {
   onEdit: () => void;
   onDelete: () => void;
   showSalonId?: boolean;
-
 }
 
-function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: ServiceCardProps) {
+function ServiceCard({
+  service,
+  onEdit,
+  onDelete,
+  showSalonId = false,
+}: ServiceCardProps) {
   const renderIcon = () => {
     return (
       <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary overflow-hidden">
@@ -1173,15 +1231,15 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
   const getGenderText = (gender: "male" | "female" | "both") => {
     switch (gender) {
       case "male":
-        return "رجال"
+        return "رجال";
       case "female":
-        return "نساء"
+        return "نساء";
       case "both":
-        return "الجميع"
+        return "الجميع";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   return (
     <Card className="h-full flex flex-col">
@@ -1191,18 +1249,26 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
             {renderIcon()}
             <div>
               <CardTitle className="text-lg">{service.name.ar}</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-1">{service.name.en}</CardDescription>
+              <CardDescription className="text-xs text-muted-foreground mt-1">
+                {service.name.en}
+              </CardDescription>
             </div>
           </div>
-          <Badge variant={service.is_active ? "default" : "secondary"}>{service.is_active ? "نشط" : "غير نشط"}</Badge>
+          <Badge variant={service.is_active ? "default" : "secondary"}>
+            {service.is_active ? "نشط" : "غير نشط"}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium mb-1">الوصف:</p>
-            <p className="text-sm text-muted-foreground">{service.description.ar}</p>
-            <p className="text-xs text-muted-foreground mt-1 opacity-70">{service.description.en}</p>
+            <p className="text-sm text-muted-foreground">
+              {service.description.ar}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 opacity-70">
+              {service.description.en}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -1243,7 +1309,7 @@ function ServiceCard({ service, onEdit, onDelete, showSalonId = false }: Service
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }
 interface GroupCardProps {
   group: ServiceGroup;

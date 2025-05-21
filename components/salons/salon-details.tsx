@@ -2359,7 +2359,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </Badge>
                 {/*  salonData.types */}
               </div>
-              <div className="flex items-center gap-2 mt-2">
+              {/* <div className="flex items-center gap-2 mt-2">
                 {salonData.types.split(",").map((type, idx) => (
                   <Badge
                     key={idx}
@@ -2377,7 +2377,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       : type}
                   </Badge>
                 ))}
-              </div>
+              </div> */}
               <div className="flex items-center gap-1 mt-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 <span className="font-medium">{salonData.average_rating}</span>

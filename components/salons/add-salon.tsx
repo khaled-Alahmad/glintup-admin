@@ -27,7 +27,14 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import dynamic from "next/dynamic";
+
+// Import the MapComponent dynamically with SSR disabled
+const MapComponent = dynamic(
+  () => import("@/components/map/map-component"),
+  { ssr: false } // This is important for Leaflet which needs window access
+);
 
 export default function AddSalon() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -192,7 +199,7 @@ export default function AddSalon() {
       console.error("Error adding salon:", error);
       toast({
         title: "خطأ",
-        description: error.respone.message,
+        description: error.formData.message,
         variant: "destructive",
       });
     }
@@ -466,23 +473,15 @@ export default function AddSalon() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="category">
+                <Label htmlFor="type">
                   نوع الصالون <span className="text-red-500">*</span>
                 </Label>
                 <Select required>
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="type">
                     <SelectValue placeholder="اختر نوع الصالون" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* <SelectItem value="women">صالون نسائي</SelectItem>
-                    <SelectItem value="men">صالون رجالي</SelectItem>
-                    <SelectItem value="both">صالون مشترك</SelectItem> */}
-                    <SelectItem value="home-service">
-                      صالونات الخدمات المنزلية
-                    </SelectItem>
-                    <SelectItem value="beauty-expert">
-                      خبيرات التجميل
-                    </SelectItem>
+                    <SelectItem value="salon">صالون</SelectItem>
                     <SelectItem value="clinic">العيادات</SelectItem>
                   </SelectContent>
                 </Select>
@@ -685,6 +684,60 @@ export default function AddSalon() {
                   placeholder="مثال: 54.649244"
                   required
                 />
+              </div>
+            </div>
+
+            <div className="my-4">
+              <div className="flex gap-2 mb-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            latitude: position.coords.latitude.toString(),
+                            longitude: position.coords.longitude.toString(),
+                          }));
+                        },
+                        (error) => {
+                          toast({
+                            title: "تعذر الحصول على الموقع",
+                            description:
+                              "يرجى السماح بالوصول إلى الموقع أو المحاولة لاحقًا.",
+                            variant: "destructive",
+                          });
+                        }
+                      );
+                    } else {
+                      toast({
+                        title: "المتصفح لا يدعم تحديد الموقع",
+                        description: "يرجى استخدام متصفح أحدث.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                >
+                  الحصول على موقعي الحالي
+                </Button>
+              </div>
+              <div style={{ height: 300, width: "100%" }}>
+                {/* Lazy load map only on client side */}
+                {typeof window !== "undefined" && (
+                  <MapComponent
+                    latitude={formData.latitude}
+                    longitude={formData.longitude}
+                    onMapClick={(lat, lng) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        latitude: lat.toString(),
+                        longitude: lng.toString(),
+                      }));
+                    }}
+                  />
+                )}
               </div>
             </div>
             {/* </div> */}

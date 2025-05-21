@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { fetchData, updateData, addData } from "@/lib/apiHelper";
+import dynamic from "next/dynamic";
+
+// Import MapComponent dynamically with SSR disabled
+const MapComponent = dynamic(
+  () => import("@/components/map/map-component"),
+  { ssr: false } // This is important for Leaflet which needs window access
+);
 import {
   Card,
   CardContent,
@@ -362,6 +369,8 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         contact_number: formData.get("contact_number") as string,
         address: formData.get("address") as string,
         city_street_name: formData.get("city_street_name") as string,
+        latitude: formData.get("latitude") as string,
+        longitude: formData.get("longitude") as string,
       };
 
       const workingHoursData = workingHours.map((hour) => {
@@ -613,6 +622,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         bio: formData.get("bio") as string,
         loyalty_service_id: formData.get("loyalty_service_id") as string,
         types: formData.getAll("types") as string[],
+        type: formData.get("type") as string,
       };
 
       const response = await updateData(
@@ -624,7 +634,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           title: "تم التحديث بنجاح",
           description: "تم تحديث بيانات الصالون بنجاح",
         });
-        router.refresh();
+        router.push(`/salons/${salonId}`);
       }
     } catch (error) {
       console.error("Failed to update salon:", error);
@@ -809,6 +819,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
     return true;
   };
+
+  console.log("salonData", salonData);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -949,8 +962,25 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
+                  <Label htmlFor="type">
+                    نوع الصالون <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    name="type"
+                    required
+                    defaultValue={salonData?.type || ""}
+                  >
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder="اختر نوع الصالون" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="salon">صالون</SelectItem>
+                      <SelectItem value="clinic">العيادات</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* <div className="space-y-2">
                   <Label htmlFor="types">أنواع الخدمة</Label>
                   <div className="flex flex-wrap gap-2">
                     {salonData?.type === "salon" ? (
@@ -977,15 +1007,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           />
                           <Label htmlFor="beautician">متخصص تجميل</Label>
                         </div>
-                        {/* <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="never"
-                            name="types"
-                            value="never"
-                            defaultChecked={salonData?.types?.includes("never")}
-                          />
-                          <Label htmlFor="never">غير متاح</Label>
-                        </div> */}
+                       
                       </>
                     ) : (
                       <>
@@ -1000,15 +1022,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           />
                           <Label htmlFor="home_service">خدمة منزلية</Label>
                         </div>
-                        {/* <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="never"
-                            name="types"
-                            value="never"
-                            defaultChecked={salonData?.types?.includes("never")}
-                          />
-                          <Label htmlFor="never">غير متاح</Label>
-                        </div> */}
+                    
                       </>
                     )}
                   </div>
@@ -1017,7 +1031,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       ? "يمكن أن تكون الخدمة متاحة للمنزل أو متخصص تجميل أو كليهما أو غير متاحة"
                       : "يمكن أن تكون الخدمة متاحة للمنزل أو غير متاحة فقط"}
                   </p>
-                </div>
+                </div> */}
 
                 <Separator />
 
@@ -1137,6 +1151,106 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       name="city_street_name"
                       defaultValue={salonData?.city_street_name}
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="latitude">
+                      خط العرض <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="latitude"
+                      name="latitude"
+                      placeholder="مثال: 24.431126"
+                      defaultValue={salonData?.location_coords?.lat || ""}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="longitude">
+                      خط الطول <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="longitude"
+                      name="longitude"
+                      placeholder="مثال: 54.649244"
+                      defaultValue={salonData?.location_coords?.lng || ""}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="my-4">
+                  <div className="flex gap-2 mb-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              // Update form fields with current location
+                              const latitude =
+                                position.coords.latitude.toString();
+                              const longitude =
+                                position.coords.longitude.toString();
+
+                              // Find and update the input fields
+                              const latitudeInput = document.getElementById(
+                                "latitude"
+                              ) as HTMLInputElement;
+                              const longitudeInput = document.getElementById(
+                                "longitude"
+                              ) as HTMLInputElement;
+
+                              if (latitudeInput) latitudeInput.value = latitude;
+                              if (longitudeInput)
+                                longitudeInput.value = longitude;
+                            },
+                            (error) => {
+                              toast({
+                                title: "تعذر الحصول على الموقع",
+                                description:
+                                  "يرجى السماح بالوصول إلى الموقع أو المحاولة لاحقًا.",
+                                variant: "destructive",
+                              });
+                            }
+                          );
+                        } else {
+                          toast({
+                            title: "المتصفح لا يدعم تحديد الموقع",
+                            description: "يرجى استخدام متصفح أحدث.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      الحصول على موقعي الحالي
+                    </Button>
+                  </div>
+                  <div style={{ height: 300, width: "100%" }}>
+                    {/* Lazy load map only on client side */}
+                    {typeof window !== "undefined" && (
+                      <MapComponent
+                        latitude={salonData?.location_coords?.lat || ""}
+                        longitude={salonData?.location_coords?.lng || ""}
+                        onMapClick={(lat, lng) => {
+                          // Update form fields with map click location
+                          const latitudeInput = document.getElementById(
+                            "latitude"
+                          ) as HTMLInputElement;
+                          const longitudeInput = document.getElementById(
+                            "longitude"
+                          ) as HTMLInputElement;
+
+                          if (latitudeInput)
+                            latitudeInput.value = lat.toString();
+                          if (longitudeInput)
+                            longitudeInput.value = lng.toString();
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
 
