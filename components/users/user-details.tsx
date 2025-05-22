@@ -1,46 +1,62 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { AlertCircle, ArrowLeft, Calendar, Clock, Edit, Mail, MapPin, Phone, User } from "lucide-react"
-import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Edit,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-import { useEffect, useState } from "react"
-import { fetchData } from "@/lib/apiHelper"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
-import { PaginationWithInfo } from "../ui/pagination-with-info"
+import { useEffect, useState } from "react";
+import { fetchData } from "@/lib/apiHelper";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { PaginationWithInfo } from "../ui/pagination-with-info";
 
 interface UserDetailsProps {
-  userId: string
+  userId: string;
 }
 
 interface UserData {
-  id: number
-  full_name: string
-  full_phone: string
-  avatar?: string
-  updated_at: string,
-  age: string
-  gender: string
-  phone: string
-  email: string
-  location: string
-  is_active: boolean
-  is_verified: boolean
-  created_at: string
-  last_login: string
-  bio?: string
+  id: number;
+  full_name: string;
+  full_phone: string;
+  avatar?: string;
+  updated_at: string;
+  age: string;
+  gender: string;
+  phone: string;
+  email: string;
+  location: string;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  last_login: string;
+  bio?: string;
 }
 interface Salon {
-  id: number
-  icon_url: string
-  merchant_commercial_name: string
-  name: string
-
+  id: number;
+  icon_url: string;
+  merchant_commercial_name: string;
+  name: string;
 }
 interface Service {
   id: number;
@@ -58,89 +74,88 @@ interface BookingService {
   booking_id: number;
   service_id: number;
   service: Service;
-
 }
 interface Booking {
-  id: number
-  avatar: string
-  notes: string
-  total_price: string
-  salon_name: string
-  salon: Salon
-  service_name: string
-  date: string
-  time: string
-  status: string
-  price: number
-  booking_services: BookingService[]
+  id: number;
+  avatar: string;
+  notes: string;
+  total_price: string;
+  salon_name: string;
+  salon: Salon;
+  service_name: string;
+  date: string;
+  time: string;
+  status: string;
+  price: number;
+  booking_services: BookingService[];
 }
 
 interface Payment {
-  id: number
-  amount: number
-  status: string
-  type: string
-  created_at: string
+  id: number;
+  amount: number;
+  status: string;
+  type: string;
+  created_at: string;
 }
 
 interface GiftCard {
-  id: number
-  code: string
-  type: string
-  amount: string
-  currency: string
-  is_used: boolean
-  message: string
-  phone: string
-  full_phone: string
-  created_at: string
-  updated_at: string
+  id: number;
+  code: string;
+  type: string;
+  amount: string;
+  currency: string;
+  is_used: boolean;
+  message: string;
+  phone: string;
+  full_phone: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface LoyaltyPoint {
-  id: number
-  points: number
+  id: number;
+  points: number;
   salon: {
-    id: number
-    name: string
-    icon_url: string
-    merchant_commercial_name: string
-  }
-  taken_at: string | null
-  used_at: string | null
+    id: number;
+    name: string;
+    icon_url: string;
+    merchant_commercial_name: string;
+  };
+  taken_at: string | null;
+  used_at: string | null;
   free_service?: {
-    id: number
-    service_id: number
+    id: number;
+    service_id: number;
     service: {
-      id: number
+      id: number;
       name: {
-        en: string
-        ar: string
-      }
-      duration_minutes: number
-      final_price: number
-      currency: string
-    }
-    is_used: boolean
-    created_at: string
-    updated_at: string
-  }
+        en: string;
+        ar: string;
+      };
+      duration_minutes: number;
+      final_price: number;
+      currency: string;
+    };
+    is_used: boolean;
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 interface Review {
-  id: number
-  rating: number
-  stars: string
-  comment: string
+  id: number;
+  rating: number;
+  stars: string;
+  comment: string;
   salon: {
-    id: number
-    merchant_commercial_name: string
-    name: string
-    icon_url: string
-  }
-  salon_reply: string | null
-  salon_reply_at: string | null
-  created_at: string
+    id: number;
+    merchant_commercial_name: string;
+    name: string;
+    icon_url: string;
+  };
+  salon_reply: string | null;
+  salon_reply_at: string | null;
+  created_at: string;
 }
 type MetaData = {
   last_page: number;
@@ -149,16 +164,20 @@ type MetaData = {
   per_page: number;
 };
 export default function UserDetails({ userId }: UserDetailsProps) {
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [bookingsData, setBookingsData] = useState<Booking[]>([])
-  const [paymentsData, setPaymentsData] = useState<Payment[]>([])
-  const [giftCardsData, setGiftCardsData] = useState<GiftCard[]>([])
-  const [giftCardsDataRecover, setGiftCardsDataRecover] = useState<GiftCard[]>([])
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [bookingsData, setBookingsData] = useState<Booking[]>([]);
+  const [paymentsData, setPaymentsData] = useState<Payment[]>([]);
+  const [giftCardsData, setGiftCardsData] = useState<GiftCard[]>([]);
+  const [giftCardsDataRecover, setGiftCardsDataRecover] = useState<GiftCard[]>(
+    []
+  );
 
-  const [loyaltyPointsData, setLoyaltyPointsData] = useState<LoyaltyPoint[]>([])
-  const [reviewsData, setReviewsData] = useState<Review[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [loyaltyPointsData, setLoyaltyPointsData] = useState<LoyaltyPoint[]>(
+    []
+  );
+  const [reviewsData, setReviewsData] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("bookings");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -166,70 +185,83 @@ export default function UserDetails({ userId }: UserDetailsProps) {
   const [perPage, setPerPage] = useState(20);
   useEffect(() => {
     const fetchUserData = async () => {
+      setLoading(true);
       try {
-        const response = await fetchData(`admin/users/${userId}`)
+        const response = await fetchData(`admin/users/${userId}`);
         if (response.success) {
-          setUserData(response.data)
+          setUserData(response.data);
+          setLoading(false);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error)
+        console.error("Error fetching user data:", error);
       }
-    }
-    fetchUserData()
-  }, [userId])
+    };
+    fetchUserData();
+  }, [userId]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      setLoading(true);
+      // setLoading(true);
       try {
         // دائمًا جلب بيانات المستخدم
-
 
         // جلب البيانات حسب التبويب النشط فقط
         let response;
         switch (activeTab) {
-          case 'bookings':
-            response = await fetchData(`admin/bookings?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+          case "bookings":
+            response = await fetchData(
+              `admin/bookings?user_id=${userId}&page=${currentPage}&limit=${perPage}`
+            );
             if (response.success) {
               setBookingsData(response.data);
               updatePagination(response.meta);
             }
             break;
 
-          case 'payments':
-            response = await fetchData(`admin/transactions?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+          case "payments":
+            response = await fetchData(
+              `admin/transactions?user_id=${userId}&page=${currentPage}&limit=${perPage}`
+            );
             if (response.success) {
               setPaymentsData(response.data);
               updatePagination(response.meta);
             }
             break;
 
-          case 'gift-cards-recover':
-            response = await fetchData(`admin/gift-cards?recipient_id=${userId}&page=${currentPage}&limit=${perPage}`);
+          case "gift-cards-recover":
+            response = await fetchData(
+              `admin/gift-cards?recipient_id=${userId}&page=${currentPage}&limit=${perPage}`
+            );
             if (response.success) {
               setGiftCardsDataRecover(response.data);
               updatePagination(response.meta);
             }
             break;
 
-          case 'gift-cards':
-            response = await fetchData(`admin/gift-cards?sender_id=${userId}&page=${currentPage}&limit=${perPage}`);
+          case "gift-cards":
+            response = await fetchData(
+              `admin/gift-cards?sender_id=${userId}&page=${currentPage}&limit=${perPage}`
+            );
             if (response.success) {
               setGiftCardsData(response.data);
               updatePagination(response.meta);
             }
             break;
 
-          case 'loyalty-points':
-            response = await fetchData(`admin/loyalty-points?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+          case "loyalty-points":
+            response = await fetchData(
+              `admin/loyalty-points?user_id=${userId}&page=${currentPage}&limit=${perPage}`
+            );
             if (response.success) {
               setLoyaltyPointsData(response.data);
               updatePagination(response.meta);
             }
             break;
 
-          case 'reviews':
-            response = await fetchData(`admin/reviews?user_id=${userId}&page=${currentPage}&limit=${perPage}`);
+          case "reviews":
+            response = await fetchData(
+              `admin/reviews?user_id=${userId}&page=${currentPage}&limit=${perPage}`
+            );
             if (response.success) {
               setReviewsData(response.data);
               updatePagination(response.meta);
@@ -240,10 +272,10 @@ export default function UserDetails({ userId }: UserDetailsProps) {
             break;
         }
 
-        setLoading(false);
+        // setLoading(false);
       } catch (err) {
-        setError('فشل في تحميل بيانات المستخدم');
-        setLoading(false);
+        setError("فشل في تحميل بيانات المستخدم");
+        // setLoading(false);
       }
     };
 
@@ -259,7 +291,6 @@ export default function UserDetails({ userId }: UserDetailsProps) {
     }
   }, [userId, currentPage, activeTab]);
 
-
   if (loading) {
     return (
       <div className="flex flex-col gap-6">
@@ -269,7 +300,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
           <Skeleton className="h-[500px] w-full md:col-span-2" />
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -281,48 +312,62 @@ export default function UserDetails({ userId }: UserDetailsProps) {
           إعادة المحاولة
         </Button>
       </div>
-    )
+    );
   }
 
-  if (!userData) return null
-
+  if (!userData) return null;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "نشط":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             نشط
           </Badge>
-        )
-      case "محظور":
+        );
+      case "cancelled":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-            محظور
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-200"
+          >
+            ملغي
           </Badge>
-        )
-      case "مؤكد":
+        );
+      case "confirmed":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             مؤكد
           </Badge>
-        )
+        );
       case "مكتمل":
         return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <Badge
+            variant="outline"
+            className="bg-blue-50 text-blue-700 border-blue-200"
+          >
             مكتمل
           </Badge>
-        )
+        );
       case "معلق":
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
             معلق
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
   console.log(paymentsData);
 
   return (
@@ -333,7 +378,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">تفاصيل المستخدم</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          تفاصيل المستخدم
+        </h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -345,8 +392,12 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                 <AvatarFallback>{userData.full_name.charAt(0)}</AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-bold">{userData.full_name}</h2>
-              <div className="mt-2">{getStatusBadge(userData.is_active ? "نشط" : "غير نشط")}</div>
-              <p className="text-sm text-muted-foreground mt-2">عضو منذ {userData.created_at}</p>
+              <div className="mt-2">
+                {getStatusBadge(userData.is_active ? "نشط" : "غير نشط")}
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                عضو منذ {userData.created_at}
+              </p>
               <Button variant="outline" className="w-full mt-4" asChild>
                 <Link href={`/users/${userId}/edit`}>
                   <Edit className="h-4 w-4 ml-2" />
@@ -376,21 +427,30 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">رقم الهاتف</p>
-                  <p className="text-sm text-muted-foreground" style={{ unicodeBidi: "plaintext", textAlign: "right" }}>{userData.phone}</p>
+                  <p
+                    className="text-sm text-muted-foreground"
+                    style={{ unicodeBidi: "plaintext", textAlign: "right" }}
+                  >
+                    {userData.phone}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">العمر</p>
-                  <p className="text-sm text-muted-foreground">{userData.age}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {userData.age}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">آخر تسجيل دخول</p>
-                  <p className="text-sm text-muted-foreground">{userData.updated_at}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {userData.updated_at}
+                  </p>
                 </div>
               </div>
               {/* <div className="flex items-start gap-3">
@@ -405,20 +465,28 @@ export default function UserDetails({ userId }: UserDetailsProps) {
         </Card>
 
         <Card className="md:col-span-2">
-          <Tabs defaultValue="bookings" className="w-full" value={activeTab} onValueChange={setActiveTab} >
-            <CardHeader className="w-full overflow-x-auto" >
+          <Tabs
+            defaultValue="bookings"
+            className="w-full"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <CardHeader className="w-full overflow-x-auto">
               <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="bookings">الحجوزات</TabsTrigger>
                 <TabsTrigger value="payments">المدفوعات</TabsTrigger>
-                <TabsTrigger value="gift-cards">بطاقات الهدايا المرسلة</TabsTrigger>
-                <TabsTrigger value="gift-cards-recover">بطاقات الهدايا المستلمة</TabsTrigger>
+                <TabsTrigger value="gift-cards">
+                  بطاقات الهدايا المرسلة
+                </TabsTrigger>
+                <TabsTrigger value="gift-cards-recover">
+                  بطاقات الهدايا المستلمة
+                </TabsTrigger>
 
                 <TabsTrigger value="loyalty-points">نقاط الولاء</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
-
               <TabsContent value="bookings" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
@@ -428,7 +496,6 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                   <Button size="sm">
                     <Link href={"/appointments"} className="text-sm">
                       عرض الكل
-
                     </Link>
                   </Button>
                 </div>
@@ -445,70 +512,103 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {
-                        bookingsData.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center">لا يوجد حجوزات</TableCell>
-                          </TableRow>
-                        ) :
-                          bookingsData.map((booking) => (
-                            <TableRow key={booking.id}>
-                              <TableCell>
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-8 w-8 border">
-                                    <AvatarImage src={booking.avatar} alt={booking.salon.merchant_commercial_name} />
-                                    <AvatarFallback>{booking.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <span>{booking.salon.merchant_commercial_name}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                {booking.booking_services.length > 0 && (
-                                  <>
-                                    <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary inline-flex">
-                                      {booking.booking_services[0].service.name.ar}
-                                    </span>
-                                    {booking.booking_services.length > 1 && (
-                                      <Popover>
-                                        <PopoverTrigger className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                                          +{booking.booking_services.length - 1} more
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-60">
-                                          <div className="flex flex-col gap-2">
-                                            {booking.booking_services.slice(1).map((service) => (
-                                              <div key={service.id} className="flex flex-col">
+                      {bookingsData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center">
+                            لا يوجد حجوزات
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        bookingsData.map((booking) => (
+                          <TableRow key={booking.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8 border">
+                                  <AvatarImage
+                                    src={booking.avatar}
+                                    alt={booking.salon.merchant_commercial_name}
+                                  />
+                                  <AvatarFallback>
+                                    {booking.salon.merchant_commercial_name.charAt(
+                                      0
+                                    )}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>
+                                  {booking.salon.merchant_commercial_name}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {booking.booking_services.length > 0 && (
+                                <>
+                                  <span className="text-sm font-medium px-2 py-1 rounded-md bg-primary/10 text-primary inline-flex">
+                                    {
+                                      booking.booking_services[0].service.name
+                                        .ar
+                                    }
+                                  </span>
+                                  {booking.booking_services.length > 1 && (
+                                    <Popover>
+                                      <PopoverTrigger className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                                        +{booking.booking_services.length - 1}{" "}
+                                        more
+                                      </PopoverTrigger>
+                                      <PopoverContent className="w-60">
+                                        <div className="flex flex-col gap-2">
+                                          {booking.booking_services
+                                            .slice(1)
+                                            .map((service) => (
+                                              <div
+                                                key={service.id}
+                                                className="flex flex-col"
+                                              >
                                                 <span className="text-sm font-medium">
                                                   {service.service.name.ar}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground">
-                                                  {service.service.final_price} {service.service.currency} • {service.service.duration_minutes} minutes
+                                                  {service.service.final_price}{" "}
+                                                  {service.service.currency} •{" "}
+                                                  {
+                                                    service.service
+                                                      .duration_minutes
+                                                  }{" "}
+                                                  minutes
                                                 </span>
                                               </div>
                                             ))}
-                                          </div>
-                                        </PopoverContent>
-                                      </Popover>
+                                        </div>
+                                      </PopoverContent>
+                                    </Popover>
+                                  )}
+                                </>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <div className="flex items-center">
+                                  <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-sm">
+                                    {new Date(booking.date).toLocaleDateString(
+                                      "en-US"
                                     )}
-                                  </>
-                                )}
-
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex flex-col">
-                                  <div className="flex items-center">
-                                    <Calendar className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{new Date(booking.date).toLocaleDateString("en-US")}</span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{booking.time}</span>
-                                  </div>
+                                  </span>
                                 </div>
-                              </TableCell>
-                              <TableCell>{booking.total_price} د.إ</TableCell>
-                              <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                            </TableRow>
-                          ))}
+                                <div className="flex items-center">
+                                  <Clock className="ml-1 h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="text-sm">
+                                    {booking.time}
+                                  </span>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{booking.total_price} د.إ</TableCell>
+                            <TableCell>
+                              {getStatusBadge(booking.status)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -545,23 +645,29 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {
-                        paymentsData.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center">لا يوجد مدفوعات</TableCell>
+                      {paymentsData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center">
+                            لا يوجد مدفوعات
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        paymentsData.map((payment) => (
+                          <TableRow key={payment.id}>
+                            <TableCell>#{payment.id}</TableCell>
+                            <TableCell>
+                              {new Date(payment.created_at).toLocaleDateString(
+                                "en-US"
+                              )}
+                            </TableCell>
+                            <TableCell>{payment.amount}</TableCell>
+                            <TableCell>{payment.type}</TableCell>
+                            <TableCell>
+                              {getStatusBadge(payment.status)}
+                            </TableCell>
                           </TableRow>
-                        ) :
-
-
-                          paymentsData.map((payment) => (
-                            <TableRow key={payment.id}>
-                              <TableCell>#{payment.id}</TableCell>
-                              <TableCell>{new Date(payment.created_at).toLocaleDateString("en-US")}</TableCell>
-                              <TableCell>{payment.amount}</TableCell>
-                              <TableCell>{payment.type}</TableCell>
-                              <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                            </TableRow>
-                          ))}
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -577,7 +683,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
               <TabsContent value="gift-cards" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-medium">بطاقات الهدايا المرسلة</h3>
+                    <h3 className="text-lg font-medium">
+                      بطاقات الهدايا المرسلة
+                    </h3>
                   </div>
                 </div>
                 <div className="rounded-md border">
@@ -594,16 +702,28 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     <TableBody>
                       {giftCardsData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center">لا يوجد بطاقات هدايا</TableCell>
+                          <TableCell colSpan={5} className="text-center">
+                            لا يوجد بطاقات هدايا
+                          </TableCell>
                         </TableRow>
                       ) : (
                         giftCardsData.map((giftCard) => (
                           <TableRow key={giftCard.id}>
                             <TableCell>{giftCard.code}</TableCell>
-                            <TableCell>{giftCard.amount} {giftCard.currency}</TableCell>
+                            <TableCell>
+                              {giftCard.amount} {giftCard.currency}
+                            </TableCell>
                             <TableCell>{giftCard.full_phone}</TableCell>
-                            <TableCell>{new Date(giftCard.created_at).toLocaleDateString("en-US")}</TableCell>
-                            <TableCell>{getStatusBadge(giftCard.is_used ? "مستخدمة" : "غير مستخدمة")}</TableCell>
+                            <TableCell>
+                              {new Date(giftCard.created_at).toLocaleDateString(
+                                "en-US"
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(
+                                giftCard.is_used ? "مستخدمة" : "غير مستخدمة"
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))
                       )}
@@ -621,7 +741,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
               <TabsContent value="gift-cards-recover" className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-medium">بطاقات الهدايا المستلمة</h3>
+                    <h3 className="text-lg font-medium">
+                      بطاقات الهدايا المستلمة
+                    </h3>
                   </div>
                 </div>
                 <div className="rounded-md border">
@@ -638,16 +760,28 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     <TableBody>
                       {giftCardsDataRecover.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center">لا يوجد بطاقات هدايا</TableCell>
+                          <TableCell colSpan={5} className="text-center">
+                            لا يوجد بطاقات هدايا
+                          </TableCell>
                         </TableRow>
                       ) : (
                         giftCardsDataRecover.map((giftCard) => (
                           <TableRow key={giftCard.id}>
                             <TableCell>{giftCard.code}</TableCell>
-                            <TableCell>{giftCard.amount} {giftCard.currency}</TableCell>
+                            <TableCell>
+                              {giftCard.amount} {giftCard.currency}
+                            </TableCell>
                             <TableCell>{giftCard.full_phone}</TableCell>
-                            <TableCell>{new Date(giftCard.created_at).toLocaleDateString("en-US")}</TableCell>
-                            <TableCell>{getStatusBadge(giftCard.is_used ? "مستخدمة" : "غير مستخدمة")}</TableCell>
+                            <TableCell>
+                              {new Date(giftCard.created_at).toLocaleDateString(
+                                "en-US"
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(
+                                giftCard.is_used ? "مستخدمة" : "غير مستخدمة"
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))
                       )}
@@ -682,7 +816,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     <TableBody>
                       {loyaltyPointsData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center">لا يوجد نقاط ولاء</TableCell>
+                          <TableCell colSpan={5} className="text-center">
+                            لا يوجد نقاط ولاء
+                          </TableCell>
                         </TableRow>
                       ) : (
                         loyaltyPointsData.map((point) => (
@@ -690,24 +826,64 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8 border">
-                                  <AvatarImage src={point.salon.icon_url} alt={point.salon.merchant_commercial_name} />
-                                  <AvatarFallback>{point.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
+                                  <AvatarImage
+                                    src={point.salon.icon_url}
+                                    alt={point.salon.merchant_commercial_name}
+                                  />
+                                  <AvatarFallback>
+                                    {point.salon.merchant_commercial_name.charAt(
+                                      0
+                                    )}
+                                  </AvatarFallback>
                                 </Avatar>
-                                <span>{point.salon.merchant_commercial_name}</span>
+                                <span>
+                                  {point.salon.merchant_commercial_name}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell>{point.points}</TableCell>
-                            <TableCell>{point.taken_at ? new Date(point.taken_at).toLocaleDateString("en-US") : "-"}</TableCell>
-                            <TableCell>{point.used_at ? new Date(point.used_at).toLocaleDateString("en-US") : "-"}</TableCell>
                             <TableCell>
-                              {point.points >= 5 && point.used_at && point.free_service ? (
+                              {point.taken_at
+                                ? new Date(point.taken_at).toLocaleDateString(
+                                    "en-US"
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell>
+                              {point.used_at
+                                ? new Date(point.used_at).toLocaleDateString(
+                                    "en-US"
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell>
+                              {point.points >= 5 &&
+                              point.used_at &&
+                              point.free_service ? (
                                 <div className="flex flex-col gap-1">
-                                  <span className="text-sm font-medium">{point.free_service.service.name.ar}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {point.free_service.service.final_price} {point.free_service.service.currency} • {point.free_service.service.duration_minutes} دقيقة
+                                  <span className="text-sm font-medium">
+                                    {point.free_service.service.name.ar}
                                   </span>
-                                  <Badge variant="outline" className={point.free_service.is_used ? "bg-green-50 text-green-700 border-green-200" : "bg-amber-50 text-amber-700 border-amber-200"}>
-                                    {point.free_service.is_used ? "مستخدمة" : "غير مستخدمة"}
+                                  <span className="text-xs text-muted-foreground">
+                                    {point.free_service.service.final_price}{" "}
+                                    {point.free_service.service.currency} •{" "}
+                                    {
+                                      point.free_service.service
+                                        .duration_minutes
+                                    }{" "}
+                                    دقيقة
+                                  </span>
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      point.free_service.is_used
+                                        ? "bg-green-50 text-green-700 border-green-200"
+                                        : "bg-amber-50 text-amber-700 border-amber-200"
+                                    }
+                                  >
+                                    {point.free_service.is_used
+                                      ? "مستخدمة"
+                                      : "غير مستخدمة"}
                                   </Badge>
                                 </div>
                               ) : (
@@ -749,7 +925,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                     <TableBody>
                       {reviewsData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center">لا يوجد تقييمات</TableCell>
+                          <TableCell colSpan={5} className="text-center">
+                            لا يوجد تقييمات
+                          </TableCell>
                         </TableRow>
                       ) : (
                         reviewsData.map((review) => (
@@ -757,16 +935,29 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-8 w-8 border">
-                                  <AvatarImage src={review.salon.icon_url} alt={review.salon.merchant_commercial_name} />
-                                  <AvatarFallback>{review.salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
+                                  <AvatarImage
+                                    src={review.salon.icon_url}
+                                    alt={review.salon.merchant_commercial_name}
+                                  />
+                                  <AvatarFallback>
+                                    {review.salon.merchant_commercial_name.charAt(
+                                      0
+                                    )}
+                                  </AvatarFallback>
                                 </Avatar>
-                                <span>{review.salon.merchant_commercial_name}</span>
+                                <span>
+                                  {review.salon.merchant_commercial_name}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell>{review.stars}</TableCell>
                             <TableCell>{review.comment}</TableCell>
                             <TableCell>{review.salon_reply || "-"}</TableCell>
-                            <TableCell>{new Date(review.created_at).toLocaleDateString("en-US")}</TableCell>
+                            <TableCell>
+                              {new Date(review.created_at).toLocaleDateString(
+                                "en-US"
+                              )}
+                            </TableCell>
                           </TableRow>
                         ))
                       )}
@@ -783,11 +974,9 @@ export default function UserDetails({ userId }: UserDetailsProps) {
               </TabsContent>
             </CardContent>
           </Tabs>
-          <CardContent>
-          </CardContent>
+          <CardContent></CardContent>
         </Card>
       </div>
-    </div >
-  )
+    </div>
+  );
 }
-

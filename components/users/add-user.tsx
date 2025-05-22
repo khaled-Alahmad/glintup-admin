@@ -28,6 +28,9 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { addData } from "@/lib/apiHelper";
+import { PhoneInput } from "react-international-phone";
+import { isValidPhone } from "@/lib/phone-utils";
+import "react-international-phone/style.css";
 
 export default function AddUser() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -45,6 +48,7 @@ export default function AddUser() {
 
     language: "ar",
   });
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -226,17 +230,40 @@ export default function AddUser() {
                 <Label htmlFor="phone">
                   رقم الهاتف <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  style={{ unicodeBidi: "plaintext" }}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, phone: e.target.value }))
-                  }
-                  required
-                />
-              </div>
-              {/* <div className="space-y-2">
+                <div className="phone-input-container">
+                  <PhoneInput
+                    defaultCountry="kw"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      fontSize: "0.875rem",
+                      borderRadius: "0.375rem",
+                    }}
+                    value={formData.phone}
+                    onChange={(phone) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        user: { ...prev, phone },
+                      }));
+
+                      // Verificar validez usando libphonenumber-js
+                      const isValid = isValidPhone(phone);
+                      if (!isValid && phone.length > 4) {
+                        setPhoneError("رقم الهاتف غير صحيح");
+                      } else {
+                        setPhoneError(null);
+                      }
+                    }}
+                    inputProps={{
+                      placeholder: "أدخل رقم الهاتف",
+                      required: true,
+                    }}
+                  />
+                  {phoneError && (
+                    <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+                  )}
+                </div>
+                {/* <div className="space-y-2">
                 <Label htmlFor="phone_code">
                   رمز الهاتف <span className="text-red-500">*</span>
                 </Label>
@@ -267,6 +294,7 @@ export default function AddUser() {
                 </Select>
               </div>
               */}
+              </div>
             </div>
 
             <div className="space-y-2">

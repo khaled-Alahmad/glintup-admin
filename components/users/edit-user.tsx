@@ -1,44 +1,58 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Upload } from "lucide-react"
-import Link from "next/link"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/hooks/use-toast"
-import { addData, fetchData, updateData } from "@/lib/apiHelper"
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Upload } from "lucide-react";
+import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { addData, fetchData, updateData } from "@/lib/apiHelper";
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
 
 interface EditUserProps {
-  userId: string
+  userId: string;
 }
 
 export default function EditUser({ userId }: EditUserProps) {
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const { toast } = useToast()
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const { toast } = useToast();
   const originalAvatar = useRef<string | null>(null);
 
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    gender: 'male',
-    birth_date: '',
+    first_name: "",
+    last_name: "",
+    gender: "male",
+    birth_date: "",
     // phone_code: '+966',
-    phone: '',
-    password: '',
-    notes: '',
+    full_phone: "",
+    password: "",
+    notes: "",
     is_active: true,
-    avatar: '',
+    avatar: "",
 
-
-    language: 'ar',
+    language: "ar",
   });
   useEffect(() => {
     const fetchUserData = async () => {
@@ -50,15 +64,11 @@ export default function EditUser({ userId }: EditUserProps) {
         setFormData(userData);
         originalAvatar.current = userData.avatar || null;
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error("Error fetching user data:", error);
       }
     };
     fetchUserData();
-  }
-    , [userId]
-  );
-
-
+  }, [userId]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,20 +76,20 @@ export default function EditUser({ userId }: EditUserProps) {
 
     try {
       const uploadFormData = new FormData();
-      uploadFormData.append('image', file);
-      uploadFormData.append('folder', "salons");
+      uploadFormData.append("image", file);
+      uploadFormData.append("folder", "salons");
 
-      const response = await addData('general/upload-image', uploadFormData);
+      const response = await addData("general/upload-image", uploadFormData);
 
       if (response.success) {
         setAvatarPreview(response.data.image_url);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          avatar: response.data.image_name
+          avatar: response.data.image_name,
         }));
       }
     } catch (error) {
-      console.error('Image upload failed:', error);
+      console.error("Image upload failed:", error);
       toast({
         title: "خطأ في رفع الصورة",
         description: "تعذر رفع الصورة، الرجاء المحاولة مرة أخرى",
@@ -93,12 +103,11 @@ export default function EditUser({ userId }: EditUserProps) {
     e.preventDefault();
 
     try {
-
       // Prepare user data
       const userData: any = {
         ...formData,
         // phone_code: formData.phone_code,
-        phone: formData.phone,
+        full_phone: formData.full_phone,
         is_active: formData.is_active,
         notes: formData.notes,
       };
@@ -110,7 +119,6 @@ export default function EditUser({ userId }: EditUserProps) {
         delete userData.avatar;
       }
 
-
       // Submit user data
       const response = await updateData(`admin/users/${userId}`, userData);
 
@@ -119,24 +127,24 @@ export default function EditUser({ userId }: EditUserProps) {
           title: "تمت الإضافة بنجاح",
           description: "تم إنشاء المستخدم الجديد",
         });
-        window.location.href = '/users' // Redirect to users list
+        window.location.href = "/users"; // Redirect to users list
         setFormData({
-          first_name: '',
-          last_name: '',
-          gender: 'male',
-          birth_date: '',
+          first_name: "",
+          last_name: "",
+          gender: "male",
+          birth_date: "",
           // phone_code: '+966',
-          phone: '',
-          password: '',
-          avatar: '',
+          full_phone: "",
+          password: "",
+          avatar: "",
           is_active: true,
-          notes: '',
-          language: 'ar',
+          notes: "",
+          language: "ar",
         });
         // Redirect or reset form
       }
     } catch (error) {
-      console.error('Error adding user:', error);
+      console.error("Error adding user:", error);
       toast({
         title: "خطأ",
         description: "فشل في إضافة المستخدم",
@@ -153,7 +161,9 @@ export default function EditUser({ userId }: EditUserProps) {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">تعديل بيانات المستخدم</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          تعديل بيانات المستخدم
+        </h1>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -165,20 +175,34 @@ export default function EditUser({ userId }: EditUserProps) {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="first_name">الاسم الأول <span className="text-red-500">*</span></Label>
+                <Label htmlFor="first_name">
+                  الاسم الأول <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="first_name"
                   value={formData.first_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      first_name: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="last_name">الاسم الأخير <span className="text-red-500">*</span></Label>
+                <Label htmlFor="last_name">
+                  الاسم الأخير <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="last_name"
                   value={formData.last_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      last_name: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
@@ -186,10 +210,14 @@ export default function EditUser({ userId }: EditUserProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="gender">الجنس <span className="text-red-500">*</span></Label>
+                <Label htmlFor="gender">
+                  الجنس <span className="text-red-500">*</span>
+                </Label>
                 <Select
                   value={formData.gender}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, gender: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر الجنس" />
@@ -201,19 +229,26 @@ export default function EditUser({ userId }: EditUserProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="birth_date">تاريخ الميلاد <span className="text-red-500">*</span></Label>
+                <Label htmlFor="birth_date">
+                  تاريخ الميلاد <span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="birth_date"
                   type="date"
                   value={formData.birth_date}
-                  onChange={(e) => setFormData(prev => ({ ...prev, birth_date: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      birth_date: e.target.value,
+                    }))
+                  }
                   required
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="phone">رقم الهاتف <span className="text-red-500">*</span></Label>
                 <Input
                   id="phone"
@@ -223,6 +258,38 @@ export default function EditUser({ userId }: EditUserProps) {
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   required
                 />
+              </div> */}
+              <div className="space-y-2">
+                <Label htmlFor="full_phone">رقم  الهاتف</Label>
+                <div className="phone-input-container">
+                  <PhoneInput
+                    defaultCountry="kw"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      fontSize: "0.875rem",
+                      borderRadius: "0.375rem",
+                    }}
+                    value={formData?.full_phone || ""}
+                    onChange={(phone) => {
+                      // Store the value in a hidden input to be submitted with the form
+                      const hiddenInput = document.getElementById(
+                        "full_phone"
+                      ) as HTMLInputElement;
+                      if (hiddenInput) hiddenInput.value = phone;
+                    }}
+                    inputProps={{
+                      placeholder: "أدخل رقم الهاتف",
+                      name: "full_phone", // Use a different name to avoid conflicts
+                    }}
+                  />
+                  <Input
+                    id="full_phone"
+                    name="full_phone"
+                    type="hidden"
+                    defaultValue={formData?.full_phone || ""}
+                  />
+                </div>
               </div>
               {/* <div className="space-y-2">
                 <Label htmlFor="phone_code">رمز الهاتف <span className="text-red-500">*</span></Label>
@@ -237,13 +304,17 @@ export default function EditUser({ userId }: EditUserProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور <span className="text-red-500">*</span></Label>
+              <Label htmlFor="password">
+                كلمة المرور <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              // required
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, password: e.target.value }))
+                }
+                // required
               />
             </div>
             {/* add notes */}
@@ -252,7 +323,9 @@ export default function EditUser({ userId }: EditUserProps) {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, notes: e.target.value }))
+                }
               />
             </div>
             <Separator />
@@ -262,7 +335,7 @@ export default function EditUser({ userId }: EditUserProps) {
                 {formData.avatar ? (
                   <div className="relative w-full">
                     <img
-                      src={avatarPreview || formData.avatar }
+                      src={avatarPreview || formData.avatar}
                       alt="معاينة الصورة"
                       className="mx-auto max-h-32 rounded-full object-cover"
                     />
@@ -273,7 +346,7 @@ export default function EditUser({ userId }: EditUserProps) {
                       className="absolute top-2 right-2"
                       onClick={() => {
                         setAvatarPreview(null);
-                        setFormData(prev => ({ ...prev, avatar: '' }));
+                        setFormData((prev) => ({ ...prev, avatar: "" }));
                       }}
                     >
                       حذف
@@ -287,7 +360,11 @@ export default function EditUser({ userId }: EditUserProps) {
                 )}
                 {!avatarPreview && (
                   <Label htmlFor="avatar" className="mt-4">
-                    <Button type="button" variant="outline" onClick={() => document.getElementById('avatar')?.click()}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById("avatar")?.click()}
+                    >
                       اختر صورة
                     </Button>
                     <Input
@@ -304,26 +381,25 @@ export default function EditUser({ userId }: EditUserProps) {
 
             <Separator />
 
-
-
             {/* إعدادات الحساب */}
             <h3 className="text-lg font-medium">إعدادات الحساب</h3>
             <div className="space-y-4">
-
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="is_active">حساب نشط</Label>
-                  <p className="text-sm text-muted-foreground">تفعيل حساب المستخدم فوراً</p>
+                  <p className="text-sm text-muted-foreground">
+                    تفعيل حساب المستخدم فوراً
+                  </p>
                 </div>
                 <Switch
                   id="is_active"
-
                   className="switch-custom"
                   checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, is_active: checked }))
+                  }
                 />
               </div>
-
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
@@ -335,6 +411,5 @@ export default function EditUser({ userId }: EditUserProps) {
         </Card>
       </form>
     </div>
-  )
+  );
 }
-
