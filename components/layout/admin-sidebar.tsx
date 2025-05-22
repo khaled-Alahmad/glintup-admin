@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "../ui/logo";
 import { fetchData } from "@/lib/apiHelper";
 import { useToast } from "@/components/ui/use-toast";
+import { getCookie } from "cookies-next";
 
 interface AdminSidebarProps {
   mobile?: boolean;
@@ -39,10 +40,27 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
   const { toast } = useToast();
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const token = getCookie("token") as string;
   // Fetch user permissions from API
   useEffect(() => {
     const fetchUserPermissions = async () => {
+      // Check if we have permissions cached in localStorage
+      const cachedData = localStorage.getItem('userPermissions');
+      const cachedToken = localStorage.getItem('cachedToken');
+      
+      // Use cached permissions if available and token is the same
+      if (cachedData && cachedToken === token) {
+        try {
+          const parsedPermissions = JSON.parse(cachedData);
+          setUserPermissions(parsedPermissions);
+          setIsLoading(false);
+          return; // Exit early if we can use cached data
+        } catch (error) {
+          console.error("Error parsing cached permissions:", error);
+          // Continue to fetch permissions if parsing failed
+        }
+      }
+
       setIsLoading(true);
       try {
         const response = await fetchData("admin/permissions");
@@ -52,6 +70,10 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
             (permission: any) => permission.key
           );
           setUserPermissions(permissionKeys);
+          
+          // Cache the permissions and token
+          localStorage.setItem('userPermissions', JSON.stringify(permissionKeys));
+          localStorage.setItem('cachedToken', token);
         } else {
           console.error("Failed to fetch permissions:", response.message);
           toast({
@@ -72,8 +94,13 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       }
     };
 
-    fetchUserPermissions();
-  }, [toast]);
+    if (token) {
+      fetchUserPermissions();
+    } else {
+      setIsLoading(false);
+      setUserPermissions([]);
+    }
+  }, [token, toast]);
 
   // Define all possible sidebar links with their required permissions
   const allLinks = [

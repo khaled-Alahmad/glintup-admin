@@ -23,6 +23,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchData, updateData } from "@/lib/apiHelper";
 import { useToast } from "@/hooks/use-toast";
+import { PhoneInput } from "react-international-phone";
+import { isValidPhone } from "@/lib/phone-utils";
+import { set } from "date-fns";
+import "react-international-phone/style.css";
 
 interface EditAdminUserProps {
   id: string;
@@ -92,9 +96,11 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
           throw new Error(response.message);
         }
         const mockAdminUser = response.data;
-          // Extract permission IDs from the permission objects
-        const permissionIds = Array.isArray(mockAdminUser.admin_permissions) 
-          ? mockAdminUser.admin_permissions.map((permission: any) => permission.id) 
+        // Extract permission IDs from the permission objects
+        const permissionIds = Array.isArray(mockAdminUser.admin_permissions)
+          ? mockAdminUser.admin_permissions.map(
+              (permission: any) => permission.id
+            )
           : [];
 
         setFormData({
@@ -205,7 +211,10 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };const handleSubmit = async (e: React.FormEvent) => {
+  };
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -234,7 +243,10 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
 
       console.log("Submitting form data:", dataToSubmit);
 
-      const response = await updateData(`admin/admin-users/${id}`, dataToSubmit);
+      const response = await updateData(
+        `admin/admin-users/${id}`,
+        dataToSubmit
+      );
       if (response.success) {
         toast({
           title: "تم التحديث بنجاح",
@@ -369,17 +381,52 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
                       <Label htmlFor="phone">
                         رقم الهاتف <span className="text-red-500">*</span>
                       </Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="مثال: +971501234567"
-                        className={errors.phone ? "border-red-500" : ""}
-                      />
-                      {errors.phone && (
-                        <p className="text-xs text-red-500">{errors.phone}</p>
-                      )}
+                      <div className="phone-input-container">
+                        <PhoneInput
+                          defaultCountry="kw"
+                          style={{
+                            width: "100%",
+                            height: "40px",
+                            fontSize: "0.875rem",
+                            borderRadius: "0.375rem",
+                          }}
+                          value={formData.phone}
+                          onChange={(phone) => {
+                            setFormData((prev) => ({ ...prev, phone }));
+                            // تحقق من صحة الرقم باستخدام isValidPhone
+                            const isValid = isValidPhone(phone);
+                            if (!isValid && phone.length > 4) {
+                              setErrors((prev) => ({
+                                ...prev,
+                                phone: "رقم الهاتف غير صحيح",
+                              }));
+                            } else {
+                              setErrors((prev) => {
+                                const newErrors = { ...prev };
+                                delete newErrors.phone;
+                                return newErrors;
+                              });
+                            }
+                            // امسح رسالة الخطأ من errors عند التغيير
+                            if (errors.phone) {
+                              setErrors((prev) => {
+                                const newErrors = { ...prev };
+                                delete newErrors.phone;
+                                return newErrors;
+                              });
+                            }
+                          }}
+                          inputProps={{
+                            placeholder: "أدخل رقم الهاتف",
+                            required: true,
+                          }}
+                        />
+                        {errors.phone && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.phone}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
