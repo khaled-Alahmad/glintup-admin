@@ -229,6 +229,8 @@ export default function AddUser() {
                 <Input
                   id="phone"
                   value={formData.phone}
+                                  style={{ unicodeBidi: "plaintext" }}
+
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, phone: e.target.value }))
                   }

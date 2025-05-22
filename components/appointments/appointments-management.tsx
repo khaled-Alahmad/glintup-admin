@@ -269,7 +269,7 @@ export default function AppointmentsManagement() {
         <h1 className="text-3xl font-bold tracking-tight">إدارة الحجوزات</h1>
         <Button onClick={() => generateMonthlyBookingReport(bookings)}>
           <FileText className="h-4 w-4 ml-2" />
-          استخراج كشف شهري
+          استخراج تقرير
         </Button>
       </div>
 
@@ -459,7 +459,10 @@ export default function AppointmentsManagement() {
                             </Avatar>
                             <div className="flex flex-col">
                               <span>{booking.user.full_name}</span>
-                              <span className="text-sm text-muted-foreground">
+                              <span
+                                className="text-sm text-muted-foreground"
+                                style={{ unicodeBidi: "plaintext" }}
+                              >
                                 {booking.user.full_phone}
                               </span>
                             </div>

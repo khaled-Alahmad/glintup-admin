@@ -36,7 +36,7 @@ export function LoginForm() {
 
   // بيانات الدخول المؤقتة
   const demoCredentials = {
-    phone: "+9711234567890",
+    phone: "+971562455477",
     password: "password",
   };
 
@@ -54,32 +54,35 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-
       // console.log("dda");
       const deviceToken = await getFirebaseToken(); // Get Firebase token
       console.log("Firebase Device Token:", deviceToken);
       console.log("after getFirebaseToken");
 
-      const response = await addData("admin/auth/login", { ...formData, device_token: deviceToken });
+      const response = await addData("admin/auth/login", {
+        ...formData,
+        device_token: deviceToken,
+      });
       console.log(response);
       if (response.success) {
-        setCookie('token', response.access_token, {
+        setCookie("token", response.access_token, {
           maxAge: 60 * 60 * 24, // 24 hours
-          path: '/',
+          path: "/",
         });
         toast({
           title: "تم تسجيل الدخول بنجاح",
           description: "مرحباً بك في لوحة تحكم Glint Up",
           variant: "default",
         });
-        window.location.href = '/';
+        window.location.href = "/";
       }
-
-
     } catch (error) {
       toast({
         title: "فشل تسجيل الدخول",
-        description: (error as { response: { message: string } })?.response?.message || 'An error occurred',
+        description:
+          (error as any)?.response?.data?.message ||
+          (error as any)?.message ||
+          "حدث خطأ غير متوقع أثناء تسجيل الدخول.",
         variant: "destructive",
       });
     } finally {
@@ -106,6 +109,7 @@ export function LoginForm() {
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
+                style={{ unicodeBidi: "plaintext" }}
                 id="phone"
                 name="phone"
                 type="phone"
@@ -212,7 +216,15 @@ export function LoginForm() {
             بيانات الدخول المؤقتة:
           </p>
           <div className="text-xs bg-muted p-2 rounded-md text-left mb-2 font-mono">
-            <div>البريد الإلكتروني: {demoCredentials.phone}</div>
+            <div>
+              رقم الهاتف :{" "}
+              <span
+                // dir="ltr"
+                style={{ unicodeBidi: "plaintext" }}
+              >
+                {demoCredentials.phone}
+              </span>
+            </div>
             <div>كلمة المرور: {demoCredentials.password}</div>
           </div>
           <Button

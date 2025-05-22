@@ -881,7 +881,7 @@ export default function SettingsPage() {
                     {/* //makeup_artists_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="makeup_artists_provider_percentage">
-                        نسبة العمولة لمنتجات العينات (%)
+                        نسبة خبيرات التجميل (%)
                       </Label>
                       <Input
                         id="makeup_artists_provider_percentage"
@@ -900,7 +900,7 @@ export default function SettingsPage() {
                     {/* //home_service_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="home_service_provider_percentage">
-                        نسبة العمولة لخدمات المنزل (%)
+                        نسبة صالونات الخدمات المنزلية (%)
                       </Label>
                       <Input
                         id="home_service_provider_percentage"
@@ -919,7 +919,7 @@ export default function SettingsPage() {
                     {/* clinics_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="clinics_provider_percentage">
-                        نسبة العمولة لعيادات الصالونات (%)
+                        نسبة العيادات (%)
                       </Label>
                       <Input
                         id="clinics_provider_percentage"
@@ -947,7 +947,7 @@ export default function SettingsPage() {
                     {/* salons_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="salons_provider_percentage">
-                        نسبة العمولة لصالونات العينات (%)
+                        نسبة الصالونات(%)
                       </Label>
                       <Input
                         id="salons_provider_percentage"

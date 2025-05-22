@@ -188,7 +188,10 @@ export default function ComplaintDetails({ complaint }: ComplaintDetailsProps) {
                             {complaint.user.full_name}
                           </h3>
                           <div className="mt-2 space-y-2 text-sm">
-                            <div className="flex items-center gap-2 text-muted-foreground">
+                            <div
+                              className="flex items-center gap-2 text-muted-foreground"
+                              style={{ unicodeBidi: "plaintext" }}
+                            >
                               <Phone className="h-4 w-4" />
                               {complaint.user.full_phone}
                             </div>

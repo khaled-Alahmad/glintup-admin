@@ -924,7 +924,12 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </div>
                     <div>
                       <Label htmlFor="phone">رقم الهاتف</Label>
-                      <Input id="phone" name="phone" required />
+                      <Input
+                        style={{ unicodeBidi: "plaintext" }}
+                        id="phone"
+                        name="phone"
+                        required
+                      />
                     </div>
                   </div>
 
@@ -1058,6 +1063,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       <Input
                         id="phone"
                         name="phone"
+                                        style={{ unicodeBidi: "plaintext" }}
+ 
                         defaultValue={editingStaff.user.phone}
                         required
                       />
@@ -2815,7 +2822,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">رقم الهاتف</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground"                 style={{ unicodeBidi: "plaintext" }}
+>
                     {salonData.owner?.full_phone}
                   </p>
                 </div>

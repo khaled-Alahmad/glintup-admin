@@ -218,6 +218,8 @@ export default function EditUser({ userId }: EditUserProps) {
                 <Input
                   id="phone"
                   value={formData.phone}
+                                  style={{ unicodeBidi: "plaintext" }}
+
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   required
                 />

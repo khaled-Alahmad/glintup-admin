@@ -9,7 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Calendar, Clock, Edit, Printer, Trash, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Edit,
+  Printer,
+  Trash,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -123,13 +131,15 @@ export default function AppointmentDetails({
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-  const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
+  const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(
+    null
+  );
 
   // Add the handleStatusChange function
   const handleStatusChange = async (newStatus: string) => {
     try {
       const response = await updateData(`admin/bookings/${appointmentId}`, {
-        status: newStatus
+        status: newStatus,
       });
 
       if (response.success) {
@@ -150,7 +160,6 @@ export default function AppointmentDetails({
       setPendingStatusChange(null);
     }
   };
-
 
   useEffect(() => {
     fetchBooking();
@@ -392,7 +401,10 @@ export default function AppointmentDetails({
                     <p className="font-medium text-lg">
                       {booking.user.full_name}
                     </p>
-                    <p className="text-muted-foreground">
+                    <p
+                      className="text-muted-foreground"
+                      style={{ unicodeBidi: "plaintext" }}
+                    >
                       {booking.user.full_phone}
                     </p>
                   </div>
@@ -417,7 +429,10 @@ export default function AppointmentDetails({
                     <p className="text-muted-foreground">
                       {booking.salon.location}
                     </p>
-                    <p className="text-muted-foreground">
+                    <p
+                      className="text-muted-foreground"
+                      style={{ unicodeBidi: "plaintext" }}
+                    >
                       {booking.salon.full_phone}
                     </p>
                   </div>
@@ -435,16 +450,16 @@ export default function AppointmentDetails({
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">التاريخ</p>
-                    <p>
-                      {new Date(booking.date).toLocaleDateString("en-US")}
-                    </p>
+                    <p>{new Date(booking.date).toLocaleDateString("en-US")}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">الوقت</p>
-                    <p>{booking.time} - {booking.end_time}</p>
+                    <p>
+                      {booking.time} - {booking.end_time}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -469,9 +484,15 @@ export default function AppointmentDetails({
                   <tbody>
                     {booking.booking_services.map((bookingService) => (
                       <tr key={bookingService.id} className="border-t">
-                        <td className="p-3">{bookingService.service.name.ar}</td>
-                        <td className="p-3 text-center">{bookingService.service.duration_minutes}</td>
-                        <td className="p-3 text-center">{bookingService.service.final_price}</td>
+                        <td className="p-3">
+                          {bookingService.service.name.ar}
+                        </td>
+                        <td className="p-3 text-center">
+                          {bookingService.service.duration_minutes}
+                        </td>
+                        <td className="p-3 text-center">
+                          {bookingService.service.final_price}
+                        </td>
                         {/* <td className="p-3 text-center">1</td> */}
                         <td className="p-3 text-center font-medium">
                           {bookingService.service.final_price}
@@ -503,7 +524,9 @@ export default function AppointmentDetails({
                   <h3 className="text-lg font-medium">ملاحظات</h3>
                   {booking.notes && (
                     <div>
-                      <p className="text-sm text-muted-foreground">ملاحظات العميل</p>
+                      <p className="text-sm text-muted-foreground">
+                        ملاحظات العميل
+                      </p>
                       <p className="p-3 bg-muted/20 rounded-md">
                         {booking.notes}
                       </p>
@@ -511,7 +534,9 @@ export default function AppointmentDetails({
                   )}
                   {booking.salon_notes && (
                     <div>
-                      <p className="text-sm text-muted-foreground">ملاحظات الصالون</p>
+                      <p className="text-sm text-muted-foreground">
+                        ملاحظات الصالون
+                      </p>
                       <p className="p-3 bg-muted/20 rounded-md">
                         {booking.salon_notes}
                       </p>
@@ -520,7 +545,6 @@ export default function AppointmentDetails({
                 </div>
               </>
             )}
-
           </CardContent>
         </Card>
 
@@ -570,14 +594,20 @@ export default function AppointmentDetails({
             </div>
           </CardContent>
           <CardFooter className="flex-col gap-2">
-            <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+            <Dialog
+              open={isStatusDialogOpen}
+              onOpenChange={setIsStatusDialogOpen}
+            >
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>تأكيد تغيير الحالة</DialogTitle>
                   <DialogDescription>
-                    {pendingStatusChange === 'cancelled' && 'هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟'}
-                    {pendingStatusChange === 'confirmed' && 'هل تريد تأكيد هذا الحجز؟'}
-                    {pendingStatusChange === 'completed' && 'هل تريد تحديد هذا الحجز كمكتمل؟'}
+                    {pendingStatusChange === "cancelled" &&
+                      "هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟"}
+                    {pendingStatusChange === "confirmed" &&
+                      "هل تريد تأكيد هذا الحجز؟"}
+                    {pendingStatusChange === "completed" &&
+                      "هل تريد تحديد هذا الحجز كمكتمل؟"}
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -591,7 +621,11 @@ export default function AppointmentDetails({
                     إلغاء
                   </Button>
                   <Button
-                    variant={pendingStatusChange === 'cancelled' ? 'destructive' : 'default'}
+                    variant={
+                      pendingStatusChange === "cancelled"
+                        ? "destructive"
+                        : "default"
+                    }
                     onClick={() => handleStatusChange(pendingStatusChange!)}
                   >
                     تأكيد
@@ -604,19 +638,20 @@ export default function AppointmentDetails({
                 className="w-full"
                 variant="default"
                 onClick={() => {
-                  setPendingStatusChange('confirmed');
+                  setPendingStatusChange("confirmed");
                   setIsStatusDialogOpen(true);
                 }}
               >
                 تأكيد الحجز
               </Button>
             )}
-            {(booking.status === "pending" || booking.status === "confirmed") && (
+            {(booking.status === "pending" ||
+              booking.status === "confirmed") && (
               <Button
                 className="w-full"
                 variant="destructive"
                 onClick={() => {
-                  setPendingStatusChange('cancelled');
+                  setPendingStatusChange("cancelled");
                   setIsStatusDialogOpen(true);
                 }}
               >
@@ -628,7 +663,7 @@ export default function AppointmentDetails({
                 className="w-full"
                 variant="default"
                 onClick={() => {
-                  setPendingStatusChange('completed');
+                  setPendingStatusChange("completed");
                   setIsStatusDialogOpen(true);
                 }}
               >
