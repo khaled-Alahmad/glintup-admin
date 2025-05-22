@@ -42,7 +42,7 @@ interface User {
   birth_date: string;
   age: string;
   avatar: string | null;
-  phone_code: string;
+  // phone_code: string;
   phone: string;
   role: string;
   is_active: boolean;

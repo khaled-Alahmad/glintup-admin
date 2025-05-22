@@ -37,7 +37,7 @@ export default function AddUser() {
     last_name: "",
     gender: "male",
     birth_date: "",
-    phone_code: "+966",
+    // phone_code: "+966",
     phone: "",
     password: "",
     is_active: true,
@@ -89,7 +89,7 @@ export default function AddUser() {
       // Prepare user data
       const userData = {
         ...formData,
-        phone_code: formData.phone_code,
+        // phone_code: formData.phone_code,
         phone: formData.phone,
         is_active: formData.is_active,
       };
@@ -108,7 +108,7 @@ export default function AddUser() {
           last_name: "",
           gender: "male",
           birth_date: "",
-          phone_code: "+966",
+          // phone_code: "+966",
           phone: "",
           password: "",
           avatar: "",
@@ -229,15 +229,14 @@ export default function AddUser() {
                 <Input
                   id="phone"
                   value={formData.phone}
-                                  style={{ unicodeBidi: "plaintext" }}
-
+                  style={{ unicodeBidi: "plaintext" }}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, phone: e.target.value }))
                   }
                   required
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="phone_code">
                   رمز الهاتف <span className="text-red-500">*</span>
                 </Label>
@@ -267,6 +266,7 @@ export default function AddUser() {
                   </SelectContent>
                 </Select>
               </div>
+              */}
             </div>
 
             <div className="space-y-2">

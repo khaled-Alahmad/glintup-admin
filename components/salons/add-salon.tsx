@@ -48,7 +48,7 @@ export default function AddSalon() {
       last_name: "",
       password: "",
       password_confirmation: "",
-      phone_code: "+352",
+      // phone_code: "+352",
       phone: "",
       gender: "male",
       birth_date: "",
@@ -329,7 +329,7 @@ export default function AddSalon() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="phone_code">
                   رمز الهاتف <span className="text-red-500">*</span>
                 </Label>
@@ -358,7 +358,7 @@ export default function AddSalon() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div>*/}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

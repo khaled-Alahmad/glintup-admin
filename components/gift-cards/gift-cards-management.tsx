@@ -47,7 +47,6 @@ interface GiftCard {
   code: string;
   sender_id: number;
   recipient_id: number | null;
-  phone_code: string;
   phone: string;
   full_phone: string;
   type: string;

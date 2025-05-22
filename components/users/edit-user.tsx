@@ -30,7 +30,7 @@ export default function EditUser({ userId }: EditUserProps) {
     last_name: '',
     gender: 'male',
     birth_date: '',
-    phone_code: '+966',
+    // phone_code: '+966',
     phone: '',
     password: '',
     notes: '',
@@ -97,7 +97,7 @@ export default function EditUser({ userId }: EditUserProps) {
       // Prepare user data
       const userData: any = {
         ...formData,
-        phone_code: formData.phone_code,
+        // phone_code: formData.phone_code,
         phone: formData.phone,
         is_active: formData.is_active,
         notes: formData.notes,
@@ -125,7 +125,7 @@ export default function EditUser({ userId }: EditUserProps) {
           last_name: '',
           gender: 'male',
           birth_date: '',
-          phone_code: '+966',
+          // phone_code: '+966',
           phone: '',
           password: '',
           avatar: '',
@@ -224,7 +224,7 @@ export default function EditUser({ userId }: EditUserProps) {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="phone_code">رمز الهاتف <span className="text-red-500">*</span></Label>
                 <Input
                   id="phone_code"
@@ -233,7 +233,7 @@ export default function EditUser({ userId }: EditUserProps) {
                   onChange={(e) => setFormData(prev => ({ ...prev, phone_code: e.target.value }))}
                   required
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-2">

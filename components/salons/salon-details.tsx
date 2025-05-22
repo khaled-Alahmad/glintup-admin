@@ -110,7 +110,7 @@ interface StaffMember {
     full_phone: string;
     gender: string;
     birth_date: string;
-    phone_code: string;
+    // phone_code: string;
     phone: string;
     salon_permissions: Array<{
       permission: SalonPermission;
@@ -157,7 +157,7 @@ interface GiftCard {
   code: string;
   sender_id: number;
   recipient_id: number | null;
-  phone_code: string;
+  // phone_code: string;
   phone: string;
   full_phone: string;
   type: string;
@@ -692,7 +692,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           salon_id: salonId,
           first_name: formData.get("first_name"),
           last_name: formData.get("last_name"),
-          phone_code: formData.get("phone_code"),
+          // phone_code: formData.get("phone_code"),
           phone: formData.get("phone"),
           gender: formData.get("gender"),
           birth_date: formData.get("birth_date"),
@@ -733,7 +733,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             salon_id: salonId,
             first_name: formData.get("first_name"),
             last_name: formData.get("last_name"),
-            phone_code: formData.get("phone_code"),
+            // phone_code: formData.get("phone_code"),
             phone: formData.get("phone"),
             gender: formData.get("gender"),
             birth_date: formData.get("birth_date"),
@@ -912,7 +912,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="phone_code">رمز الدولة</Label>
                       <Input
@@ -931,7 +931,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         required
                       />
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1048,7 +1048,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="phone_code">رمز الدولة</Label>
                       <Input
@@ -1069,7 +1069,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         required
                       />
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
