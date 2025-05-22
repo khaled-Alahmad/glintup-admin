@@ -18,11 +18,14 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Upload, User, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
+import { isValidPhone } from '@/lib/phone-utils';
 
-export default function EditAdminProfile() {
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+export default function EditAdminProfile() {  const [avatarPreview, setAvatarPreview] = useState<string | null>(
     "/placeholder.svg?height=128&width=128"
   );
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // بيانات نموذجية للمسؤول
   const admin = {
@@ -152,17 +155,45 @@ export default function EditAdminProfile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">                <div className="space-y-2">
                   <Label htmlFor="phone">رقم الهاتف</Label>
-                  <div className="relative">
-                    <Phone className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <div className="phone-input-container">
+                    <PhoneInput
+                      defaultCountry="ae"
+                      style={{
+                        width: '100%',
+                        height: '40px',
+                        fontSize: '0.875rem',
+                        borderRadius: '0.375rem',
+                      }}
+                      value={admin.phone}
+                      onChange={(phone) => {
+                        // Verificar validez usando libphonenumber-js
+                        const isValid = isValidPhone(phone);
+                        if (!isValid && phone.length > 4) {
+                          setPhoneError("رقم الهاتف غير صحيح");
+                        } else {
+                          setPhoneError(null);
+                        }
+                        
+                        // Actualizar el input oculto
+                        const hiddenInput = document.getElementById("phone") as HTMLInputElement;
+                        if (hiddenInput) hiddenInput.value = phone;
+                      }}
+                      inputProps={{
+                        placeholder: "أدخل رقم الهاتف",
+                        name: "phone_display"
+                      }}
+                    />
                     <Input
                       id="phone"
-                      style={{ unicodeBidi: "plaintext" }}
+                      name="phone"
+                      type="hidden"
                       defaultValue={admin.phone}
-                      className="pr-9"
                     />
+                    {phoneError && (
+                      <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">

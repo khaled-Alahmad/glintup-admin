@@ -4,6 +4,8 @@
 
 /* Import Leaflet CSS */
 @import "leaflet/dist/leaflet.css";
+/* Import Phone Input CSS */
+@import "../styles/phone-input.css";
 
 .switch-custom {
   direction: ltr !important;

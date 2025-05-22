@@ -27,8 +27,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
+import { isValidPhone } from "@/lib/phone-utils";
+import { useToast } from "../ui/use-toast";
 
 // Import the MapComponent dynamically with SSR disabled
 const MapComponent = dynamic(
@@ -40,6 +43,16 @@ export default function AddSalon() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  //  error phone for business_contact_number and contact_number
+  const [businessContactPhoneError, setBusinessContactPhoneError] = useState<
+    string | null
+  >(null);
+  const [contactPhoneError, setContactPhoneError] = useState<string | null>(
+    null
+  );
+  // loading
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -48,7 +61,6 @@ export default function AddSalon() {
       last_name: "",
       password: "",
       password_confirmation: "",
-      // phone_code: "+352",
       phone: "",
       gender: "male",
       birth_date: "",
@@ -74,7 +86,7 @@ export default function AddSalon() {
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    setIsLoading(true);
     try {
       const uploadFormData = new FormData();
       uploadFormData.append("image", file);
@@ -89,6 +101,7 @@ export default function AddSalon() {
           icon: response.data.image_name,
         }));
       }
+      setIsLoading(false);
     } catch (error) {
       console.error("Image upload failed:", error);
       toast({
@@ -119,6 +132,7 @@ export default function AddSalon() {
   ) => {
     if (e.target.files) {
       try {
+        setIsLoading(true);
         const files = Array.from(e.target.files);
         setNewImages((prev) => [...prev, ...files]);
 
@@ -150,6 +164,7 @@ export default function AddSalon() {
             url: r.url,
           })),
         ]);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error uploading images:", error);
         toast({
@@ -167,7 +182,20 @@ export default function AddSalon() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validar el número de teléfono antes de enviar
+    if (!isValidPhone(formData.user.phone)) {
+      setPhoneError("يرجى إدخال رقم هاتف صحيح");
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال رقم هاتف صحيح للمالك",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      setIsLoading(true);
       const uploadedImages = await Promise.all(
         newImages.map(async (file) => {
           const imageFormData = new FormData();
@@ -195,11 +223,12 @@ export default function AddSalon() {
         });
         window.location.href = "/salons";
       }
+      setIsLoading(false);
     } catch (error: any) {
       console.error("Error adding salon:", error);
       toast({
         title: "خطأ",
-        description: error.formData.message,
+        description: error.response.message,
         variant: "destructive",
       });
     }
@@ -317,17 +346,39 @@ export default function AddSalon() {
                 <Label htmlFor="phone">
                   رقم الهاتف <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="phone"
-                  value={formData.user.phone}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      user: { ...prev.user, phone: e.target.value },
-                    }))
-                  }
-                  required
-                />
+                <div className="phone-input-container">
+                  <PhoneInput
+                    defaultCountry="kw"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      fontSize: "0.875rem",
+                      borderRadius: "0.375rem",
+                    }}
+                    value={formData.user.phone}
+                    onChange={(phone) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        user: { ...prev.user, phone },
+                      }));
+
+                      // Verificar validez usando libphonenumber-js
+                      const isValid = isValidPhone(phone);
+                      if (!isValid && phone.length > 4) {
+                        setPhoneError("رقم الهاتف غير صحيح");
+                      } else {
+                        setPhoneError(null);
+                      }
+                    }}
+                    inputProps={{
+                      placeholder: "أدخل رقم الهاتف",
+                      required: true,
+                    }}
+                  />
+                  {phoneError && (
+                    <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+                  )}
+                </div>
               </div>
               {/* <div className="space-y-2">
                 <Label htmlFor="phone_code">
@@ -530,17 +581,39 @@ export default function AddSalon() {
                 <Label htmlFor="contact_number">
                   رقم هاتف التواصل <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="contact_number"
-                  value={formData.contact_number}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      contact_number: e.target.value,
-                    }))
-                  }
-                  required
-                />
+                <div className="phone-input-container">
+                  <PhoneInput
+                    defaultCountry="kw"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      fontSize: "0.875rem",
+                      borderRadius: "0.375rem",
+                    }}
+                    value={formData.contact_number}
+                    onChange={(phone) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        contact_number: phone,
+                      }));
+                      const isValid = isValidPhone(phone);
+                      if (!isValid && phone.length > 4) {
+                        setContactPhoneError("رقم الهاتف غير صحيح");
+                      } else {
+                        setContactPhoneError(null);
+                      }
+                    }}
+                    inputProps={{
+                      placeholder: "أدخل رقم هاتف التواصل",
+                      required: true,
+                    }}
+                  />
+                  {contactPhoneError && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {contactPhoneError}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -567,17 +640,39 @@ export default function AddSalon() {
                 <Label htmlFor="business_contact_number">
                   رقم هاتف الأعمال <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="business_contact_number"
-                  value={formData.business_contact_number}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      business_contact_number: e.target.value,
-                    }))
-                  }
-                  required
-                />
+                <div className="phone-input-container">
+                  <PhoneInput
+                    defaultCountry="kw"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      fontSize: "0.875rem",
+                      borderRadius: "0.375rem",
+                    }}
+                    value={formData.business_contact_number}
+                    onChange={(phone) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        business_contact_number: phone,
+                      }));
+                      const isValid = isValidPhone(phone);
+                      if (!isValid && phone.length > 4) {
+                        setBusinessContactPhoneError("رقم الهاتف غير صحيح");
+                      } else {
+                        setBusinessContactPhoneError(null);
+                      }
+                    }}
+                    inputProps={{
+                      placeholder: "أدخل رقم هاتف الأعمال",
+                      required: true,
+                    }}
+                  />
+                  {businessContactPhoneError && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {businessContactPhoneError}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -958,7 +1053,9 @@ export default function AddSalon() {
             <Button variant="outline" type="button" asChild>
               <Link href="/salons">إلغاء</Link>
             </Button>
-            <Button type="submit">حفظ الصالون</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "جاري الحفظ..." : "حفظ الصالون"}
+            </Button>
           </CardFooter>
         </Card>
       </form>

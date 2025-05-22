@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { fetchData, updateData, addData } from "@/lib/apiHelper";
 import dynamic from "next/dynamic";
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 // Import MapComponent dynamically with SSR disabled
 const MapComponent = dynamic(
@@ -1094,12 +1096,35 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="contact_number">رقم جهة الاتصال</Label>
-                    <Input
-                      id="contact_number"
-                      style={{ unicodeBidi: "plaintext" }}
-                      name="contact_number"
-                      defaultValue={salonData?.contact_number}
-                    />
+                    <div className="phone-input-container">
+                      <PhoneInput
+                        defaultCountry="kw"
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          fontSize: '0.875rem',
+                          borderRadius: '0.375rem',
+                        }}
+                        value={salonData?.contact_number || ""}
+                        onChange={(phone) => {
+                          // Store the value in a hidden input to be submitted with the form
+                          const hiddenInput = document.getElementById(
+                            "contact_number"
+                          ) as HTMLInputElement;
+                          if (hiddenInput) hiddenInput.value = phone;
+                        }}
+                        inputProps={{
+                          placeholder: "أدخل رقم الهاتف",
+                          name: "contact_number_display", // Use a different name to avoid conflicts
+                        }}
+                      />
+                      <Input
+                        id="contact_number"
+                        name="contact_number"
+                        type="hidden"
+                        defaultValue={salonData?.contact_number}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="contact_email">
@@ -1116,12 +1141,35 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <Label htmlFor="business_contact_number">
                       رقم جهة الأعمال
                     </Label>
-                    <Input
-                      style={{ unicodeBidi: "plaintext" }} // eslint-disable-line
-                      id="business_contact_number"
-                      name="business_contact_number"
-                      defaultValue={salonData?.business_contact_number}
-                    />
+                    <div className="phone-input-container">
+                      <PhoneInput
+                        defaultCountry="kw"
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          fontSize: '0.875rem',
+                          borderRadius: '0.375rem',
+                        }}
+                        value={salonData?.business_contact_number || ""}
+                        onChange={(phone) => {
+                          // Store the value in a hidden input to be submitted with the form
+                          const hiddenInput = document.getElementById(
+                            "business_contact_number"
+                          ) as HTMLInputElement;
+                          if (hiddenInput) hiddenInput.value = phone;
+                        }}
+                        inputProps={{
+                          placeholder: "أدخل رقم الهاتف",
+                          name: "business_contact_number_display", // Use a different name to avoid conflicts
+                        }}
+                      />
+                      <Input
+                        id="business_contact_number"
+                        name="business_contact_number"
+                        type="hidden"
+                        defaultValue={salonData?.business_contact_number}
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
