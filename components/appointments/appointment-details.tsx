@@ -46,6 +46,7 @@ interface Service {
     en: string;
     ar: string;
   };
+  icon_url: string | null;
   duration_minutes: number;
   price: string;
   final_price: number;
@@ -453,7 +454,7 @@ export default function AppointmentDetails({
                     <p>{new Date(booking.date).toLocaleDateString("en-US")}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">الوقت</p>
@@ -461,7 +462,7 @@ export default function AppointmentDetails({
                       {booking.time} - {booking.end_time}
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -470,44 +471,81 @@ export default function AppointmentDetails({
             {/* الخدمات */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">الخدمات</h3>
-              <div className="border rounded-md overflow-hidden">
-                <table className="w-full">
+              <div className="overflow-x-auto rounded-lg border">
+                <table className="min-w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
-                      <th className="text-right p-3">الخدمة</th>
-                      <th className="text-center p-3">المدة (دقيقة)</th>
-                      <th className="text-center p-3">السعر (د.إ)</th>
-                      {/* <th className="text-center p-3">الكمية</th> */}
-                      <th className="text-center p-3">الإجمالي (د.إ)</th>
+                      <th className="text-right p-3 font-semibold whitespace-nowrap">
+                        الخدمة
+                      </th>
+                      <th className="text-center p-3 font-semibold whitespace-nowrap">
+                        المدة (دقيقة)
+                      </th>
+                      <th className="text-center p-3 font-semibold whitespace-nowrap">
+                        السعر
+                      </th>
+                      <th className="text-center p-3 font-semibold whitespace-nowrap">
+                        الإجمالي
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {booking.booking_services.map((bookingService) => (
-                      <tr key={bookingService.id} className="border-t">
-                        <td className="p-3">
-                          {bookingService.service.name.ar}
-                        </td>
-                        <td className="p-3 text-center">
-                          {bookingService.service.duration_minutes}
-                        </td>
-                        <td className="p-3 text-center">
-                          {bookingService.service.final_price}
-                        </td>
-                        {/* <td className="p-3 text-center">1</td> */}
-                        <td className="p-3 text-center font-medium">
-                          {bookingService.service.final_price}
+                    {booking.booking_services.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="p-4 text-center text-muted-foreground"
+                        >
+                          لا توجد خدمات لهذا الحجز
                         </td>
                       </tr>
-                    ))}
-                    <tr className="border-t bg-muted/30">
+                    ) : (
+                      booking.booking_services.map((bookingService) => (
+                        <tr
+                          key={bookingService.id}
+                          className="border-t hover:bg-muted/10 transition"
+                        >
+                          <td className="p-3">
+                            {/* i need add service img  */}
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage
+                                  src={
+                                    bookingService.service.icon_url ||
+                                    "/placeholder.svg"
+                                  }
+                                  alt={bookingService.service.name.en}
+                                />
+                                <AvatarFallback>
+                                  {bookingService.service.name.en.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>{bookingService.service.name.en}</span>
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            {bookingService.service.duration_minutes}
+                          </td>
+                          <td className="p-3 text-center">
+                            {bookingService.service.final_price}{" "}
+                            {bookingService.service.currency}
+                          </td>
+                          <td className="p-3 text-center font-medium">
+                            {bookingService.service.final_price}{" "}
+                            {bookingService.service.currency}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                    <tr className="border-t bg-muted/20">
                       <td className="p-3 font-bold">الإجمالي</td>
                       <td className="p-3 text-center font-bold">
                         {totalDuration} دقيقة
                       </td>
-                      {/* <td className="p-3"></td> */}
                       <td className="p-3"></td>
                       <td className="p-3 text-center font-bold">
-                        {totalPrice} د.إ
+                        {totalPrice}{" "}
+                        {booking.booking_services[0]?.service.currency || "د.إ"}
                       </td>
                     </tr>
                   </tbody>
@@ -658,7 +696,7 @@ export default function AppointmentDetails({
                 إلغاء الحجز
               </Button>
             )}
-            {booking.status === "confirmed" && (
+            {/* {booking.status === "confirmed" && (
               <Button
                 className="w-full"
                 variant="default"
@@ -669,7 +707,7 @@ export default function AppointmentDetails({
               >
                 تحديد كمكتمل
               </Button>
-            )}
+            )} */}
           </CardFooter>
         </Card>
       </div>
