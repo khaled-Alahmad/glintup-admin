@@ -93,7 +93,7 @@ interface Service {
   category: string;
 }
 
-// تعريف نوع البيانات للخدمة في الصالون
+// تعريف نوع البيانات للخدمة في المزود
 interface SalonService {
   id: string;
   serviceId: string;
@@ -265,7 +265,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       if (response.success) {
         toast({
           title: "تم التحديث بنجاح",
-          description: "تم تحديث صور الصالون بنجاح",
+          description: "تم تحديث صور المزود بنجاح",
         });
         // Reset states
         setNewImages([]);
@@ -335,7 +335,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     fetchSalonSocialMedia();
   }, [salonId]);
 
-  // خدمات الصالون المحددة
+  // خدمات المزود المحددة
   const [salonServices, setSalonServices] = useState<SalonService[]>([]);
   useEffect(() => {
     const fetchWorkingHours = async () => {
@@ -542,7 +542,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
   // المدة المخصصة للخدمة المختارة
   const [customDuration, setCustomDuration] = useState<number>(0);
 
-  // جلب بيانات الصالون
+  // جلب بيانات المزود
   useEffect(() => {
     const fetchSalonData = async () => {
       try {
@@ -567,7 +567,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         console.error("Failed to fetch salon data:", error);
         toast({
           title: "خطأ في جلب البيانات",
-          description: "حدث خطأ أثناء جلب بيانات الصالون",
+          description: "حدث خطأ أثناء جلب بيانات المزود",
           variant: "destructive",
         });
       } finally {
@@ -595,7 +595,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         console.error("Failed to upload logo:", error);
         toast({
           title: "خطأ في رفع الصورة",
-          description: "حدث خطأ أثناء رفع شعار الصالون",
+          description: "حدث خطأ أثناء رفع شعار المزود",
           variant: "destructive",
         });
       }
@@ -634,7 +634,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       if (response.success) {
         toast({
           title: "تم التحديث بنجاح",
-          description: "تم تحديث بيانات الصالون بنجاح",
+          description: "تم تحديث بيانات المزود بنجاح",
         });
         router.push(`/salons/${salonId}`);
       }
@@ -642,7 +642,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       console.error("Failed to update salon:", error);
       toast({
         title: "خطأ في التحديث",
-        description: "حدث خطأ أثناء تحديث بيانات الصالون",
+        description: "حدث خطأ أثناء تحديث بيانات المزود",
         variant: "destructive",
       });
     } finally {
@@ -650,16 +650,16 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     }
   };
 
-  // إضافة خدمة إلى الصالون
+  // إضافة خدمة إلى المزود
   const addServiceToSalon = () => {
     if (!selectedServiceId) return;
 
     const service = availableServices.find((s) => s.id === selectedServiceId);
     if (!service) return;
 
-    // التحقق من عدم وجود الخدمة مسبقاً في الصالون
+    // التحقق من عدم وجود الخدمة مسبقاً في المزود
     if (salonServices.some((s) => s.serviceId === selectedServiceId)) {
-      alert("هذه الخدمة موجودة بالفعل في الصالون");
+      alert("هذه الخدمة موجودة بالفعل في المزود");
       return;
     }
 
@@ -683,7 +683,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     setCustomDuration(0);
   };
 
-  // تعديل خدمة في الصالون
+  // تعديل خدمة في المزود
   const editSalonService = () => {
     if (!currentService) return;
 
@@ -697,14 +697,14 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     setCurrentService(null);
   };
 
-  // حذف خدمة من الصالون
+  // حذف خدمة من المزود
   const removeSalonService = (serviceId: string) => {
     setSalonServices(
       salonServices.filter((service) => service.id !== serviceId)
     );
   };
 
-  // إضافة مجموعة إلى الصالون
+  // إضافة مجموعة إلى المزود
   const addCollection = (collectionId: string) => {
     const collection = availableCollections.find((c) => c.id === collectionId);
     if (collection && !selectedCollections.some((c) => c.id === collectionId)) {
@@ -712,7 +712,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     }
   };
 
-  // إزالة مجموعة من الصالون
+  // إزالة مجموعة من المزود
   const removeCollection = (collectionId: string) => {
     setSelectedCollections(
       selectedCollections.filter((c) => c.id !== collectionId)
@@ -833,7 +833,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           </Link>
         </Button>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          تعديل بيانات الصالون
+          تعديل بيانات المزود
         </h1>
       </div>
 
@@ -850,8 +850,8 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           <form onSubmit={handleSubmitBasic}>
             <Card>
               <CardHeader>
-                <CardTitle>تعديل بيانات الصالون</CardTitle>
-                <CardDescription>قم بتعديل معلومات الصالون</CardDescription>
+                <CardTitle>تعديل بيانات المزود</CardTitle>
+                <CardDescription>قم بتعديل معلومات المزود</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* المعلومات الأساسية */}
@@ -859,7 +859,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">
-                      اسم الصالون <span className="text-red-500">*</span>
+                      اسم المزود <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="name"
@@ -871,7 +871,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">وصف الصالون</Label>
+                  <Label htmlFor="description">وصف المزود</Label>
                   <Textarea
                     id="description"
                     name="description"
@@ -924,7 +924,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 </div>
 
                 <div className="space-y-2 mt-6">
-                  <Label htmlFor="description">وصف الصالون</Label>
+                  <Label htmlFor="description">وصف المزود</Label>
                   <Textarea
                     id="description"
                     name="description"
@@ -934,7 +934,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio">نبذة عن الصالون</Label>
+                  <Label htmlFor="bio">نبذة عن المزود</Label>
                   <Textarea
                     id="bio"
                     name="bio"
@@ -966,20 +966,22 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="type">
-                    نوع الصالون <span className="text-red-500">*</span>
+                  نوع المزود <span className="text-red-500">*</span>
                   </Label>
                   <Select
-                    name="type"
-                    required
-                    defaultValue={salonData?.type || ""}
+                  name="type"
+                  required
+                  defaultValue={salonData?.type || ""}
                   >
-                    <SelectTrigger id="type">
-                      <SelectValue placeholder="اختر نوع الصالون" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="salon">صالون</SelectItem>
-                      <SelectItem value="clinic">العيادات</SelectItem>
-                    </SelectContent>
+                  <SelectTrigger id="type">
+                    <SelectValue placeholder="اختر نوع المزود" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="salon">صالون</SelectItem>
+                    <SelectItem value="home_service">خدمة منزلية</SelectItem>
+                    <SelectItem value="beautician">متخصص تجميل</SelectItem>
+                    <SelectItem value="clinic">العيادات</SelectItem>
+                  </SelectContent>
                   </Select>
                 </div>
                 {/* <div className="space-y-2">
@@ -1042,9 +1044,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="is_approved">صالون موثق</Label>
+                        <Label htmlFor="is_approved">مزود موثق</Label>
                         <p className="text-sm text-muted-foreground">
-                          إضافة علامة التوثيق إلى الصالون
+                          إضافة علامة التوثيق إلى المزود
                         </p>
                       </div>
                       <Switch
@@ -1056,9 +1058,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="is_active">صالون نشط</Label>
+                        <Label htmlFor="is_active">مزود نشط</Label>
                         <p className="text-sm text-muted-foreground">
-                          تعيين الصالون نشطًا
+                          تعيين المزود نشطًا
                         </p>
                       </div>
                       <Switch
@@ -1089,7 +1091,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
               <CardHeader>
                 <CardTitle>معلومات الاتصال</CardTitle>
                 <CardDescription>
-                  تعديل معلومات الاتصال والموقع للصالون
+                  تعديل معلومات الاتصال والموقع للمزود
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -1622,11 +1624,11 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           <Card>
             <CardHeader>
               <CardTitle>الصور والوسائط</CardTitle>
-              <CardDescription>تعديل صور وشعار الصالون</CardDescription>
+              <CardDescription>تعديل صور وشعار المزود</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">شعار الصالون</h3>
+                <h3 className="text-lg font-medium">شعار المزود</h3>
                 <Label
                   htmlFor="logo"
                   className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -1654,7 +1656,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-1">
-                        اسحب وأفلت شعار الصالون هنا أو انقر للتصفح
+                        اسحب وأفلت شعار المزود هنا أو انقر للتصفح
                       </p>
                       <p className="text-xs text-gray-500">PNG, JPG حتى 2MB</p>
                     </div>
@@ -1679,7 +1681,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   <div className="flex flex-col items-center">
                     <Upload className="h-12 w-12 text-gray-400 mb-2" />
                     <p className="text-sm text-gray-600 mb-1">
-                      اسحب وأفلت صور الصالون هنا أو انقر للتصفح
+                      اسحب وأفلت صور المزود هنا أو انقر للتصفح
                     </p>
                     <p className="text-xs text-gray-500">
                       PNG, JPG حتى 5MB لكل صورة
@@ -1705,7 +1707,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     >
                       <img
                         src={image.url}
-                        alt="صورة الصالون"
+                        alt="صورة المزود"
                         className="w-full h-full object-contain"
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1740,12 +1742,12 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           <Card>
             <CardHeader>
               <CardTitle>الخدمات والأسعار</CardTitle>
-              <CardDescription>تعديل خدمات الصالون وأسعارها</CardDescription>
+              <CardDescription>تعديل خدمات المزود وأسعارها</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">خدمات الصالون</h3>
+                  <h3 className="text-lg font-medium">خدمات المزود</h3>
                   <Dialog
                     open={isAddServiceDialogOpen}
                     onOpenChange={setIsAddServiceDialogOpen}
@@ -1758,10 +1760,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                       <DialogHeader>
-                        <DialogTitle>إضافة خدمة للصالون</DialogTitle>
+                        <DialogTitle>إضافة خدمة للمزود</DialogTitle>
                         <DialogDescription>
                           اختر خدمة من القائمة وحدد السعر والمدة المناسبة
-                          للصالون
+                          للمزود
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
@@ -1913,7 +1915,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       لم يتم إضافة أي خدمات بعد
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      اضغط على زر "إضافة خدمة" لإضافة خدمات للصالون
+                      اضغط على زر "إضافة خدمة" لإضافة خدمات للمزود
                     </p>
                   </div>
                 )}
@@ -1926,9 +1928,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
               >
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
-                    <DialogTitle>تعديل خدمة الصالون</DialogTitle>
+                    <DialogTitle>تعديل خدمة المزود</DialogTitle>
                     <DialogDescription>
-                      قم بتعديل تفاصيل الخدمة في الصالون
+                      قم بتعديل تفاصيل الخدمة في المزود
                     </DialogDescription>
                   </DialogHeader>
                   {currentService && (
@@ -2011,7 +2013,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           <Card>
             <CardHeader>
               <CardTitle>المجموعات</CardTitle>
-              <CardDescription>إدارة مجموعات الخدمات للصالون</CardDescription>
+              <CardDescription>إدارة مجموعات الخدمات للمزود</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col gap-4">

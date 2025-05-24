@@ -2352,18 +2352,34 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </Badge>
                 )}
                 {/* type */}
-                <Badge
-                  variant="outline"
-                  className="bg-purple-50 text-purple-700 border-purple-200"
-                >
-                  {salonData.type === "clinic"
-                    ? "عيادة"
-                    : salonData.type === "salon"
-                    ? "صالون"
-                    : salonData.type === "home_service"
-                    ? "خدمة منزلية"
-                    : salonData.type}
-                </Badge>
+                {salonData.types &&
+                  salonData.types.split(",").map((type, idx) => (
+                    <Badge
+                      key={idx}
+                      variant="outline"
+                      className={
+                        type === "clinic"
+                          ? "bg-purple-50 text-purple-700 border-purple-200"
+                          : type === "salon"
+                          ? "bg-pink-50 text-pink-700 border-pink-200"
+                          : type === "home_service"
+                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          : type === "beautician"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-gray-50 text-gray-700 border-gray-200"
+                      }
+                    >
+                      {type === "clinic"
+                        ? "عيادة"
+                        : type === "salon"
+                        ? "صالون"
+                        : type === "home_service"
+                        ? "خدمة منزلية"
+                        : type === "beautician"
+                        ? "خبيرة تجميل"
+                        : type}
+                    </Badge>
+                  ))}
                 {/*  salonData.types */}
               </div>
               {/* <div className="flex items-center gap-2 mt-2">
@@ -2822,8 +2838,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">رقم الهاتف</p>
-                  <p className="text-sm text-muted-foreground"                 style={{ unicodeBidi: "plaintext" }}
->
+                  <p
+                    className="text-sm text-muted-foreground"
+                    style={{ unicodeBidi: "plaintext" }}
+                  >
                     {salonData.owner?.full_phone}
                   </p>
                 </div>
@@ -3169,46 +3187,6 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <Plus className="h-4 w-4 ml-2" />
                     {"إضافة خدمة"}
                   </Button>
-                  {/* add filter by is_home_service,is_beautician */}
-                  <div className="flex gap-4">
-                    <div className="w-[200px]">
-                      <Select
-                        value={isHomeService ? "home" : "all"}
-                        onValueChange={(value) =>
-                          setIsHomeService(value === "home")
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="نوع الخدمة المنزلية" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">جميع الخدمات</SelectItem>
-                          <SelectItem value="home">
-                            الخدمات المنزلية فقط
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="w-[200px]">
-                      <Select
-                        value={isBeautician ? "beautician" : "all"}
-                        onValueChange={(value) =>
-                          setIsBeautician(value === "beautician")
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="نوع خدمة التجميل" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">جميع الخدمات</SelectItem>
-                          <SelectItem value="beautician">
-                            خدمات خبير التجميل فقط
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
                 </div>
                 <Separator />
 
@@ -3341,31 +3319,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               </div>
                             </div>
                           </div>
-                          {/* <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleReplyReview(review)}>
-                              <MessageSquare className="mr-2 h-4 w-4" />
-                              <span>الرد على التقييم</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleReportReview(review)}>
-                              <Flag className="mr-2 h-4 w-4" />
-                              <span>الإبلاغ عن التقييم</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => handleDeleteReview(review)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              <span>حذف التقييم</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu> */}
+                          
                         </div>
                         <p className="mt-3">{review.comment}</p>
                         {review.salon_reply && (

@@ -5,7 +5,7 @@ import type React from "react";
 import { Suspense, useEffect, useState } from "react";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Button } from "@/components/ui/button";
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, DoorClosed, DoorOpen, LogOutIcon, Menu, Search } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -36,7 +36,7 @@ interface Notification {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,7 +123,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       // Call logout API
       const response = await addData("admin/auth/logout", {});
       console.log("Logout response:", response);
-      
+
       // Show success message
       if (response.success) {
         toast({
@@ -132,7 +132,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           variant: "default",
         });
       }
-      
+
       // Always call handleLogout regardless of API response
       // This function will clear localStorage and cookies, and redirect to login
       handleLogout();
@@ -276,44 +276,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            {/* Logout Button with Confirm Modal */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8"
+              onClick={() => setShowLogoutModal(true)}
+            >
+              <span className="mr-2">
+              <LogOutIcon className="me-2" />
+              </span>
+            </Button>
+            {/* Confirm Logout Modal */}
+            {showLogoutModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-xs">
+                <h2 className="text-lg font-semibold mb-2 text-center">تأكيد تسجيل الخروج</h2>
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                هل أنت متأكد أنك تريد تسجيل الخروج؟
+                </p>
+                <div className="flex justify-between gap-2">
                 <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowLogoutModal(false)}
                 >
-                  <Avatar className="h-8 w-8 ring-2 ring-primary/20">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      مشرف
-                    </AvatarFallback>
-                  </Avatar>
+                  إلغاء
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 mt-1">
-                <DropdownMenuLabel>حسابي</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <Link href={"/profile"}>
-                    <span className="mr-2">👤</span> الملف الشخصي
-                  </Link>{" "}
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Link href={"/profile/edit"}>
-                    <span className="mr-2">⚙️</span> إعدادات الحساب
-                  </Link>{" "}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  className="cursor-pointer text-red-500"
-                  onClick={handleLogoutClick}
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => {
+                  setShowLogoutModal(false);
+                  handleLogoutClick();
+                  }}
                 >
-                  <span className="mr-2">🚪</span> تسجيل الخروج
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  تسجيل الخروج
+                </Button>
+                </div>
+              </div>
+              </div>
+            )}
           </div>
         </header>
 

@@ -77,6 +77,7 @@ export default function AddSalon() {
     business_contact_email: "",
     description: "",
     bio: "",
+    type: "salon",
     icon: "",
     types: ["salon"],
     latitude: "",
@@ -219,7 +220,7 @@ export default function AddSalon() {
       if (response.success) {
         toast({
           title: "تمت الإضافة بنجاح",
-          description: "تم إنشاء الصالون الجديد",
+          description: "تم إنشاء المزود الجديد",
         });
         window.location.href = "/salons";
       }
@@ -252,15 +253,15 @@ export default function AddSalon() {
           </Link>
         </Button>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          إضافة صالون جديد
+          إضافة مزود جديد
         </h1>
       </div>
 
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>معلومات الصالون</CardTitle>
-            <CardDescription>أدخل معلومات الصالون الأساسية</CardDescription>
+            <CardTitle>معلومات المزود</CardTitle>
+            <CardDescription>أدخل معلومات المزود الأساسية</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* المعلومات الأساسية */}
@@ -456,8 +457,8 @@ export default function AddSalon() {
 
             <Separator />
 
-            {/* معلومات الصالون */}
-            <h3 className="text-lg font-medium">معلومات الصالون</h3>
+            {/* معلومات المزود */}
+            <h3 className="text-lg font-medium">معلومات المزود</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="merchant_legal_name">
@@ -494,7 +495,7 @@ export default function AddSalon() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">وصف الصالون</Label>
+              <Label htmlFor="description">وصف المزود</Label>
               <Textarea
                 id="description"
                 value={formData.description}
@@ -504,20 +505,20 @@ export default function AddSalon() {
                     description: e.target.value,
                   }))
                 }
-                placeholder="أدخل وصف الصالون"
+                placeholder="أدخل وصف المزود"
                 rows={4}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">نبذة عن الصالون</Label>
+              <Label htmlFor="bio">نبذة عن المزود</Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, bio: e.target.value }))
                 }
-                placeholder="أدخل نبذة عن الصالون"
+                placeholder="أدخل نبذة عن المزود"
                 rows={4}
               />
             </div>
@@ -525,25 +526,36 @@ export default function AddSalon() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="type">
-                  نوع الصالون <span className="text-red-500">*</span>
+                  نوع المزود <span className="text-red-500">*</span>
                 </Label>
-                <Select required>
+                <Select
+                  required
+                  value={formData.type}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      type: value,
+                    }))
+                  }
+                >
                   <SelectTrigger id="type">
-                    <SelectValue placeholder="اختر نوع الصالون" />
+                    <SelectValue placeholder="اختر نوع المزود" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="salon">صالون</SelectItem>
-                    <SelectItem value="clinic">العيادات</SelectItem>
+                    <SelectItem value="home_service">خدمة منزلية</SelectItem>
+                    <SelectItem value="beautician">خبيرة تجميل</SelectItem>
+                    <SelectItem value="clinic">عيادة</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status">
-                  حالة الصالون <span className="text-red-500">*</span>
+                  حالة المزود <span className="text-red-500">*</span>
                 </Label>
                 <Select defaultValue="active" required>
                   <SelectTrigger id="status">
-                    <SelectValue placeholder="اختر حالة الصالون" />
+                    <SelectValue placeholder="اختر حالة المزود" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">نشط</SelectItem>
@@ -872,11 +884,11 @@ export default function AddSalon() {
             <Separator /> */}
 
             {/* الصور */}
-            <h3 className="text-lg font-medium">صور الصالون</h3>
+            <h3 className="text-lg font-medium">صور المزود</h3>
             <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="logo">
-                  شعار الصالون <span className="text-red-500">*</span>
+                  شعار المزود <span className="text-red-500">*</span>
                 </Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   {logoPreview ? (
@@ -902,7 +914,7 @@ export default function AddSalon() {
                         <div className="flex flex-col items-center">
                           <Upload className="h-10 w-10 text-gray-400 mb-2" />
                           <p className="text-sm text-gray-600">
-                            اختر شعار الصالون
+                            اختر شعار المزود
                           </p>
                         </div>
                         {/* <Button type="button" variant="outline">
@@ -931,7 +943,7 @@ export default function AddSalon() {
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-1">
-                        اسحب وأفلت صور الصالون هنا أو انقر للتصفح
+                        اسحب وأفلت صور المزود هنا أو انقر للتصفح
                       </p>
                       <p className="text-xs text-gray-500">
                         PNG, JPG حتى 5MB لكل صورة
@@ -1031,18 +1043,18 @@ export default function AddSalon() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="featured">صالون مميز</Label>
+                  <Label htmlFor="featured">مزود مميز</Label>
                   <p className="text-sm text-muted-foreground">
-                    عرض الصالون في قسم الصالونات المميزة
+                    عرض المزود في قسم المزودات المميزة
                   </p>
                 </div>
                 <Switch id="featured" className="switch-custom " />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="verified">صالون موثق</Label>
+                  <Label htmlFor="verified">مزود موثق</Label>
                   <p className="text-sm text-muted-foreground">
-                    إضافة علامة التوثيق إلى الصالون
+                    إضافة علامة التوثيق إلى المزود
                   </p>
                 </div>
                 <Switch id="verified" className="switch-custom " />
@@ -1054,7 +1066,7 @@ export default function AddSalon() {
               <Link href="/salons">إلغاء</Link>
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "جاري الحفظ..." : "حفظ الصالون"}
+              {isLoading ? "جاري الحفظ..." : "حفظ المزود"}
             </Button>
           </CardFooter>
         </Card>

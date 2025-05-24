@@ -63,10 +63,10 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
 
       setIsLoading(true);
       try {
-        const response = await fetchData("admin/permissions");
+        const response = await fetchData("general/profile");
         if (response.success) {
           // Extract permission keys from API response
-          const permissionKeys = response.data.map(
+          const permissionKeys = response.data?.admin_permissions.map(
             (permission: any) => permission.key
           );
           setUserPermissions(permissionKeys);

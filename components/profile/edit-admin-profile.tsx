@@ -2,7 +2,8 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,38 +17,97 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Upload, User, Mail, Phone, MapPin } from "lucide-react";
+import {
+  ArrowLeft,
+  Upload,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
-import { PhoneInput } from 'react-international-phone';
-import 'react-international-phone/style.css';
-import { isValidPhone } from '@/lib/phone-utils';
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
+import { isValidPhone } from "@/lib/phone-utils";
+import { fetchData, addData, updateData } from "@/lib/apiHelper";
+import { useToast } from "@/components/ui/use-toast";
 
-export default function EditAdminProfile() {  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    "/placeholder.svg?height=128&width=128"
-  );
+export default function EditAdminProfile() {
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    role: "",
+    address: "",
+    image_name: "",
+  });
 
-  // بيانات نموذجية للمسؤول
-  const admin = {
-    id: 1,
-    name: "أحمد محمد",
-    email: "ahmed@glintup.com",
-    phone: "+971 50 123 4567",
-    role: "مدير النظام",
-    joinDate: "15 يناير 2023",
-    lastLogin: "اليوم، 10:30 صباحًا",
-    address: "دبي، الإمارات العربية المتحدة",
-    avatar: "/placeholder.svg?height=128&width=128",
-    notifications: {
-      email: true,
-      push: true,
-      sms: false,
-    },
+  // Cargar datos del perfil desde la API
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchData("general/profile");
+        if (response.success) {
+          const profileData = response.data;
+          setProfile(profileData);
+          setFormData({
+            full_name: profileData.full_name || "",
+            email: profileData.email || "",
+            phone: profileData.full_phone || "",
+            role: profileData.role || "",
+            address: profileData.address || "",
+            image_name: profileData.avatar || "",
+          });
+          setAvatarPreview(
+            profileData.avatar || "/placeholder.svg?height=128&width=128"
+          );
+        } else {
+          toast({
+            variant: "destructive",
+            title: "خطأ في تحميل البيانات",
+            description: response.message || "فشل في تحميل بيانات الملف الشخصي",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        toast({
+          variant: "destructive",
+          title: "خطأ في تحميل البيانات",
+          description: "حدث خطأ أثناء تحميل بيانات الملف الشخصي",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [toast]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
@@ -57,7 +117,7 @@ export default function EditAdminProfile() {  const [avatarPreview, setAvatarPre
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
           <Link href="/profile">
@@ -69,217 +129,240 @@ export default function EditAdminProfile() {  const [avatarPreview, setAvatarPre
         </h1>
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          // هنا يتم معالجة إرسال البيانات
-          console.log("تم حفظ التغييرات");
-        }}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="md:col-span-1">
-            <CardHeader>
-              <CardTitle>الصورة الشخصية</CardTitle>
-              <CardDescription>تغيير صورتك الشخصية</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-center">
-                <div className="relative">
-                  <Avatar className="h-32 w-32">
-                    <AvatarImage
-                      src={avatarPreview || admin.avatar}
-                      alt={admin.name}
-                    />
-                    <AvatarFallback>{admin.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0">
-                    <Label
-                      htmlFor="avatar-upload"
-                      className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground cursor-pointer"
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Label>
-                    <Input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarChange}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  يفضل استخدام صورة بأبعاد 256×256 بكسل بتنسيق JPG أو PNG
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>المعلومات الشخصية</CardTitle>
-              <CardDescription>تعديل معلوماتك الشخصية</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
-                    الاسم <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      defaultValue={admin.name}
-                      className="pr-9"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">
-                    البريد الإلكتروني <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      defaultValue={admin.email}
-                      className="pr-9"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">                <div className="space-y-2">
-                  <Label htmlFor="phone">رقم الهاتف</Label>
-                  <div className="phone-input-container">
-                    <PhoneInput
-                      defaultCountry="ae"
-                      style={{
-                        width: '100%',
-                        height: '40px',
-                        fontSize: '0.875rem',
-                        borderRadius: '0.375rem',
-                      }}
-                      value={admin.phone}
-                      onChange={(phone) => {
-                        // Verificar validez usando libphonenumber-js
-                        const isValid = isValidPhone(phone);
-                        if (!isValid && phone.length > 4) {
-                          setPhoneError("رقم الهاتف غير صحيح");
-                        } else {
-                          setPhoneError(null);
-                        }
-                        
-                        // Actualizar el input oculto
-                        const hiddenInput = document.getElementById("phone") as HTMLInputElement;
-                        if (hiddenInput) hiddenInput.value = phone;
-                      }}
-                      inputProps={{
-                        placeholder: "أدخل رقم الهاتف",
-                        name: "phone_display"
-                      }}
-                    />
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="hidden"
-                      defaultValue={admin.phone}
-                    />
-                    {phoneError && (
-                      <p className="text-sm text-red-500 mt-1">{phoneError}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">الدور الوظيفي</Label>
-                  <Input
-                    id="role"
-                    defaultValue={admin.role}
-                    readOnly
-                    disabled
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">العنوان</Label>
-                <div className="relative">
-                  <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    id="address"
-                    defaultValue={admin.address}
-                    className="pr-9 min-h-[80px]"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* <Card className="md:col-span-3">
-            <CardHeader>
-              <CardTitle>إعدادات الإشعارات</CardTitle>
-              <CardDescription>تخصيص إعدادات الإشعارات</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="email-notifications">
-                      إشعارات البريد الإلكتروني
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      استلام إشعارات عبر البريد الإلكتروني عند وجود تحديثات مهمة
-                    </p>
-                  </div>
-                  <Switch
-                    id="email-notifications"
-                    defaultChecked={admin.notifications.email}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="push-notifications">إشعارات الدفع</Label>
-                    <p className="text-sm text-muted-foreground">
-                      استلام إشعارات عند إتمام عمليات الدفع
-                    </p>
-                  </div>
-                  <Switch
-                    id="push-notifications"
-                    defaultChecked={admin.notifications.push}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="sms-notifications">
-                      إشعارات الرسائل النصية
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      استلام إشعارات عبر الرسائل النصية للتنبيهات العاجلة
-                    </p>
-                  </div>
-                  <Switch
-                    id="sms-notifications"
-                    defaultChecked={admin.notifications.sms}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
+      {isLoading ? (
+        <div className="flex justify-center items-center h-[50vh]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+            <h2 className="mt-4 text-xl">جاري تحميل البيانات...</h2>
+          </div>
         </div>
+      ) : (
+        <form
+          onSubmit={async (e: FormEvent) => {
+            e.preventDefault();
 
-        <div className="flex justify-between mt-6">
-          <Button variant="outline" asChild>
-            <Link href="/profile">إلغاء</Link>
-          </Button>
-          <Button type="submit">حفظ التغييرات</Button>
-        </div>
-      </form>
+            if (phoneError) {
+              toast({
+                variant: "destructive",
+                title: "خطأ في النموذج",
+                description: "رقم الهاتف غير صحيح، يرجى التصحيح قبل الإرسال",
+              });
+              return;
+            }
+
+            setIsSubmitting(true);
+
+            try {
+              // رفع الصورة أولاً إذا كانت موجودة
+              if (avatarFile) {
+                const formDataImage = new FormData();
+                formDataImage.append("image", avatarFile);
+                formDataImage.append("folder", "salons");
+
+                const imageResponse = await addData(
+                  "general/upload-image",
+                  formDataImage,
+                  {},
+                  true
+                );
+                if (imageResponse.success && imageResponse.data?.image_name) {
+                  formData.image_name = imageResponse.data.image_name;
+                } else {
+                  throw new Error(imageResponse.message || "فشل في رفع الصورة");
+                }
+              }
+
+              // تحديث البيانات الشخصية
+              const response = await updateData("general/profile", formData);
+
+              if (response.success) {
+                toast({
+                  title: "تم التحديث",
+                  description: "تم تحديث بيانات الملف الشخصي بنجاح",
+                });
+                router.push("/profile");
+              } else {
+                throw new Error(
+                  response.message || "فشل في تحديث الملف الشخصي"
+                );
+              }
+            } catch (error: any) {
+              console.error("Error updating profile:", error);
+              toast({
+                variant: "destructive",
+                title: "خطأ في تحديث البيانات",
+                description:
+                  error.message || "حدث خطأ أثناء تحديث بيانات الملف الشخصي",
+              });
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="md:col-span-1">
+              <CardHeader>
+                <CardTitle>الصورة الشخصية</CardTitle>
+                <CardDescription>تغيير صورتك الشخصية</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <Avatar className="h-32 w-32">
+                      <AvatarImage
+                        src={avatarPreview || "/placeholder-user.jpg"}
+                        alt={formData.full_name}
+                      />
+                      <AvatarFallback>
+                        {formData.full_name
+                          ? formData.full_name.charAt(0)
+                          : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute bottom-0 right-0">
+                      <Label
+                        htmlFor="avatar-upload"
+                        className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground cursor-pointer"
+                      >
+                        <Upload className="h-4 w-4" />
+                      </Label>
+                      <Input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    يفضل استخدام صورة بأبعاد 256×256 بكسل بتنسيق JPG أو PNG
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>المعلومات الشخصية</CardTitle>
+                <CardDescription>تعديل معلوماتك الشخصية</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="full_name">
+                      الاسم <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="full_name"
+                        value={formData.full_name}
+                        onChange={handleInputChange}
+                        className="pr-9"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">
+                      البريد الإلكتروني <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="pr-9"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">رقم الهاتف</Label>
+                    <div className="phone-input-container">
+                      <PhoneInput
+                        defaultCountry="ae"
+                        style={{
+                          width: "100%",
+                          height: "40px",
+                          fontSize: "0.875rem",
+                          borderRadius: "0.375rem",
+                        }}
+                        value={formData.phone}
+                        onChange={(phone) => {
+                          // Verificar validez usando libphonenumber-js
+                          const isValid = isValidPhone(phone);
+                          if (!isValid && phone.length > 4) {
+                            setPhoneError("رقم الهاتف غير صحيح");
+                          } else {
+                            setPhoneError(null);
+                          }
+
+                          // Actualizar el estado
+                          setFormData({
+                            ...formData,
+                            phone: phone,
+                          });
+                        }}
+                        inputProps={{
+                          placeholder: "أدخل رقم الهاتف",
+                          name: "phone_display",
+                        }}
+                      />
+                      {phoneError && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {phoneError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">الدور الوظيفي</Label>
+                    <Input id="role" value={formData.role} readOnly disabled />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">العنوان</Label>
+                  <div className="relative">
+                    <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Textarea
+                      id="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="pr-9 min-h-[80px]"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex justify-between mt-6">
+            <Button variant="outline" asChild>
+              <Link href="/profile">إلغاء</Link>
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  جاري الحفظ...
+                </>
+              ) : (
+                "حفظ التغييرات"
+              )}
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

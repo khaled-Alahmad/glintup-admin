@@ -253,12 +253,17 @@ export default function SalonsManagement() {
                       </TableCell>
                       {/*  */}
 
-                      <TableCell>
-                        {salon.type === "clinic" ? "عيادة" :
-                          salon.type === "salon" ? "صالون" :
-                            salon.type === "home_service" ? "خدمة منزلية" :
-                              salon.type}
-                      </TableCell>
+                        <TableCell>
+                        {salon.type === "clinic"
+                          ? "عيادة"
+                          : salon.type === "salon"
+                          ? "صالون"
+                          : salon.type === "home_service"
+                          ? "خدمة منزلية"
+                          : salon.type === "beautician"
+                          ? "أخصائية تجميل"
+                          : salon.type}
+                        </TableCell>
                       <TableCell>{salon.city_street_name || salon.address}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
@@ -336,6 +341,9 @@ export default function SalonsManagement() {
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </div>
                   {!isLoading && salons.length > 0 && totalPages > 1 && (
                     <div className="mt-4">
                       <PaginationWithInfo
@@ -347,9 +355,6 @@ export default function SalonsManagement() {
                       />
                     </div>
                   )}
-                </TableBody>
-              </Table>
-            </div>
           </div>
         </CardContent>
       </Card>

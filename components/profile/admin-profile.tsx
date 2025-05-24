@@ -21,73 +21,138 @@ import {
   Calendar,
   MapPin,
   Bell,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { fetchData, handleLogout } from "@/lib/apiHelper";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function AdminProfile() {
-  // بيانات نموذجية للمسؤول
-  const admin = {
-    id: 1,
-    name: "أحمد محمد",
-    email: "ahmed@glintup.com",
-    phone: "+971 50 123 4567",
-    role: "مدير النظام",
-    joinDate: "15 يناير 2023",
-    lastLogin: "اليوم، 10:30 صباحًا",
-    address: "دبي، الإمارات العربية المتحدة",
-    avatar: "/placeholder.svg?height=128&width=128",
-    permissions: [
-      "إدارة المستخدمين",
-      "إدارة الصالونات",
-      "إدارة الحجوزات",
-      "إدارة المدفوعات",
-      "إدارة الإعلانات",
-      "إدارة العروض",
-      "إدارة التقييمات",
-      "إدارة الشكاوى",
-      "إدارة إعدادات النظام",
-    ],
-    activities: [
-      {
-        id: 1,
-        action: "تسجيل الدخول",
-        date: "اليوم، 10:30 صباحًا",
-        ip: "192.168.1.1",
-      },
-      {
-        id: 2,
-        action: "تعديل بيانات صالون",
-        date: "اليوم، 09:45 صباحًا",
-        ip: "192.168.1.1",
-      },
-      {
-        id: 3,
-        action: "إضافة مستخدم جديد",
-        date: "أمس، 03:20 مساءً",
-        ip: "192.168.1.1",
-      },
-      {
-        id: 4,
-        action: "تعديل إعدادات النظام",
-        date: "أمس، 11:15 صباحًا",
-        ip: "192.168.1.1",
-      },
-      {
-        id: 5,
-        action: "تسجيل الدخول",
-        date: "أمس، 09:00 صباحًا",
-        ip: "192.168.1.1",
-      },
-    ],
-    notifications: {
-      email: true,
-      push: true,
-      sms: false,
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<any>(null);
+
+  // نموذج للأنشطة (سيتم استبداله بـ API لاحقًا)
+  const activities = [
+    {
+      id: 1,
+      action: "تسجيل الدخول",
+      date: "اليوم، 10:30 صباحًا",
+      ip: "192.168.1.1",
     },
+    {
+      id: 2,
+      action: "تعديل بيانات صالون",
+      date: "اليوم، 09:45 صباحًا",
+      ip: "192.168.1.1",
+    },
+    {
+      id: 3,
+      action: "إضافة مستخدم جديد",
+      date: "أمس، 03:20 مساءً",
+      ip: "192.168.1.1",
+    },
+    {
+      id: 4,
+      action: "تعديل إعدادات النظام",
+      date: "أمس، 11:15 صباحًا",
+      ip: "192.168.1.1",
+    },
+    {
+      id: 5,
+      action: "تسجيل الدخول",
+      date: "أمس، 09:00 صباحًا",
+      ip: "192.168.1.1",
+    },
+  ];
+
+  // نموذج لإعدادات الإشعارات (سيتم استبداله بـ API لاحقًا)
+  const notifications = {
+    email: true,
+    push: true,
+    sms: false,
   };
 
+  // جلب بيانات الملف الشخصي من API
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchData("general/profile");
+        if (response.success) {
+          setProfile(response.data);
+        } else {
+          toast({
+            variant: "destructive",
+            title: "خطأ في تحميل البيانات",
+            description: response.message || "فشل في تحميل بيانات الملف الشخصي",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        toast({
+          variant: "destructive",
+          title: "خطأ في تحميل البيانات",
+          description: "حدث خطأ أثناء تحميل بيانات الملف الشخصي",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [toast]);
+  // دالة لمعالجة تسجيل الخروج
+  const handleLogoutClick = () => {
+    handleLogout();
+  };
+
+  // دالة للحصول على الأحرف الأولى من الاسم
+  const getInitials = (name: string) => {
+    if (!name) return "";
+    return name
+      .split(" ")
+      .map((part) => part.charAt(0))
+      .join("")
+      .toUpperCase();
+  };
+
+  // عرض شاشة التحميل
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 flex justify-center items-center h-[50vh]">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+          <h2 className="mt-4 text-xl">جاري تحميل البيانات...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // عرض رسالة خطأ إذا لم يتم العثور على بيانات
+  if (!profile) {
+    return (
+      <div className="space-y-6 ">
+        <div className="text-center p-6 border rounded-lg">
+          <h2 className="text-xl font-bold text-red-500">
+            تعذر تحميل البيانات
+          </h2>
+          <p className="mt-2">
+            لم نتمكن من تحميل بيانات الملف الشخصي. الرجاء المحاولة مرة أخرى.
+          </p>
+          <Button className="mt-4" onClick={() => window.location.reload()}>
+            إعادة التحميل
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className=" space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           الملف الشخصي
@@ -105,48 +170,62 @@ export default function AdminProfile() {
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={admin.avatar} alt={admin.name} />
-                <AvatarFallback>{admin.name.charAt(0)}</AvatarFallback>
+                <AvatarImage
+                  src={profile.avatar || "/placeholder-user.jpg"}
+                  alt={profile.full_name}
+                />
+                <AvatarFallback>
+                  {getInitials(profile.full_name)}
+                </AvatarFallback>
               </Avatar>
             </div>
-            <CardTitle className="text-xl">{admin.name}</CardTitle>
+            <CardTitle className="text-xl">{profile.full_name}</CardTitle>
             <CardDescription className="flex justify-center items-center gap-1">
               <Shield className="h-4 w-4" />
-              {admin.role}
+              {profile.role === "admin" ? "مدير النظام" : profile.role}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <span>{admin.email}</span>
-            </div>
+            {profile.email && (
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span>{profile.email}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
-              <span style={{ unicodeBidi: "plaintext" }}>{admin.phone}</span>
+              <span style={{ unicodeBidi: "plaintext" }}>
+                {profile.full_phone}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>تاريخ الانضمام: {admin.joinDate}</span>
+              <span>تاريخ الانضمام: {profile.register_at}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span>{admin.address}</span>
-            </div>
+            {profile.address && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>{profile.address}</span>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex justify-center">
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleLogoutClick}
+            >
               <LogOut className="h-4 w-4 ml-2" />
               تسجيل الخروج
             </Button>
           </CardFooter>
-        </Card>
-
+        </Card>{" "}
         <div className="md:col-span-2 space-y-6">
           <Tabs defaultValue="permissions" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="permissions">الصلاحيات</TabsTrigger>
-              <TabsTrigger value="activities">سجل النشاطات</TabsTrigger>
-              <TabsTrigger value="settings">الإعدادات</TabsTrigger>
+              {/* <TabsTrigger value="activities">سجل النشاطات</TabsTrigger>
+              <TabsTrigger value="settings">الإعدادات</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="permissions" className="mt-4">
@@ -159,15 +238,22 @@ export default function AdminProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {admin.permissions.map((permission, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 p-2 rounded-md border"
-                      >
-                        <Shield className="h-4 w-4 text-primary" />
-                        <span>{permission}</span>
+                    {profile.admin_permissions &&
+                    profile.admin_permissions.length > 0 ? (
+                      profile.admin_permissions.map((permission: any) => (
+                        <div
+                          key={permission.id}
+                          className="flex items-center gap-2 p-2 rounded-md border"
+                        >
+                          <Shield className="h-4 w-4 text-primary" />
+                          <span>{permission.name.ar.ar}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-2 text-center p-6">
+                        <p>لا توجد صلاحيات مخصصة لك حاليًا.</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -183,7 +269,7 @@ export default function AdminProfile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {admin.activities.map((activity) => (
+                    {activities.map((activity) => (
                       <div
                         key={activity.id}
                         className="flex justify-between items-center p-3 rounded-md border"
@@ -224,10 +310,10 @@ export default function AdminProfile() {
                         </div>
                         <Badge
                           variant={
-                            admin.notifications.email ? "default" : "secondary"
+                            profile.email_offers ? "default" : "secondary"
                           }
                         >
-                          {admin.notifications.email ? "مفعل" : "معطل"}
+                          {profile.email_offers ? "مفعل" : "معطل"}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
@@ -235,26 +321,14 @@ export default function AdminProfile() {
                           <Bell className="h-4 w-4" />
                           <span>إشعارات الدفع</span>
                         </div>
-                        <Badge
-                          variant={
-                            admin.notifications.push ? "default" : "secondary"
-                          }
-                        >
-                          {admin.notifications.push ? "مفعل" : "معطل"}
-                        </Badge>
+                        <Badge variant="secondary">معطل</Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Bell className="h-4 w-4" />
                           <span>إشعارات الرسائل النصية</span>
                         </div>
-                        <Badge
-                          variant={
-                            admin.notifications.sms ? "default" : "secondary"
-                          }
-                        >
-                          {admin.notifications.sms ? "مفعل" : "معطل"}
-                        </Badge>
+                        <Badge variant="secondary">معطل</Badge>
                       </div>
                     </div>
                   </div>
@@ -265,13 +339,17 @@ export default function AdminProfile() {
                       <Button
                         variant="outline"
                         className="w-full justify-start"
+                        asChild
                       >
-                        <Key className="h-4 w-4 ml-2" />
-                        تغيير كلمة المرور
+                        <Link href="/profile/change-password">
+                          <Key className="h-4 w-4 ml-2" />
+                          تغيير كلمة المرور
+                        </Link>
                       </Button>
                       <Button
                         variant="outline"
                         className="w-full justify-start"
+                        disabled
                       >
                         <Shield className="h-4 w-4 ml-2" />
                         تفعيل المصادقة الثنائية

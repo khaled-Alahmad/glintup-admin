@@ -263,7 +263,7 @@ export function LoginForm() {  const [isLoading, setIsLoading] = useState(false)
           </Button>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-4 pt-0">
+      {/* <CardFooter className="flex flex-col space-y-4 pt-0">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
@@ -275,7 +275,7 @@ export function LoginForm() {  const [isLoading, setIsLoading] = useState(false)
         <Button variant="secondary" className="w-full">
           تسجيل الدخول باستخدام Google
         </Button>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 }

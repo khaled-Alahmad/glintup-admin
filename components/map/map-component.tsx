@@ -7,13 +7,14 @@ import "leaflet/dist/leaflet.css";
 
 // Specify the default icon for Leaflet markers
 const defaultIcon = L.icon({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
 // LocationMarker component to handle map clicks
@@ -48,11 +49,11 @@ export default function MapComponent({
   // Initialize with default position for Kuwait if not provided
   const defaultLat = 29.3759;
   const defaultLng = 47.9774;
-  
+
   // Convert string inputs to numbers
   const lat = latitude ? parseFloat(latitude) : defaultLat;
   const lng = longitude ? parseFloat(longitude) : defaultLng;
-    // Track position as state
+  // Track position as state
   const [position, setPosition] = useState<[number, number]>([lat, lng]);
 
   // Update position when props change
@@ -72,13 +73,22 @@ export default function MapComponent({
       center={position}
       zoom={13}
       scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%", borderRadius: "0.5rem" }}
+      style={{
+        height: "100%",
+        width: "100%",
+        borderRadius: "0.5rem",
+        position: "relative",
+        zIndex: 0,
+      }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <LocationMarker position={position} onPositionChange={handlePositionChange} />
+      <LocationMarker
+        position={position}
+        onPositionChange={handlePositionChange}
+      />
     </MapContainer>
   );
 }
