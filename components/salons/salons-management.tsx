@@ -1,10 +1,23 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,12 +25,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Filter, Loader2, MoreHorizontal, Search, Star } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Filter, Loader2, MoreHorizontal, Search, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -25,96 +44,103 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { addData, fetchData, updateData } from "@/lib/apiHelper"
-import { useToast } from "../ui/use-toast"
-import { PaginationWithInfo } from "../ui/pagination-with-info"
-import { Skeleton } from "../ui/skeleton"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { addData, fetchData, updateData } from "@/lib/apiHelper";
+import { useToast } from "../ui/use-toast";
+import { PaginationWithInfo } from "../ui/pagination-with-info";
+import { Skeleton } from "../ui/skeleton";
 export default function SalonsManagement() {
-  const [salons, setSalons] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const { toast } = useToast()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedSalon, setSelectedSalon] = useState<any>(null)
-  const [showNotificationDialog, setShowNotificationDialog] = useState(false)
-  const [showSuspendDialog, setShowSuspendDialog] = useState(false)
-  const [showBanDialog, setShowBanDialog] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalItems, setTotalItems] = useState(0)
-  const [perPage, setPerPage] = useState(10)
+  const [salons, setSalons] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSalon, setSelectedSalon] = useState<any>(null);
+  const [showNotificationDialog, setShowNotificationDialog] = useState(false);
+  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+  const [showBanDialog, setShowBanDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [perPage, setPerPage] = useState(10);
 
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all");
   // Add fetch function
   const fetchSalons = async () => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       const queryParams = new URLSearchParams({
         page: currentPage.toString(),
         limit: perPage.toString(),
         ...(searchQuery && { search: searchQuery }),
-        ...(statusFilter !== 'all' && { is_active: statusFilter === 'نشط' ? '1' : '0' }),
+        ...(statusFilter !== "all" && {
+          is_active: statusFilter === "نشط" ? "1" : "0",
+        }),
       });
 
-      const response = await fetchData(`admin/salons?${queryParams.toString()}`)
+      const response = await fetchData(
+        `admin/salons?${queryParams.toString()}`
+      );
       if (response.success) {
-        setSalons(response.data)
-        setTotalItems(response.data.total)
+        setSalons(response.data);
+        setTotalItems(response.data.total);
         setPerPage(response.meta.per_page);
         setTotalPages(response.meta.last_page);
         setCurrentPage(response.meta.current_page);
       }
     } catch (error) {
-      console.error('Failed to fetch salons:', error)
+      console.error("Failed to fetch salons:", error);
       toast({
         title: "خطأ في جلب البيانات",
         description: "حدث خطأ أثناء جلب بيانات الصالونات",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Add status update function
-  const updateSalonStatus = async (salonId: number, status: string, reason?: string) => {
+  const updateSalonStatus = async (
+    salonId: number,
+    status: string,
+    reason?: string
+  ) => {
     try {
       const response = await updateData(`admin/salons/${salonId}`, {
-        is_active: status === "نشط" ? '1' : '0',
+        is_active: status === "نشط" ? "1" : "0",
         reason,
-      })
+      });
       if (response.success) {
         toast({
           title: "تم تحديث الحالة",
           description: "تم تحديث حالة الصالون بنجاح",
-        })
-        fetchSalons()
+        });
+        fetchSalons();
       }
     } catch (error) {
-      console.error('Failed to update salon status:', error)
+      console.error("Failed to update salon status:", error);
       toast({
         title: "خطأ في تحديث الحالة",
         description: "حدث خطأ أثناء تحديث حالة الصالون",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    fetchSalons()
-  }, [page])
+    fetchSalons();
+  }, [page]);
 
   // Update search and filter handlers
   useEffect(() => {
     // const timer = setTimeout(() => {
-    fetchSalons()
+    fetchSalons();
     // }, 500)
     // return () => clearTimeout(timer)
-  }, [searchQuery, statusFilter])
-
+  }, [searchQuery, statusFilter, currentPage, perPage]);
 
   // const filteredSalons = salons.filter((salon) => {
   //   const matchesSearch =
@@ -130,28 +156,37 @@ export default function SalonsManagement() {
   const getStatusBadge = (status: boolean, isApproved: boolean) => {
     if (!isApproved) {
       return (
-        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+        <Badge
+          variant="outline"
+          className="bg-amber-50 text-amber-700 border-amber-200"
+        >
           قيد المراجعة
         </Badge>
-      )
+      );
     }
     switch (status) {
       case true:
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-200"
+          >
             نشط
           </Badge>
-        )
+        );
       case false:
         return (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200"
+          >
             غير نشط
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status ? "نشط" : "غير نشط"}</Badge>
+        return <Badge variant="outline">{status ? "نشط" : "غير نشط"}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -165,7 +200,9 @@ export default function SalonsManagement() {
       <Card>
         <CardHeader>
           <CardTitle>الصالونات المسجلة</CardTitle>
-          <CardDescription>قائمة بجميع الصالونات المسجلة في النظام</CardDescription>
+          <CardDescription>
+            قائمة بجميع الصالونات المسجلة في النظام
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
@@ -228,166 +265,210 @@ export default function SalonsManagement() {
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8">
                         <div className="flex flex-col items-center gap-2">
-                          <p className="text-muted-foreground">لا توجد صالونات مسجلة</p>
+                          <p className="text-muted-foreground">
+                            لا توجد صالونات مسجلة
+                          </p>
                           <Button asChild variant="link" className="gap-1">
-                            <Link href="/salons/add">
-                              إضافة صالون جديد
-                            </Link>
+                            <Link href="/salons/add">إضافة صالون جديد</Link>
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
-                  ) : salons.map((salon) => (
-                    <TableRow key={salon.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9 border">
-                            <AvatarImage src={salon.icon_url} alt={salon.merchant_commercial_name} />
-                            <AvatarFallback>{salon.merchant_commercial_name?.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{salon.merchant_commercial_name}</span>
-                            <span className="text-xs text-muted-foreground">{salon.owner?.full_name}</span>
+                  ) : (
+                    salons.map((salon) => (
+                      <TableRow key={salon.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9 border">
+                              <AvatarImage
+                                src={salon.icon_url}
+                                alt={salon.merchant_commercial_name}
+                              />
+                              <AvatarFallback>
+                                {salon.merchant_commercial_name?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {salon.merchant_commercial_name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {salon.owner?.full_name}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      {/*  */}
+                        </TableCell>
+                        {/*  */}
 
                         <TableCell>
-                        {salon.type === "clinic"
-                          ? "عيادة"
-                          : salon.type === "salon"
-                          ? "صالون"
-                          : salon.type === "home_service"
-                          ? "خدمة منزلية"
-                          : salon.type === "beautician"
-                          ? "أخصائية تجميل"
-                          : salon.type}
+                          {salon.type === "clinic"
+                            ? "عيادة"
+                            : salon.type === "salon"
+                            ? "صالون"
+                            : salon.type === "home_service"
+                            ? "خدمة منزلية"
+                            : salon.type === "beautician"
+                            ? "أخصائية تجميل"
+                            : salon.type}
                         </TableCell>
-                      <TableCell>{salon.city_street_name || salon.address}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-xs text-right" style={{ unicodeBidi: 'plaintext' }}>{salon.contact_number}</span>
-                          <span className="text-xs text-muted-foreground">{salon.contact_email}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(salon.is_active, salon.is_approved)}</TableCell>
-                      <TableCell>{salon.bookings_count}</TableCell>
-                      <TableCell style={{ unicodeBidi: 'plaintext' }} className=" text-right">{salon.total_revenue + " د.إ"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center align-items-center ">
-                          <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-1" />
-                          <span>{salon.average_rating || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>خيارات</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <Link href={`/salons/${salon.id}`} className="cursor-pointer w-full">
-                                عرض التفاصيل
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/salons/${salon.id}/edit`} className="cursor-pointer w-full">
-                                تعديل البيانات
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => {
-                                setSelectedSalon(salon)
-                                setShowNotificationDialog(true)
-                              }}
+                        <TableCell>
+                          {salon.city_street_name || salon.address}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span
+                              className="text-xs text-right"
+                              style={{ unicodeBidi: "plaintext" }}
                             >
-                              إرسال إشعار
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {salon.status === "نشط" ? (
+                              {salon.contact_number}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {salon.contact_email}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(salon.is_active, salon.is_approved)}
+                        </TableCell>
+                        <TableCell>{salon.bookings_count}</TableCell>
+                        <TableCell
+                          style={{ unicodeBidi: "plaintext" }}
+                          className=" text-right"
+                        >
+                          {salon.total_revenue + " د.إ"}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center align-items-center ">
+                            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-1" />
+                            <span>{salon.average_rating || 0}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>خيارات</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={`/salons/${salon.id}`}
+                                  className="cursor-pointer w-full"
+                                >
+                                  عرض التفاصيل
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link
+                                  href={`/salons/${salon.id}/edit`}
+                                  className="cursor-pointer w-full"
+                                >
+                                  تعديل البيانات
+                                </Link>
+                              </DropdownMenuItem>
                               <DropdownMenuItem
-                                className="text-amber-600 cursor-pointer"
+                                className="cursor-pointer"
                                 onClick={() => {
-                                  setSelectedSalon(salon)
-                                  setShowSuspendDialog(true)
+                                  setSelectedSalon(salon);
+                                  setShowNotificationDialog(true);
                                 }}
                               >
-                                تعليق الصالون
+                                إرسال إشعار
                               </DropdownMenuItem>
-                            ) : (
+                              <DropdownMenuSeparator />
+                              {salon.status === "نشط" ? (
+                                <DropdownMenuItem
+                                  className="text-amber-600 cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedSalon(salon);
+                                    setShowSuspendDialog(true);
+                                  }}
+                                >
+                                  تعليق الصالون
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    updateSalonStatus(salon.id, "نشط")
+                                  }
+                                  className="text-green-600 cursor-pointer"
+                                >
+                                  تفعيل الصالون
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem
-                                onClick={() => updateSalonStatus(salon.id, "نشط")}
-                                className="text-green-600 cursor-pointer">
-                                تفعيل الصالون
+                                className="text-red-600 cursor-pointer"
+                                onClick={() => {
+                                  setSelectedSalon(salon);
+                                  setShowBanDialog(true);
+                                }}
+                              >
+                                حظر الصالون
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              className="text-red-600 cursor-pointer"
-                              onClick={() => {
-                                setSelectedSalon(salon)
-                                setShowBanDialog(true)
-                              }}
-                            >
-                              حظر الصالون
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
-                  {!isLoading && salons.length > 0 && totalPages > 1 && (
-                    <div className="mt-4">
-                      <PaginationWithInfo
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={totalItems}
-                        itemsPerPage={perPage}
-                        onPageChange={setCurrentPage}
-                      />
-                    </div>
-                  )}
+            {!isLoading && salons.length > 0 && totalPages > 1 && (
+              <div className="mt-4">
+                <PaginationWithInfo
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={perPage}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
       {/* نافذة إرسال إشعار */}
-      <Dialog open={showNotificationDialog} onOpenChange={setShowNotificationDialog}>
+      <Dialog
+        open={showNotificationDialog}
+        onOpenChange={setShowNotificationDialog}
+      >
         <DialogContent>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
 
-            try {
-              const response = await addData(`admin/salons/${selectedSalon.id}/send-notification`, {
-                title: formData.get('title'),
-                message: formData.get('message')
-              });
+              try {
+                const response = await addData(
+                  `admin/salons/${selectedSalon.id}/send-notification`,
+                  {
+                    title: formData.get("title"),
+                    message: formData.get("message"),
+                  }
+                );
 
-              if (response.success) {
+                if (response.success) {
+                  toast({
+                    title: "تم بنجاح",
+                    description: "تم إرسال الإشعار بنجاح",
+                  });
+                  setShowNotificationDialog(false);
+                }
+              } catch (error) {
+                console.error("Failed to send notification:", error);
                 toast({
-                  title: "تم بنجاح",
-                  description: "تم إرسال الإشعار بنجاح",
+                  title: "خطأ",
+                  description: "حدث خطأ أثناء إرسال الإشعار",
+                  variant: "destructive",
                 });
-                setShowNotificationDialog(false);
               }
-            } catch (error) {
-              console.error('Failed to send notification:', error);
-              toast({
-                title: "خطأ",
-                description: "حدث خطأ أثناء إرسال الإشعار",
-                variant: "destructive",
-              });
-            }
-          }}>
+            }}
+          >
             <DialogHeader>
               <DialogTitle>إرسال إشعار للصالون</DialogTitle>
               <DialogDescription>
@@ -423,9 +504,7 @@ export default function SalonsManagement() {
               >
                 إلغاء
               </Button>
-              <Button type="submit">
-                إرسال الإشعار
-              </Button>
+              <Button type="submit">إرسال الإشعار</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -437,13 +516,18 @@ export default function SalonsManagement() {
           <DialogHeader>
             <DialogTitle>تعليق الصالون</DialogTitle>
             <DialogDescription>
-              {selectedSalon && `هل أنت متأكد من رغبتك في تعليق صالون ${selectedSalon.merchant_commercial_name}؟`}
+              {selectedSalon &&
+                `هل أنت متأكد من رغبتك في تعليق صالون ${selectedSalon.merchant_commercial_name}؟`}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="suspend-reason">سبب التعليق</Label>
-              <Textarea id="suspend-reason" placeholder="أدخل سبب تعليق الصالون" rows={4} />
+              <Textarea
+                id="suspend-reason"
+                placeholder="أدخل سبب تعليق الصالون"
+                rows={4}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="suspend-duration">مدة التعليق</Label>
@@ -462,10 +546,16 @@ export default function SalonsManagement() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSuspendDialog(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowSuspendDialog(false)}
+            >
               إلغاء
             </Button>
-            <Button variant="destructive" onClick={() => setShowSuspendDialog(false)}>
+            <Button
+              variant="destructive"
+              onClick={() => setShowSuspendDialog(false)}
+            >
               تعليق الصالون
             </Button>
           </DialogFooter>
@@ -475,49 +565,60 @@ export default function SalonsManagement() {
       {/* نافذة حظر الصالون */}
       <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
         <DialogContent>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
 
-            try {
-              const response = await updateData(`admin/salons/${selectedSalon.id}`, {
-                is_active: 0,
-                message: formData.get('ban-reason')
-              });
+              try {
+                const response = await updateData(
+                  `admin/salons/${selectedSalon.id}`,
+                  {
+                    is_active: 0,
+                    message: formData.get("ban-reason"),
+                  }
+                );
 
-              if (response.success) {
+                if (response.success) {
+                  toast({
+                    title: "تم بنجاح",
+                    description: "تم إرسال الإشعار بنجاح",
+                  });
+                  setShowBanDialog(false);
+                }
+              } catch (error) {
+                console.error("Failed to send notification:", error);
                 toast({
-                  title: "تم بنجاح",
-                  description: "تم إرسال الإشعار بنجاح",
+                  title: "خطأ",
+                  description: "حدث خطأ أثناء إرسال الإشعار",
+                  variant: "destructive",
                 });
-                setShowBanDialog(false);
               }
-            } catch (error) {
-              console.error('Failed to send notification:', error);
-              toast({
-                title: "خطأ",
-                description: "حدث خطأ أثناء إرسال الإشعار",
-                variant: "destructive",
-              });
-            }
-          }}>
+            }}
+          >
             <DialogHeader>
               <DialogTitle>حظر الصالون</DialogTitle>
               <DialogDescription>
-                {selectedSalon && `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.merchant_commercial_name} بشكل دائم؟`}
+                {selectedSalon &&
+                  `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.merchant_commercial_name} بشكل دائم؟`}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="ban-reason">سبب الحظر</Label>
-                <Textarea id="ban-reason" name="ban-reason" placeholder="أدخل سبب حظر الصالون" rows={4} />
+                <Textarea
+                  id="ban-reason"
+                  name="ban-reason"
+                  placeholder="أدخل سبب حظر الصالون"
+                  rows={4}
+                />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBanDialog(false)}>
                 إلغاء
               </Button>
-              <Button variant="destructive" type="submit" >
+              <Button variant="destructive" type="submit">
                 حظر الصالون
               </Button>
             </DialogFooter>
@@ -525,6 +626,5 @@ export default function SalonsManagement() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
-
