@@ -26,7 +26,7 @@ import { CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Logo } from "../ui/logo";
-import { fetchData } from "@/lib/apiHelper";
+import { fetchData, refreshUserPermissions } from "@/lib/apiHelper";
 import { useToast } from "@/components/ui/use-toast";
 import { getCookie } from "cookies-next";
 
@@ -40,67 +40,64 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
   const { toast } = useToast();
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const token = getCookie("token") as string;
-  // Fetch user permissions from API
-  useEffect(() => {
-    const fetchUserPermissions = async () => {
-      // Check if we have permissions cached in localStorage
-      const cachedData = localStorage.getItem('userPermissions');
-      const cachedToken = localStorage.getItem('cachedToken');
-      
-      // Use cached permissions if available and token is the same
-      if (cachedData && cachedToken === token) {
-        try {
-          const parsedPermissions = JSON.parse(cachedData);
-          setUserPermissions(parsedPermissions);
-          setIsLoading(false);
-          return; // Exit early if we can use cached data
-        } catch (error) {
-          console.error("Error parsing cached permissions:", error);
-          // Continue to fetch permissions if parsing failed
-        }
-      }
 
-      setIsLoading(true);
-      try {
-        const response = await fetchData("general/profile");
-        if (response.success) {
-          // Extract permission keys from API response
-          const permissionKeys = response.data?.admin_permissions.map(
-            (permission: any) => permission.key
-          );
-          setUserPermissions(permissionKeys);
-          
-          // Cache the permissions and token
-          localStorage.setItem('userPermissions', JSON.stringify(permissionKeys));
-          localStorage.setItem('cachedToken', token);
-        } else {
-          console.error("Failed to fetch permissions:", response.message);
-          toast({
-            variant: "destructive",
-            title: "خطأ في تحميل الصلاحيات",
-            description: response.message || "فشل في تحميل صلاحيات المستخدم",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching permissions:", error);
+  // Function to fetch and update user permissions
+  const fetchAndUpdatePermissions = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchData("general/profile");
+      if (response.success) {
+        const permissionKeys = response.data?.admin_permissions.map(
+          (permission: any) => permission.key
+        );
+        // Store permissions in localStorage
+        localStorage.setItem('userPermissions', JSON.stringify(permissionKeys));
+        setUserPermissions(permissionKeys);
+      } else {
+        console.error("Failed to fetch permissions:", response.message);
         toast({
           variant: "destructive",
           title: "خطأ في تحميل الصلاحيات",
-          description: "حدث خطأ أثناء تحميل صلاحيات المستخدم",
+          description: response.message || "فشل في تحميل صلاحيات المستخدم",
         });
-      } finally {
+      }
+    } catch (error) {
+      console.error("Error fetching permissions:", error);
+      toast({
+        variant: "destructive",
+        title: "خطأ في تحميل الصلاحيات",
+        description: "حدث خطأ أثناء تحميل صلاحيات المستخدم",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadUserPermissions = async () => {
+      // Check if permissions are already stored in localStorage
+      const storedPermissions = localStorage.getItem('userPermissions');
+      
+      if (storedPermissions) {
+        // If permissions are already stored, use them
+        setUserPermissions(JSON.parse(storedPermissions));
         setIsLoading(false);
+      } else {
+        // If not, fetch them from the server
+        await fetchAndUpdatePermissions();
       }
     };
 
-    if (token) {
-      fetchUserPermissions();
-    } else {
-      setIsLoading(false);
-      setUserPermissions([]);
-    }
-  }, [token, toast]);
+    loadUserPermissions();
+
+    // Add an event listener to refresh permissions when needed
+    window.addEventListener('refreshPermissions', fetchAndUpdatePermissions);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('refreshPermissions', fetchAndUpdatePermissions);
+    };
+  }, []); // Empty dependency array - only run once when component mounts
 
   // Define all possible sidebar links with their required permissions
   const allLinks = [
@@ -130,7 +127,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       href: "/admin-users",
       icon: UserCog,
       active: pathname.startsWith("/admin-users"),
-      requiredPermission: "admin_users",
+      requiredPermission: "admin-users",
     },
     {
       name: "المجموعات",
@@ -144,7 +141,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       href: "/gift-cards",
       icon: Gift,
       active: pathname.startsWith("/gift-cards"),
-      requiredPermission: "gift_cards",
+      requiredPermission: "gift-cards",
     },
     // {
     //   name: "الأحداث",
@@ -212,6 +209,8 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
   ];
 
   // Filter links based on user permissions
+  console.log("userPermissions:", userPermissions);
+
   // Show all links if user has no permissions data loaded yet or during loading
   const links =
     isLoading || userPermissions.length === 0

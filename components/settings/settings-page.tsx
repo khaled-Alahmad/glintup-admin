@@ -21,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import "react-international-phone/style.css";
+
 import {
   Bell,
   CreditCard,
@@ -37,13 +39,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { addData, deleteData, fetchData, updateData } from "@/lib/apiHelper";
-import { useToast } from "../ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { PhoneInput } from "react-international-phone";
+import { useToast } from "@/hooks/use-toast";
 interface SocialMediaSite {
   id: number;
   name: {
@@ -83,7 +86,7 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       try {
         setIsLoading(true);
-        const response = await fetchData("admin/settings");
+        const response = await fetchData("admin/settings?limit=100");
         if (response.success) {
           setSettings(response.data);
           // Initialize form data
@@ -118,9 +121,15 @@ export default function SettingsPage() {
       const changedSettings = Object.entries(formData)
         .filter(([key, value]) => {
           const originalSetting = settings.find((s) => s.key === key);
-          return originalSetting && originalSetting.value !== value;
+          // Treat empty string as null for comparison
+          const originalValue = originalSetting?.value ?? "";
+          const currentValue = value ?? "";
+          return originalSetting && originalValue !== currentValue;
         })
-        .map(([key, value]) => ({ key, value }));
+        .map(([key, value]) => ({
+          key,
+          value: value === "" ? null : value,
+        }));
 
       if (changedSettings.length === 0) {
         toast({
@@ -470,6 +479,44 @@ export default function SettingsPage() {
                           handleInputChange("support_email", e.target.value)
                         }
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">البريد الإلكتروني العام</Label>
+                      <Input
+                        id="email"
+                        value={formData["email"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">رقم الهاتف</Label>
+                      <div className="phone-input-container">
+                        <PhoneInput
+                          // id="phone"
+                          defaultCountry="ae"
+                          style={{
+                            width: "100%",
+                            display: "flex",
+                            flexDirection: "row",
+                            height: "40px",
+                            fontSize: "0.875rem",
+                            borderRadius: "0.375rem",
+                          }}
+                          value={formData["phone"] || ""}
+                          onChange={(value: string) =>
+                            handleInputChange("phone", value)
+                          }
+                          // international
+                          className="w-full"
+                          inputProps={{
+                            placeholder: "أدخل رقم الهاتف",
+                            required: true,
+                            name: "phone_display",
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                   <h3 className="text-lg font-medium">معلومات اساسية</h3>
@@ -974,6 +1021,19 @@ export default function SettingsPage() {
                             "adver_cost_per_day",
                             e.target.value
                           )
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="menu_request_cost">
+                        تكلفة طلب القائمة
+                      </Label>
+                      <Input
+                        id="menu_request_cost"
+                        type="number"
+                        value={formData["menu_request_cost"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("menu_request_cost", e.target.value)
                         }
                       />
                     </div>
