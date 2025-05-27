@@ -909,7 +909,7 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">نسب العمولة</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="system_percentage_gift">
                         نسبة العمولة لبطاقات الهدايا Glintup (%)
                       </Label>
@@ -924,7 +924,7 @@ export default function SettingsPage() {
                           )
                         }
                       />
-                    </div>
+                    </div> */}
                     {/* //makeup_artists_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="makeup_artists_provider_percentage">
