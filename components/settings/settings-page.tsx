@@ -47,6 +47,7 @@ import {
 } from "../ui/dropdown-menu";
 import { PhoneInput } from "react-international-phone";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "../ui/textarea";
 interface SocialMediaSite {
   id: number;
   name: {
@@ -313,7 +314,18 @@ export default function SettingsPage() {
                 <Settings className="h-4 w-4 ml-2" />
                 إعدادات عامة
               </Button>
-
+              <Button
+                variant={
+                  activeTab === "experience_artists" ? "default" : "ghost"
+                }
+                className={`justify-start ${
+                  activeTab === "general" ? "" : "hover:bg-muted"
+                }`}
+                onClick={() => setActiveTab("experience_artists")}
+              >
+                <Settings className="h-4 w-4 ml-2" />
+                إعدادات خبيرة التجميل
+              </Button>
               <Button
                 variant={activeTab === "commissions" ? "default" : "ghost"}
                 className={`justify-start ${
@@ -347,6 +359,142 @@ export default function SettingsPage() {
             </nav>
           </CardContent>
         </Card>
+        {activeTab === "experience_artists" && (
+          <Card className="bg-white dark:bg-gray-800 shadow-md">
+            <CardHeader>
+              <CardTitle>إعدادات خبيرة التجميل</CardTitle>
+              <CardDescription>إدارة إعدادات خبيرة التجميل</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                {/* <h3 className="text-lg font-medium">إعدادات عامة</h3> */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Arabic fields */}
+                  <div className="space-y-2">
+                    <Label htmlFor="makeup_artist_home_service_text_ar">
+                      {/* نصلك اينما كن */}
+                      نصلك اينما كنت (عربي)
+                    </Label>
+                    <Textarea
+                      id="makeup_artist_home_service_text_ar"
+                      value={
+                        formData["makeup_artist_home_service_text_ar"] || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "makeup_artist_home_service_text_ar",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="makeup_artist_center_service_text_ar">
+                      خدمتنا في مقرنا (عربي)
+                    </Label>
+                    <Textarea
+                      id="makeup_artist_center_service_text_ar"
+                      value={
+                        formData["makeup_artist_center_service_text_ar"] || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "makeup_artist_center_service_text_ar",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="makeup_artist_center_and_home_service_text_ar">
+                      نقدم الخدمة في منزلك أو مقرنا (عربي)
+                    </Label>
+                    <Textarea
+                      id="makeup_artist_center_and_home_service_text_ar"
+                      value={
+                        formData[
+                          "makeup_artist_center_and_home_service_text_ar"
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "makeup_artist_center_and_home_service_text_ar",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  {/* English fields */}
+                  <div className="space-y-2">
+                    <Label htmlFor="makeup_artist_home_service_text_en">
+                      We reach you wherever you are (English)
+                    </Label>
+                    <Textarea
+                      id="makeup_artist_home_service_text_en"
+                      value={
+                        formData["makeup_artist_home_service_text_en"] || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "makeup_artist_home_service_text_en",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="makeup_artist_center_service_text_en">
+                      Our service at our headquarters (English)
+                    </Label>
+                    <Textarea
+                      id="makeup_artist_center_service_text_en"
+                      value={
+                        formData["makeup_artist_center_service_text_en"] || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "makeup_artist_center_service_text_en",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="makeup_artist_center_and_home_service_text_en">
+                      We provide service at your home or our headquarters
+                      (English)
+                    </Label>
+                    <Textarea
+                      id="makeup_artist_center_and_home_service_text_en"
+                      value={
+                        formData[
+                          "makeup_artist_center_and_home_service_text_en"
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleInputChange(
+                          "makeup_artist_center_and_home_service_text_en",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button
+                className="rounded-full"
+                onClick={handleSaveSettings}
+                disabled={isLoading}
+              >
+                <Save className="h-4 w-4 ml-2" />
+                حفظ الإعدادات
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+
         {activeTab === "app" && (
           <Card className="bg-white dark:bg-gray-800 shadow-md">
             <CardHeader>
@@ -926,7 +1074,8 @@ export default function SettingsPage() {
                       />
                     </div> */}
                     {/* //makeup_artists_provider_percentage */}
-                    <div className="space-y-2">
+                    {/* menu_request_cost */}
+                    {/* <div className="space-y-2">
                       <Label htmlFor="makeup_artists_provider_percentage">
                         نسبة خبيرات التجميل (%)
                       </Label>
@@ -943,7 +1092,41 @@ export default function SettingsPage() {
                           )
                         }
                       />
+                    </div> */}
+                    <div className="space-y-2">
+                      <Label htmlFor="makeup_artists_provider_percentage">
+                        نسبة خبيرات التجميل (%)
+                      </Label>
+                      <Input
+                        id="makeup_artists_provider_percentage"
+                        min={0}
+                        type="number"
+                        value={
+                          formData["makeup_artists_provider_percentage"] || ""
+                        }
+                        onChange={(e) =>
+                          handleInputChange(
+                            "makeup_artists_provider_percentage",
+                            e.target.value
+                          )
+                        }
+                      />
                     </div>
+                    {/* menu_request_cost */}
+                    {/* <div className="space-y-2">
+                      <Label htmlFor="menu_request_cost">
+                        تكلفة طلب القائمة
+                      </Label>
+                      <Input
+                        id="menu_request_cost"
+                        type="number"
+                        value={formData["menu_request_cost"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("menu_request_cost", e.target.value)
+                        }
+                      />
+                    </div> */}
+
                     {/* //home_service_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="home_service_provider_percentage">
@@ -952,6 +1135,7 @@ export default function SettingsPage() {
                       <Input
                         id="home_service_provider_percentage"
                         type="number"
+                        min={0}
                         value={
                           formData["home_service_provider_percentage"] || ""
                         }
@@ -971,6 +1155,7 @@ export default function SettingsPage() {
                       <Input
                         id="clinics_provider_percentage"
                         type="number"
+                        min={0}
                         value={formData["clinics_provider_percentage"] || ""}
                         onChange={(e) =>
                           handleInputChange(
@@ -984,6 +1169,7 @@ export default function SettingsPage() {
                       <Label htmlFor="tax">الضريبة</Label>
                       <Input
                         id="tax"
+                        min={0}
                         type="number"
                         value={formData["tax"] || ""}
                         onChange={(e) =>
@@ -997,6 +1183,7 @@ export default function SettingsPage() {
                         نسبة الصالونات(%)
                       </Label>
                       <Input
+                        min={0}
                         id="salons_provider_percentage"
                         type="number"
                         value={formData["salons_provider_percentage"] || ""}
@@ -1029,6 +1216,7 @@ export default function SettingsPage() {
                         تكلفة طلب القائمة
                       </Label>
                       <Input
+                        min={0}
                         id="menu_request_cost"
                         type="number"
                         value={formData["menu_request_cost"] || ""}
