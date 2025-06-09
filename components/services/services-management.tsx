@@ -45,10 +45,24 @@ import { useToast } from "@/hooks/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
 import { Pagination } from "../ui/pagination";
 import { se } from "date-fns/locale";
-
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface ServiceGroup {
   id: number;
+  orders?: any[]; // Assuming orders is an array, adjust type as needed
   name: {
     en: string;
     ar: string;
@@ -95,6 +109,9 @@ export default function ServicesManagement() {
       setIsLoading(false);
     }
   };
+
+  // منع جلب البيانات أثناء السحب
+  const [isDragging, setIsDragging] = useState(false);
 
   // Add group management functions
   const handleAddGroup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -179,13 +196,52 @@ export default function ServicesManagement() {
     }
   };
 
+  // sensors for dnd-kit
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  // دالة تغيير ترتيب المجموعات dnd-kit
+  const handleDndKitDragEnd = async (event: any) => {
+    if (!event.active || !event.over) {
+      return;
+    }
+
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = groups.findIndex((g) => g.id === active.id);
+    const newIndex = groups.findIndex((g) => g.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const newGroups = arrayMove(groups, oldIndex, newIndex);
+    // تحديد orders الجديد (من العنصر الذي سنأخذ مكانه)
+    let newOrdersValue: any = null;
+    if (newIndex === 0 && newGroups.length > 1) {
+      newOrdersValue = newGroups[1].orders;
+    } else if (newIndex > 0) {
+      newOrdersValue = newGroups[newIndex - 1].orders;
+    }
+    const reorderBody = { orders: newOrdersValue };
+    try {
+      await addData(`admin/groups/${active.id}/reorder`, reorderBody);
+      setGroups(newGroups);
+      setIsDragging(false);
+    } catch (error) {
+      toast({
+        title: "خطأ في الترتيب",
+        description: "حدث خطأ أثناء تحديث الترتيب",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // عند بدء السحب
+  const handleDragStart = () => setIsDragging(true);
+
   // Update the useEffect to fetch groups
   useEffect(() => {
-    fetchGroups();
+    if (!isDragging) fetchGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupCurrentPage]);
-
-
-
 
   return (
     <div className="flex flex-col gap-6">
@@ -258,8 +314,6 @@ export default function ServicesManagement() {
         onValueChange={setActiveTab}
       >
         <TabsContent value="groups" className="mt-4">
-    
-
           {isLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -278,22 +332,34 @@ export default function ServicesManagement() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {groups.map((group) => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  onEdit={() => {
-                    setEditingGroup(group);
-                    setIsEditGroupDialogOpen(true);
-                  }}
-                  onDelete={() => {
-                    setEditingGroup(group);
-                    setIsDeleteGroupDialogOpen(true);
-                  }}
-                />
-              ))}
-            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDndKitDragEnd}
+            >
+              <SortableContext
+                items={groups.map((g) => g.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="flex flex-col gap-4">
+                  {groups.map((group, idx) => (
+                    <SortableGroupCard
+                      key={group.id}
+                      group={group}
+                      onEdit={() => {
+                        setEditingGroup(group);
+                        setIsEditGroupDialogOpen(true);
+                      }}
+                      onDelete={() => {
+                        setEditingGroup(group);
+                        setIsDeleteGroupDialogOpen(true);
+                      }}
+                      index={idx}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
 
           {!isLoading && groups.length > 0 && groupTotalPages > 1 && (
@@ -308,7 +374,7 @@ export default function ServicesManagement() {
             </div>
           )}
         </TabsContent>
-       
+
       </Tabs>
       {/* Add Group Dialog */}
       <Dialog
@@ -475,13 +541,29 @@ interface GroupCardProps {
   onDelete: () => void;
 }
 
-function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
+function GroupCard({ group, onEdit, onDelete, dragHandleProps }: GroupCardProps & { dragHandleProps?: React.HTMLAttributes<HTMLDivElement> }) {
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col select-none">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">{group.name.ar}</CardTitle>
+          <div className="flex flex-col flex-1">
+            <div className="flex items-center w-full mb-1">
+              {/* Drag handle */}
+              <div
+                {...dragHandleProps}
+                className="cursor-grab active:cursor-grabbing mr-2 p-1 rounded hover:bg-muted transition"
+                title="اسحب لتحريك المجموعة"
+                style={{ userSelect: 'none' }}
+              >
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="6" r="1.5" /><circle cx="5" cy="10" r="1.5" /><circle cx="5" cy="14" r="1.5" /><circle cx="10" cy="6" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="10" cy="14" r="1.5" /></svg>
+              </div>
+              <CardTitle className="text-lg flex justify-between items-center w-full">
+                <span className="font-bold">{group.name.ar}</span>
+                {/* <Badge className="ml-2 " variant="secondary">
+                  {group.orders} الترتيب
+                </Badge> */}
+              </CardTitle>
+            </div>
             <CardDescription className="text-xs text-muted-foreground mt-1">
               {group.name.en}
             </CardDescription>
@@ -504,5 +586,38 @@ function GroupCard({ group, onEdit, onDelete }: GroupCardProps) {
         </Button>
       </CardFooter>
     </Card>
+  );
+}
+
+function SortableGroupCard({ group, onEdit, onDelete, index }: { group: ServiceGroup, onEdit: () => void, onDelete: () => void, index: number }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: group.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    boxShadow: isDragging ? '0 0 10px #aaa' : undefined,
+    minWidth: '300px',
+    margin: '8px',
+    userSelect: 'none',
+    background: isDragging ? '#f9fafb' : undefined,
+    zIndex: isDragging ? 100 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={{ ...style, userSelect: 'none' as any }} {...attributes}>
+      <GroupCard
+        group={group}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        dragHandleProps={listeners}
+      />
+    </div>
   );
 }
