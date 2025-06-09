@@ -26,7 +26,8 @@ import { setCookie } from "cookies-next";
 import { getFirebaseToken } from "@/app/firebaseConfig";
 import { isValidPhone } from '@/lib/phone-utils';
 
-export function LoginForm() {  const [isLoading, setIsLoading] = useState(false);
+export function LoginForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     phone: "",
@@ -53,13 +54,13 @@ export function LoginForm() {  const [isLoading, setIsLoading] = useState(false)
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validar teléfono antes de enviar
     if (!isValidPhone(formData.phone)) {
       setPhoneError("يرجى إدخال رقم هاتف صحيح");
       return;
     }
-    
+
     setIsLoading(true);
 
     try {
@@ -111,43 +112,43 @@ export function LoginForm() {  const [isLoading, setIsLoading] = useState(false)
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">          <div className="space-y-2">
-            <Label htmlFor="phone" className="text-right block">
-              رقم الهاتف
-            </Label>
-            <div className="phone-input-container">
-              <PhoneInput
-                defaultCountry="ae"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  height: '40px',
-                  fontSize: '0.875rem',
-                  borderRadius: '0.375rem',
-                }}
-                value={formData.phone}
-                onChange={(phone) => {
-                  setFormData((prev) => ({ ...prev, phone }));
-                  
-                  // Validar el número de teléfono
-                  const isValid = isValidPhone(phone);
-                  if (!isValid && phone.length > 4) {
-                    setPhoneError("رقم الهاتف غير صحيح");
-                  } else {
-                    setPhoneError(null);
-                  }
-                }}
-                inputProps={{
-                  placeholder: "أدخل رقم الهاتف",
-                  required: true,
-                  name: "phone_display"
-                }}
-              />
-              {phoneError && (
-                <p className="text-sm text-red-500 mt-1">{phoneError}</p>
-              )}
-            </div>
+          <Label htmlFor="phone" className="text-right block">
+            رقم الهاتف
+          </Label>
+          <div className="phone-input-container">
+            <PhoneInput
+              defaultCountry="ae"
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'row',
+                height: '40px',
+                fontSize: '0.875rem',
+                borderRadius: '0.375rem',
+              }}
+              value={formData.phone}
+              onChange={(phone) => {
+                setFormData((prev) => ({ ...prev, phone }));
+
+                // Validar el número de teléfono
+                const isValid = isValidPhone(phone);
+                if (!isValid && phone.length > 4) {
+                  setPhoneError("رقم الهاتف غير صحيح");
+                } else {
+                  setPhoneError(null);
+                }
+              }}
+              inputProps={{
+                placeholder: "أدخل رقم الهاتف",
+                required: true,
+                name: "phone_display"
+              }}
+            />
+            {phoneError && (
+              <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+            )}
           </div>
+        </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password" className="text-right block">
@@ -236,7 +237,7 @@ export function LoginForm() {  const [isLoading, setIsLoading] = useState(false)
             )}
           </Button>
         </form>
-
+        {/* 
         <div className="mt-4 text-center">
           <p className="text-sm text-muted-foreground mb-2">
             بيانات الدخول المؤقتة:
@@ -261,7 +262,7 @@ export function LoginForm() {  const [isLoading, setIsLoading] = useState(false)
           >
             استخدام بيانات الدخول المؤقتة
           </Button>
-        </div>
+        </div> */}
       </CardContent>
       {/* <CardFooter className="flex flex-col space-y-4 pt-0">
         <div className="relative">

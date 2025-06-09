@@ -306,9 +306,8 @@ export default function SettingsPage() {
             <nav className="flex flex-col space-y-1 px-2">
               <Button
                 variant={activeTab === "general" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "general" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "general" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("general")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -318,9 +317,8 @@ export default function SettingsPage() {
                 variant={
                   activeTab === "experience_artists" ? "default" : "ghost"
                 }
-                className={`justify-start ${
-                  activeTab === "general" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "general" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("experience_artists")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -328,9 +326,8 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "commissions" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "commissions" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "commissions" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("commissions")}
               >
                 <Percent className="h-4 w-4 ml-2" />
@@ -338,9 +335,8 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "app" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "app" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "app" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("app")}
               >
                 <Smartphone className="h-4 w-4 ml-2" />
@@ -348,9 +344,8 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "social-media" ? "default" : "ghost"}
-                className={`justify-start ${
-                  activeTab === "social-media" ? "" : "hover:bg-muted"
-                }`}
+                className={`justify-start ${activeTab === "social-media" ? "" : "hover:bg-muted"
+                  }`}
                 onClick={() => setActiveTab("social-media")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -367,117 +362,84 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                {/* <h3 className="text-lg font-medium">إعدادات عامة</h3> */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Arabic fields */}
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                  {/* Home Service */}
                   <div className="space-y-2">
                     <Label htmlFor="makeup_artist_home_service_text_ar">
-                      {/* نصلك اينما كن */}
-                      نصلك اينما كنت (عربي)
+                      نص خدمة "نصلك أينما كنت" <span className="text-muted-foreground">(عربي / English)</span>
                     </Label>
-                    <Textarea
-                      id="makeup_artist_home_service_text_ar"
-                      value={
-                        formData["makeup_artist_home_service_text_ar"] || ""
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          "makeup_artist_home_service_text_ar",
-                          e.target.value
-                        )
-                      }
-                    />
+                    <div className="flex gap-2">
+                      <Textarea
+                        id="makeup_artist_home_service_text_ar"
+                        placeholder="نص الخدمة بالعربي"
+                        value={formData["makeup_artist_home_service_text_ar"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("makeup_artist_home_service_text_ar", e.target.value)
+                        }
+                        className="w-1/2"
+                      />
+                      <Textarea
+                        id="makeup_artist_home_service_text_en"
+                        placeholder='Home Service Text (English)'
+                        value={formData["makeup_artist_home_service_text_en"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("makeup_artist_home_service_text_en", e.target.value)
+                        }
+                        className="w-1/2"
+                      />
+                    </div>
                   </div>
+                  {/* Center Service */}
                   <div className="space-y-2">
                     <Label htmlFor="makeup_artist_center_service_text_ar">
-                      خدمتنا في مقرنا (عربي)
+                      نص خدمة "خدمتنا في مقرنا" <span className="text-muted-foreground">(عربي / English)</span>
                     </Label>
-                    <Textarea
-                      id="makeup_artist_center_service_text_ar"
-                      value={
-                        formData["makeup_artist_center_service_text_ar"] || ""
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          "makeup_artist_center_service_text_ar",
-                          e.target.value
-                        )
-                      }
-                    />
+                    <div className="flex gap-2">
+                      <Textarea
+                        id="makeup_artist_center_service_text_ar"
+                        placeholder="نص الخدمة بالعربي"
+                        value={formData["makeup_artist_center_service_text_ar"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("makeup_artist_center_service_text_ar", e.target.value)
+                        }
+                        className="w-1/2"
+                      />
+                      <Textarea
+                        id="makeup_artist_center_service_text_en"
+                        placeholder='Center Service Text (English)'
+                        value={formData["makeup_artist_center_service_text_en"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("makeup_artist_center_service_text_en", e.target.value)
+                        }
+                        className="w-1/2"
+                      />
+                    </div>
                   </div>
+                  {/* Center & Home Service */}
                   <div className="space-y-2">
                     <Label htmlFor="makeup_artist_center_and_home_service_text_ar">
-                      نقدم الخدمة في منزلك أو مقرنا (عربي)
+                      نص خدمة "نقدم الخدمة في منزلك أو مقرنا" <span className="text-muted-foreground">(عربي / English)</span>
                     </Label>
-                    <Textarea
-                      id="makeup_artist_center_and_home_service_text_ar"
-                      value={
-                        formData[
-                          "makeup_artist_center_and_home_service_text_ar"
-                        ] || ""
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          "makeup_artist_center_and_home_service_text_ar",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-                  {/* English fields */}
-                  <div className="space-y-2">
-                    <Label htmlFor="makeup_artist_home_service_text_en">
-                      We reach you wherever you are (English)
-                    </Label>
-                    <Textarea
-                      id="makeup_artist_home_service_text_en"
-                      value={
-                        formData["makeup_artist_home_service_text_en"] || ""
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          "makeup_artist_home_service_text_en",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="makeup_artist_center_service_text_en">
-                      Our service at our headquarters (English)
-                    </Label>
-                    <Textarea
-                      id="makeup_artist_center_service_text_en"
-                      value={
-                        formData["makeup_artist_center_service_text_en"] || ""
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          "makeup_artist_center_service_text_en",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="makeup_artist_center_and_home_service_text_en">
-                      We provide service at your home or our headquarters
-                      (English)
-                    </Label>
-                    <Textarea
-                      id="makeup_artist_center_and_home_service_text_en"
-                      value={
-                        formData[
-                          "makeup_artist_center_and_home_service_text_en"
-                        ] || ""
-                      }
-                      onChange={(e) =>
-                        handleInputChange(
-                          "makeup_artist_center_and_home_service_text_en",
-                          e.target.value
-                        )
-                      }
-                    />
+                    <div className="flex gap-2">
+                      <Textarea
+                        id="makeup_artist_center_and_home_service_text_ar"
+                        placeholder="نص الخدمة بالعربي"
+                        value={formData["makeup_artist_center_and_home_service_text_ar"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("makeup_artist_center_and_home_service_text_ar", e.target.value)
+                        }
+                        className="w-1/2"
+                      />
+                      <Textarea
+                        id="makeup_artist_center_and_home_service_text_en"
+                        placeholder='Center & Home Service Text (English)'
+                        value={formData["makeup_artist_center_and_home_service_text_en"] || ""}
+                        onChange={(e) =>
+                          handleInputChange("makeup_artist_center_and_home_service_text_en", e.target.value)
+                        }
+                        className="w-1/2"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
