@@ -22,6 +22,9 @@ import Link from "next/link"
 import { fetchData, updateData } from "@/lib/apiHelper"
 import { useToast } from "@/hooks/use-toast"
 import { PaginationWithInfo } from "../ui/pagination-with-info"
+import { DateRange } from "react-day-picker"
+import { DateRangePicker } from "../ui/date-range-picker"
+import { format } from "date-fns"
 interface Advertisement {
   id: number;
   salon_id: number | null;
@@ -134,15 +137,25 @@ export default function AdvertisementsManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [perPage, setPerPage] = useState(10);
-
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   // Add fetch function
   const fetchAdvertisements = async () => {
     try {
       setIsLoading(true);
       const searchParam = searchQuery ? `&search=${searchQuery}` : '';
       const statusParam = statusFilter != "all" ? `&is_active=${statusFilter}` : '';
+      
+      // Add date range params
+      let dateFromParam = '';
+      let dateToParam = '';
+      if (dateRange?.from) {
+        dateFromParam = `&valid_from=${format(dateRange.from, 'yyyy-MM-dd')}`;
+      }
+      if (dateRange?.to) {
+        dateToParam = `&valid_to=${format(dateRange.to, 'yyyy-MM-dd')}`;
+      }
 
-      const response = await fetchData(`admin/promotion-ads?page=${currentPage}&limit=${perPage}${searchParam}${statusParam}`);
+      const response = await fetchData(`admin/promotion-ads?page=${currentPage}&limit=${perPage}${searchParam}${statusParam}${dateFromParam}${dateToParam}`);
       if (response.success) {
         setAdvertisements(response.data);
         setTotalPages(response.meta.last_page);
@@ -159,7 +172,7 @@ export default function AdvertisementsManagement() {
   // Add useEffect for fetching data
   useEffect(() => {
     fetchAdvertisements();
-  }, [currentPage, searchQuery, statusFilter]);
+  }, [currentPage, searchQuery, statusFilter, dateRange]);
 
   const handleStatusUpdate = async (adId: number, action: Boolean) => {
     try {
@@ -276,8 +289,7 @@ export default function AdvertisementsManagement() {
           </Tabs>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          <div className="flex flex-col gap-4">            <div className="flex flex-col sm:flex-row gap-4 justify-between">
               <div className="relative w-full sm:w-auto">
                 <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -287,7 +299,12 @@ export default function AdvertisementsManagement() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2 items-end">
+                <DateRangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
+                  placeholder="تصفية حسب فترة الإعلان"
+                />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[180px]">
                     <div className="flex items-center gap-2">
