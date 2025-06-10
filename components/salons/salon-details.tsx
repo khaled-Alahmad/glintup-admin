@@ -88,6 +88,7 @@ import Image from "next/image";
 import SalonCoupons from "./salon-coupons";
 import GroupsTab from "./salon-groups";
 import { useToast } from "@/hooks/use-toast";
+import SalonActivityLogs from "./salon-activity-logs";
 interface SalonPermission {
   id: number;
   name: {
@@ -1280,34 +1281,33 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       {payment.method === "wallet"
                         ? "المحفظة"
                         : payment.method === "stripe"
-                        ? "بطاقة ائتمان"
-                        : payment.method === "cash"
-                        ? "نقداً"
-                        : payment.method}
+                          ? "بطاقة ائتمان"
+                          : payment.method === "cash"
+                            ? "نقداً"
+                            : payment.method}
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 rounded-md text-sm font-medium ${
-                          payment.status === "confirm"
+                        className={`px-2 py-1 rounded-md text-sm font-medium ${payment.status === "confirm"
                             ? "bg-green-50 text-green-700"
                             : payment.status === "pending"
-                            ? "bg-amber-50 text-amber-700"
-                            : payment.status === "canceled"
-                            ? "bg-red-50 text-red-700"
-                            : payment.status === "rejected"
-                            ? "bg-red-50 text-red-700"
-                            : "bg-gray-50 text-gray-700"
-                        }`}
+                              ? "bg-amber-50 text-amber-700"
+                              : payment.status === "canceled"
+                                ? "bg-red-50 text-red-700"
+                                : payment.status === "rejected"
+                                  ? "bg-red-50 text-red-700"
+                                  : "bg-gray-50 text-gray-700"
+                          }`}
                       >
                         {payment.status === "confirm"
                           ? "مؤكد"
                           : payment.status === "pending"
-                          ? "قيد الانتظار"
-                          : payment.status === "canceled"
-                          ? "ملغي"
-                          : payment.status === "rejected"
-                          ? "مرفوض"
-                          : payment.status}
+                            ? "قيد الانتظار"
+                            : payment.status === "canceled"
+                              ? "ملغي"
+                              : payment.status === "rejected"
+                                ? "مرفوض"
+                                : payment.status}
                       </span>
                     </TableCell>
                     <TableCell className="text-nowrap">
@@ -1798,8 +1798,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       // filter is_home_service,is_beautician
 
       const response = await fetchData(
-        `admin/services?page=${currentPage}&limit=${perPage}&salon_id=${salonId}&is_home_service=${
-          isHomeService ? isHomeService : undefined
+        `admin/services?page=${currentPage}&limit=${perPage}&salon_id=${salonId}&is_home_service=${isHomeService ? isHomeService : undefined
         }&is_beautician=${isBeautician ? isBeautician : undefined}`
       );
       if (response.success) {
@@ -2203,11 +2202,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${
-              i < rating
+            className={`h-4 w-4 ${i < rating
                 ? "text-yellow-500 fill-yellow-500"
                 : "text-gray-300 fill-gray-300"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -2360,10 +2358,10 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   {salonData.type === "clinic"
                     ? "عيادة"
                     : salonData.type === "salon"
-                    ? "صالون"
-                    : salonData.type === "home_service"
-                    ? "خدمة منزلية"
-                    : salonData.type}
+                      ? "صالون"
+                      : salonData.type === "home_service"
+                        ? "خدمة منزلية"
+                        : salonData.type}
                 </Badge>
                 {/*  salonData.types */}
               </div>
@@ -2637,8 +2635,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               {currentGiftCard.type == "services"
                                 ? "خدمات"
                                 : currentGiftCard.type == "amount"
-                                ? "مبلغ مالي "
-                                : ""}
+                                  ? "مبلغ مالي "
+                                  : ""}
                             </p>
                             {/* <Button
                       variant="ghost"
@@ -2823,8 +2821,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">رقم الهاتف</p>
-                  <p className="text-sm text-muted-foreground"                 style={{ unicodeBidi: "plaintext" }}
->
+                  <p className="text-sm text-muted-foreground" style={{ unicodeBidi: "plaintext" }}
+                  >
                     {salonData.owner?.full_phone}
                   </p>
                 </div>
@@ -2921,7 +2919,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             onValueChange={setActiveTab}
           >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-10">
+              <TabsList className="grid w-full grid-cols-11">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -2938,9 +2936,14 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <TabsTrigger value="customers">العملاء</TabsTrigger>
                 <TabsTrigger value="coupons">الكوبونات</TabsTrigger>
                 <TabsTrigger value="groups">المجموعات</TabsTrigger>
+                <TabsTrigger value="logs">السجل</TabsTrigger>
+
               </TabsList>
             </CardHeader>
             <CardContent>
+              <TabsContent value="logs" className="space-y-6">
+                <SalonActivityLogs salonId={salonId} />
+              </TabsContent>
               <TabsContent value="staff" className="space-y-6">
                 <StaffTab />
               </TabsContent>
