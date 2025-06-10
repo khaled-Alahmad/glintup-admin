@@ -55,7 +55,7 @@ interface EditAdminUserProps {
 // نموذج بيانات الصلاحيات
 const mockPermissions = [
   { id: 1, name: { ar: { ar: "لوحة المعلومات" } }, key: "dashboard" },
-  { id: 2, name: { ar: { ar: "الصالونات" } }, key: "salons" },
+  { id: 2, name: { ar: { ar: "المزودين" } }, key: "salons" },
   { id: 3, name: { ar: { ar: "المستخدمين" } }, key: "users" },
   { id: 4, name: { ar: { ar: "الحجوزات" } }, key: "appointments" },
   { id: 5, name: { ar: { ar: "المدفوعات" } }, key: "payments" },

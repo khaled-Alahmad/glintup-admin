@@ -389,10 +389,10 @@ export default function ServicesManagement() {
           <form onSubmit={handleAddGroup}>
             <div className="grid gap-4 py-4">
               {/* <div className="space-y-2">
-                <Label htmlFor="salon_id">الصالون</Label>
+                <Label htmlFor="salon_id">المزود</Label>
                 <Select name="salon_id" defaultValue="5">
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="اختر الصالون" />
+                    <SelectValue placeholder="اختر المزود" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -444,10 +444,10 @@ export default function ServicesManagement() {
             <form onSubmit={handleEditGroup}>
               <div className="grid gap-4 py-4">
                 {/* <div className="space-y-2">
-                  <Label htmlFor="salon_id">الصالون</Label>
+                  <Label htmlFor="salon_id">المزود</Label>
                   <Select name="salon_id" defaultValue={editingGroup.salon_id.toString()}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="اختر الصالون" />
+                      <SelectValue placeholder="اختر المزود" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>

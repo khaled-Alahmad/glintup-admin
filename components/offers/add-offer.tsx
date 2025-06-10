@@ -69,18 +69,18 @@ export default function AddOffer() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salon">
-                  الصالون <span className="text-red-500">*</span>
+                  المزود <span className="text-red-500">*</span>
                 </Label>
                 <Select required>
                   <SelectTrigger id="salon">
-                    <SelectValue placeholder="اختر الصالون" />
+                    <SelectValue placeholder="اختر المزود" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">صالون الأميرة</SelectItem>
-                    <SelectItem value="2">صالون إليت</SelectItem>
-                    <SelectItem value="3">صالون جلام</SelectItem>
-                    <SelectItem value="4">صالون مس بيوتي</SelectItem>
-                    <SelectItem value="5">صالون روز</SelectItem>
+                    <SelectItem value="1">مزود الأميرة</SelectItem>
+                    <SelectItem value="2">مزود إليت</SelectItem>
+                    <SelectItem value="3">مزود جلام</SelectItem>
+                    <SelectItem value="4">مزود مس بيوتي</SelectItem>
+                    <SelectItem value="5">مزود روز</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

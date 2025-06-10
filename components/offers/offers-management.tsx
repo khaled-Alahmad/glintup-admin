@@ -25,7 +25,7 @@ const offers = [
     id: "1",
     title: "خصم 25% على جميع الخدمات",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون الأميرة",
+    salonName: "مزود الأميرة",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-06-01",
     endDate: "2024-06-30",
@@ -39,7 +39,7 @@ const offers = [
     id: "2",
     title: "خصم 50% على الباقات",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون إليت",
+    salonName: "مزود إليت",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-05-15",
     endDate: "2024-06-15",
@@ -53,7 +53,7 @@ const offers = [
     id: "3",
     title: "خصم 15% للعملاء الجدد",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون جلام",
+    salonName: "مزود جلام",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-05-01",
     endDate: "2024-05-30",
@@ -67,7 +67,7 @@ const offers = [
     id: "4",
     title: "خصم 30% على خدمات العناية بالبشرة",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون مس بيوتي",
+    salonName: "مزود مس بيوتي",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-06-10",
     endDate: "2024-07-10",
@@ -81,7 +81,7 @@ const offers = [
     id: "5",
     title: "خصم 20% بمناسبة العيد",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون روز",
+    salonName: "مزود روز",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-06-15",
     endDate: "2024-07-15",
@@ -236,7 +236,7 @@ export default function OffersManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>العرض</TableHead>
-                    <TableHead>الصالون</TableHead>
+                    <TableHead>المزود</TableHead>
                     <TableHead>الفترة</TableHead>
                     <TableHead>كود الخصم</TableHead>
                     <TableHead>نسبة الخصم</TableHead>

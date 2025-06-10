@@ -202,17 +202,17 @@ export default function AddAdvertisement() {
 
           {/* Update salon select */}
           <div className="space-y-2">
-            <Label htmlFor="salon_id">الصالون</Label>
+            <Label htmlFor="salon_id">المزود</Label>
             <Select name="salon_id" required>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="اختر الصالون" />
+                <SelectValue placeholder="اختر المزود" />
               </SelectTrigger>
               <SelectContent>
                 <div className="flex items-center px-3 pb-2">
                   <Search className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
                     className="h-8"
-                    placeholder="ابحث عن صالون..."
+                    placeholder="ابحث عن مزود..."
                     value={salonSearchTerm}
                     onChange={(e) => {
                       setSalonSearchTerm(e.target.value);

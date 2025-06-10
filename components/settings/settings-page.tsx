@@ -1006,7 +1006,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>إعدادات العمولات</CardTitle>
               <CardDescription>
-                إدارة إعدادات العمولات والمدفوعات للصالونات
+                إدارة إعدادات العمولات والمدفوعات للمزودات
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -1092,7 +1092,7 @@ export default function SettingsPage() {
                     {/* //home_service_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="home_service_provider_percentage">
-                        نسبة صالونات الخدمات المنزلية (%)
+                        نسبة مزودات الخدمات المنزلية (%)
                       </Label>
                       <Input
                         id="home_service_provider_percentage"
@@ -1142,7 +1142,7 @@ export default function SettingsPage() {
                     {/* salons_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="salons_provider_percentage">
-                        نسبة الصالونات(%)
+                        نسبة المزودين(%)
                       </Label>
                       <Input
                         min={0}

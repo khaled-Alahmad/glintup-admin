@@ -342,7 +342,7 @@ export default function AppointmentsManagement() {
       <Card>
         <CardHeader>
           <CardTitle>الحجوزات</CardTitle>
-          <CardDescription>إدارة حجوزات الصالونات</CardDescription>
+          <CardDescription>إدارة حجوزات المزودين</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
@@ -418,7 +418,7 @@ export default function AppointmentsManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>العميل</TableHead>
-                    <TableHead>الصالون</TableHead>
+                    <TableHead>المزود</TableHead>
                     <TableHead>الخدمة</TableHead>
                     <TableHead>التاريخ والوقت</TableHead>
                     {/* <TableHead>حالة الدفع</TableHead> */}

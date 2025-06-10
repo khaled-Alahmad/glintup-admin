@@ -109,7 +109,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       requiredPermission: "dashboard",
     },
     {
-      name: "الصالونات",
+      name: "المزودين",
       href: "/salons",
       icon: Store,
       active: pathname.startsWith("/salons"),

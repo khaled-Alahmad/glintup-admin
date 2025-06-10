@@ -35,12 +35,12 @@ export default function LoginPage() {
             مرحباً بك في Glint Up
           </h1>
           <p className="text-lg md:text-xl mb-6 md:mb-8 text-center max-w-md">
-            منصة إدارة صالونات التجميل الأولى في المنطقة
+            منصة إدارة مزودات التجميل الأولى في المنطقة
           </p>
           <div className="grid grid-cols-2 gap-4 w-full max-w-md">
             <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg text-center">
               <h3 className="font-bold text-xl md:text-2xl mb-1">+1000</h3>
-              <p className="text-sm">صالون تجميل</p>
+              <p className="text-sm">مزود تجميل</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg text-center">
               <h3 className="font-bold text-xl md:text-2xl mb-1">+5000</h3>

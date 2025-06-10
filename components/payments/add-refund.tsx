@@ -46,7 +46,7 @@ export default function AddRefund() {
             <CardDescription>أدخل معلومات طلب الاسترجاع الجديد</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* معلومات العميل والصالون */}
+            {/* معلومات العميل والمزود */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="customer">
@@ -67,18 +67,18 @@ export default function AddRefund() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salon">
-                  الصالون <span className="text-red-500">*</span>
+                  المزود <span className="text-red-500">*</span>
                 </Label>
                 <Select required>
                   <SelectTrigger id="salon">
-                    <SelectValue placeholder="اختر الصالون" />
+                    <SelectValue placeholder="اختر المزود" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">صالون الأميرة</SelectItem>
-                    <SelectItem value="2">صالون إليت</SelectItem>
-                    <SelectItem value="3">صالون جلام</SelectItem>
-                    <SelectItem value="4">صالون مس بيوتي</SelectItem>
-                    <SelectItem value="5">صالون روز</SelectItem>
+                    <SelectItem value="1">مزود الأميرة</SelectItem>
+                    <SelectItem value="2">مزود إليت</SelectItem>
+                    <SelectItem value="3">مزود جلام</SelectItem>
+                    <SelectItem value="4">مزود مس بيوتي</SelectItem>
+                    <SelectItem value="5">مزود روز</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -133,7 +133,7 @@ export default function AddRefund() {
                   <SelectValue placeholder="اختر سبب الاسترجاع" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cancel">إلغاء الحجز من قبل الصالون</SelectItem>
+                  <SelectItem value="cancel">إلغاء الحجز من قبل المزود</SelectItem>
                   <SelectItem value="customer-cancel">إلغاء الحجز من قبل العميل</SelectItem>
                   <SelectItem value="not-satisfied">عدم رضا عن الخدمة</SelectItem>
                   <SelectItem value="double-payment">دفع مزدوج</SelectItem>

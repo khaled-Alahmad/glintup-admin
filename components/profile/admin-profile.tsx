@@ -45,7 +45,7 @@ export default function AdminProfile() {
     },
     {
       id: 2,
-      action: "تعديل بيانات صالون",
+      action: "تعديل بيانات مزود",
       date: "اليوم، 09:45 صباحًا",
       ip: "192.168.1.1",
     },

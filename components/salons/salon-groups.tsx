@@ -310,7 +310,7 @@ export default function GroupsTab({ salonId }: GroupsTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">مجموعات الصالون</h2>
+        <h2 className="text-xl font-bold">مجموعات المزود</h2>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus className="h-4 w-4 ml-2" />
           إضافة مجموعة
@@ -410,7 +410,7 @@ export default function GroupsTab({ salonId }: GroupsTabProps) {
           <DialogHeader>
             <DialogTitle>إضافة مجموعة جديدة</DialogTitle>
             <DialogDescription>
-              قم بإدخال تفاصيل المجموعة الجديدة للصالون
+              قم بإدخال تفاصيل المجموعة الجديدة للمزود
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddGroup}>

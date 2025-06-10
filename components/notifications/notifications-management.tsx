@@ -106,7 +106,7 @@ const mockData: NotificationResponse = {
       id: 3,
       user_id: 7,
       title: "حجز موعد جديد",
-      message: "تم حجز موعد جديد في صالون الأناقة",
+      message: "تم حجز موعد جديد في مزود الأناقة",
       notificationable_id: null,
       notificationable_type: null,
       notificationable: null,
@@ -135,7 +135,7 @@ const mockData: NotificationResponse = {
       id: 2,
       user_id: 7,
       title: "تم إضافة مراجعة جديدة",
-      message: "تم إضافة تقييم جديد لصالون الجمال الفاخر",
+      message: "تم إضافة تقييم جديد لمزود الجمال الفاخر",
       notificationable_id: 2,
       notificationable_type: "App\\Models\\Reviews\\Review",
       notificationable: null,
@@ -163,8 +163,8 @@ const mockData: NotificationResponse = {
     {
       id: 1,
       user_id: 5,
-      title: "تم تسجيل صالون جديد",
-      message: "تم تسجيل صالون جديد بإسم ماسة الجمال ويتطلب المراجعة",
+      title: "تم تسجيل مزود جديد",
+      message: "تم تسجيل مزود جديد بإسم ماسة الجمال ويتطلب المراجعة",
       notificationable_id: 3,
       notificationable_type: "App\\Models\\Salons\\Salon",
       notificationable: null,
@@ -420,7 +420,7 @@ export default function NotificationsManagement() {
     if (!type) return "";
 
     const typeMap: Record<string, string> = {
-      "App\\Models\\Salons\\Salon": "صالون",
+      "App\\Models\\Salons\\Salon": "مزود",
       "App\\Models\\Reviews\\Review": "تقييم",
       "App\\Models\\Appointments\\Appointment": "موعد",
       "App\\Models\\Users\\User": "مستخدم",

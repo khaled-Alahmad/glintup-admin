@@ -504,7 +504,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>الصالون</TableHead>
+                        <TableHead>المزود</TableHead>
                         <TableHead>الخدمة</TableHead>
                         <TableHead>التاريخ والوقت</TableHead>
                         <TableHead>السعر</TableHead>
@@ -806,7 +806,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>الصالون</TableHead>
+                        <TableHead>المزود</TableHead>
                         <TableHead>النقاط</TableHead>
                         <TableHead>تاريخ الاكتساب</TableHead>
                         <TableHead>تاريخ الاستخدام</TableHead>
@@ -915,10 +915,10 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>الصالون</TableHead>
+                        <TableHead>المزود</TableHead>
                         <TableHead>التقييم</TableHead>
                         <TableHead>التعليق</TableHead>
-                        <TableHead>رد الصالون</TableHead>
+                        <TableHead>رد المزود</TableHead>
                         <TableHead>التاريخ</TableHead>
                       </TableRow>
                     </TableHeader>

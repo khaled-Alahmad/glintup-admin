@@ -65,12 +65,12 @@ const refunds = [
     id: "1",
     customerName: "هند خالد",
     customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون مس بيوتي",
+    salonName: "مزود مس بيوتي",
     salonLogo: "/placeholder.svg?height=32&width=32",
     requestDate: "2024-04-02",
     processDate: "2024-04-03",
     amount: "200 د.إ",
-    reason: "إلغاء الحجز من قبل الصالون",
+    reason: "إلغاء الحجز من قبل المزود",
     status: "مكتمل",
     bookingId: "B-1237",
   },
@@ -78,7 +78,7 @@ const refunds = [
     id: "2",
     customerName: "محمد العلي",
     customerAvatar: "/placeholder.svg?height=32&width=32",
-    salonName: "صالون إليت",
+    salonName: "مزود إليت",
     salonLogo: "/placeholder.svg?height=32&width=32",
     requestDate: "2024-04-03",
     processDate: "",
@@ -517,7 +517,7 @@ export default function PaymentsManagement() {
                     <TableRow>
                       <TableHead>رقم الطلب</TableHead>
                       <TableHead>العميل</TableHead>
-                      <TableHead>الصالون</TableHead>
+                      <TableHead>المزود</TableHead>
                       <TableHead>تاريخ الطلب</TableHead>
                       <TableHead>التكلفة</TableHead>
                       <TableHead>سبب الاسترجاع</TableHead>

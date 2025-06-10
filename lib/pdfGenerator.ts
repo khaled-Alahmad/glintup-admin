@@ -165,7 +165,7 @@ export const generateMonthlyBookingReport = (
         { header: 'رقم الحجز', accessor: 'code' },
         { header: 'العميل', accessor: 'user', render: (_, row) => row.user?.full_name || '' },
         { header: 'رقم الهاتف', accessor: 'user', render: (_, row) => row.user?.full_phone || '' },
-        { header: 'الصالون', accessor: 'salon', render: (_, row) => row.salon?.merchant_commercial_name || '' },
+        { header: 'المزود', accessor: 'salon', render: (_, row) => row.salon?.merchant_commercial_name || '' },
         { header: 'التاريخ', accessor: 'date', render: (value) => new Date(value).toLocaleDateString('ar-EG') },
         { header: 'الوقت', accessor: 'time', render: (time, row) => `${time} - ${row.end_time}` },
         {

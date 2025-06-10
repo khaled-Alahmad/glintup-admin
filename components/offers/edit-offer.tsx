@@ -79,18 +79,18 @@ export default function EditOffer({ offerId }: EditOfferProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salon">
-                  الصالون <span className="text-red-500">*</span>
+                  المزود <span className="text-red-500">*</span>
                 </Label>
                 <Select defaultValue="1">
                   <SelectTrigger id="salon">
-                    <SelectValue placeholder="اختر الصالون" />
+                    <SelectValue placeholder="اختر المزود" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">صالون الأميرة</SelectItem>
-                    <SelectItem value="2">صالون إليت</SelectItem>
-                    <SelectItem value="3">صالون جلام</SelectItem>
-                    <SelectItem value="4">صالون مس بيوتي</SelectItem>
-                    <SelectItem value="5">صالون روز</SelectItem>
+                    <SelectItem value="1">مزود الأميرة</SelectItem>
+                    <SelectItem value="2">مزود إليت</SelectItem>
+                    <SelectItem value="3">مزود جلام</SelectItem>
+                    <SelectItem value="4">مزود مس بيوتي</SelectItem>
+                    <SelectItem value="5">مزود روز</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -100,7 +100,7 @@ export default function EditOffer({ offerId }: EditOfferProps) {
               <Label htmlFor="description">وصف العرض</Label>
               <Textarea
                 id="description"
-                defaultValue="استمتعي بخصم 25% على جميع الخدمات في صالون الأميرة خلال شهر يونيو."
+                defaultValue="استمتعي بخصم 25% على جميع الخدمات في مزود الأميرة خلال شهر يونيو."
                 rows={4}
               />
             </div>

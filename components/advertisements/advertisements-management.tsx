@@ -56,7 +56,7 @@ const advertisements = [
     id: "1",
     title: "عروض الصيف المميزة",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون الأميرة",
+    salonName: "مزود الأميرة",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-06-01",
     endDate: "2024-08-31",
@@ -70,7 +70,7 @@ const advertisements = [
     id: "2",
     title: "خصم 30% على جميع الخدمات",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون إليت",
+    salonName: "مزود إليت",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-05-15",
     endDate: "2024-06-15",
@@ -78,13 +78,13 @@ const advertisements = [
     views: 980,
     clicks: 210,
     amount: "800 د.إ",
-    position: "صفحة الصالونات",
+    position: "صفحة المزودين",
   },
   {
     id: "3",
     title: "باقات العناية بالشعر",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون جلام",
+    salonName: "مزود جلام",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-05-01",
     endDate: "2024-05-30",
@@ -98,7 +98,7 @@ const advertisements = [
     id: "4",
     title: "عروض العناية بالبشرة",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون مس بيوتي",
+    salonName: "مزود مس بيوتي",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-06-10",
     endDate: "2024-07-10",
@@ -106,13 +106,13 @@ const advertisements = [
     views: 0,
     clicks: 0,
     amount: "900 د.إ",
-    position: "صفحة الصالونات",
+    position: "صفحة المزودين",
   },
   {
     id: "5",
     title: "خصومات العيد",
     image: "/placeholder.svg?height=80&width=160",
-    salonName: "صالون روز",
+    salonName: "مزود روز",
     salonLogo: "/placeholder.svg?height=32&width=32",
     startDate: "2024-06-15",
     endDate: "2024-07-15",
@@ -309,7 +309,7 @@ export default function AdvertisementsManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>الإعلان</TableHead>
-                    <TableHead>الصالون</TableHead>
+                    <TableHead>المزود</TableHead>
                     <TableHead>الفترة</TableHead>
                     <TableHead>المشاهدات</TableHead>
                     <TableHead>النقرات</TableHead>

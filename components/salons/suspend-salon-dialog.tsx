@@ -49,20 +49,20 @@ export function SuspendSalonDialog({ salonId, salonName }: SuspendSalonDialogPro
       <DialogTrigger asChild>
         <Button variant="outline" className="text-amber-600 border-amber-200 hover:bg-amber-50">
           <AlertTriangle className="h-4 w-4 ml-2" />
-          تعليق الصالون
+          تعليق المزود
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>تعليق الصالون</DialogTitle>
-          <DialogDescription>هل أنت متأكد من رغبتك في تعليق صالون {salonName}؟</DialogDescription>
+          <DialogTitle>تعليق المزود</DialogTitle>
+          <DialogDescription>هل أنت متأكد من رغبتك في تعليق مزود {salonName}؟</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="suspend-reason">سبب التعليق</Label>
             <Textarea
               id="suspend-reason"
-              placeholder="أدخل سبب تعليق الصالون"
+              placeholder="أدخل سبب تعليق المزود"
               rows={4}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -89,7 +89,7 @@ export function SuspendSalonDialog({ salonId, salonName }: SuspendSalonDialogPro
             إلغاء
           </Button>
           <Button variant="destructive" onClick={handleSuspendSalon} disabled={isSuspending}>
-            {isSuspending ? "جاري التعليق..." : "تعليق الصالون"}
+            {isSuspending ? "جاري التعليق..." : "تعليق المزود"}
           </Button>
         </DialogFooter>
       </DialogContent>

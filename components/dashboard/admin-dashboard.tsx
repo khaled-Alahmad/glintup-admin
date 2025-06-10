@@ -177,7 +177,7 @@ export default function AdminDashboard() {
         <Card className="stats-card card-hover overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-1 bg-primary"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">صالونات مسجلة</CardTitle>
+            <CardTitle className="text-sm font-medium">مزودات مسجلة</CardTitle>
             <Store className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
             <div className="bg-muted/30 p-4 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex justify-between items-center mb-2">
                 <div>
-                  <Badge className="bg-purple-500 text-white border-0">تفعيل صالونات</Badge>
+                  <Badge className="bg-purple-500 text-white border-0">تفعيل مزودات</Badge>
                   <h4 className="font-medium mt-2">مراجعة {dashboardData.fast_tasks.salons.salons_review_count} طلبات تفعيل جديدة</h4>
                 </div>
                 <div className="text-sm text-muted-foreground">
@@ -453,8 +453,8 @@ export default function AdminDashboard() {
 
         <Card className="col-span-1 bg-white dark:bg-gray-800 shadow-md">
           <CardHeader>
-            <CardTitle>أفضل الصالونات</CardTitle>
-            <CardDescription>الصالونات الأكثر حجزاً هذا الشهر</CardDescription>
+            <CardTitle>أفضل المزودين</CardTitle>
+            <CardDescription>المزودين الأكثر حجزاً هذا الشهر</CardDescription>
           </CardHeader>
           <CardContent>
             <TopSalons salons={dashboardData.bset_salons} />

@@ -73,7 +73,7 @@ import { se } from "date-fns/locale";
 //     avatar: null,
 //     admin_permissions: [
 //       { id: 1, name: { ar: { ar: "لوحة المعلومات" } }, key: "dashboard" },
-//       { id: 2, name: { ar: { ar: "الصالونات" } }, key: "salons" },
+//       { id: 2, name: { ar: { ar: "المزودين" } }, key: "salons" },
 //       { id: 3, name: { ar: { ar: "المستخدمين" } }, key: "users" },
 //     ],
 //     created_at: "2025-04-09 16:29:37",
@@ -116,7 +116,7 @@ import { se } from "date-fns/locale";
 //     is_verified: true,
 //     avatar: null,
 //     admin_permissions: [
-//       { id: 2, name: { ar: { ar: "الصالونات" } }, key: "salons" },
+//       { id: 2, name: { ar: { ar: "المزودين" } }, key: "salons" },
 //       { id: 6, name: { ar: { ar: "الإعلانات" } }, key: "advertisements" },
 //       { id: 7, name: { ar: { ar: "العروض" } }, key: "offers" },
 //     ],
@@ -137,7 +137,7 @@ interface AdminPermission {
 // نموذج بيانات الصلاحيات
 const mockPermissions = [
   { id: 1, name: { ar: { ar: "لوحة المعلومات" } }, key: "dashboard" },
-  { id: 2, name: { ar: { ar: "الصالونات" } }, key: "salons" },
+  { id: 2, name: { ar: { ar: "المزودين" } }, key: "salons" },
   { id: 3, name: { ar: { ar: "المستخدمين" } }, key: "users" },
   { id: 4, name: { ar: { ar: "الحجوزات" } }, key: "appointments" },
   { id: 5, name: { ar: { ar: "المدفوعات" } }, key: "payments" },

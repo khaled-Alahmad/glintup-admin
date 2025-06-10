@@ -221,7 +221,7 @@ export default function AdvertisementDetails({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> */}
               {/* <div className="p-3 border rounded-md">
                     <p className="text-sm text-muted-foreground">
-                      الصالون المستهدف
+                      المزود المستهدف
                     </p>
                     <p className="font-medium">{advertisement.target.salon}</p>
                   </div>

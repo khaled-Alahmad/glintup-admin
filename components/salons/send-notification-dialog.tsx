@@ -54,8 +54,8 @@ export function SendNotificationDialog({ salonId, salonName }: SendNotificationD
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>إرسال إشعار للصالون</DialogTitle>
-          <DialogDescription>سيتم إرسال هذا الإشعار إلى صالون {salonName}</DialogDescription>
+          <DialogTitle>إرسال إشعار للمزود</DialogTitle>
+          <DialogDescription>سيتم إرسال هذا الإشعار إلى مزود {salonName}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">

@@ -58,7 +58,7 @@ interface Review {
 //     id: "1",
 //     customerName: "سارة أحمد",
 //     customerAvatar: "/placeholder.svg?height=32&width=32",
-//     salonName: "صالون الأميرة",
+//     salonName: "مزود الأميرة",
 //     salonLogo: "/placeholder.svg?height=32&width=32",
 //     date: "2024-04-03",
 //     rating: 5,
@@ -70,7 +70,7 @@ interface Review {
 //     id: "2",
 //     customerName: "نورة محمد",
 //     customerAvatar: "/placeholder.svg?height=32&width=32",
-//     salonName: "صالون إليت",
+//     salonName: "مزود إليت",
 //     salonLogo: "/placeholder.svg?height=32&width=32",
 //     date: "2024-04-02",
 //     rating: 4,
@@ -82,7 +82,7 @@ interface Review {
 //     id: "3",
 //     customerName: "عبير علي",
 //     customerAvatar: "/placeholder.svg?height=32&width=32",
-//     salonName: "صالون جلام",
+//     salonName: "مزود جلام",
 //     salonLogo: "/placeholder.svg?height=32&width=32",
 //     date: "2024-04-01",
 //     rating: 2,
@@ -94,7 +94,7 @@ interface Review {
 //     id: "4",
 //     customerName: "هند خالد",
 //     customerAvatar: "/placeholder.svg?height=32&width=32",
-//     salonName: "صالون مس بيوتي",
+//     salonName: "مزود مس بيوتي",
 //     salonLogo: "/placeholder.svg?height=32&width=32",
 //     date: "2024-03-30",
 //     rating: 1,
@@ -106,11 +106,11 @@ interface Review {
 //     id: "5",
 //     customerName: "ليلى عبدالله",
 //     customerAvatar: "/placeholder.svg?height=32&width=32",
-//     salonName: "صالون روز",
+//     salonName: "مزود روز",
 //     salonLogo: "/placeholder.svg?height=32&width=32",
 //     date: "2024-03-29",
 //     rating: 5,
-//     comment: "أفضل صالون زرته، الخدمة ممتازة والأسعار معقولة. أنصح به بشدة.",
+//     comment: "أفضل مزود زرته، الخدمة ممتازة والأسعار معقولة. أنصح به بشدة.",
 //     status: "منشور",
 //     serviceType: "حمام مغربي",
 //   },
@@ -427,7 +427,7 @@ export default function ReviewsManagement() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <CardTitle>التقييمات</CardTitle>
-                <CardDescription>إدارة تقييمات العملاء للصالونات</CardDescription>
+                <CardDescription>إدارة تقييمات العملاء للمزودات</CardDescription>
               </div>
               {/* <TabsList className="bg-secondary/50">
                 <TabsTrigger value="all">الكل</TabsTrigger>
@@ -602,7 +602,7 @@ export default function ReviewsManagement() {
                         </div> */}
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="font-medium">الصالون:</span>
+                        <span className="font-medium">المزود:</span>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6 border">
                             <AvatarImage src={review.salon.icon_url} alt={review.salon.merchant_commercial_name} />

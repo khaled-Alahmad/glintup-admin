@@ -977,7 +977,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <SelectValue placeholder="اختر نوع المزود" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="salon">صالون</SelectItem>
+                    <SelectItem value="salon">مزود</SelectItem>
                     <SelectItem value="home_service">خدمة منزلية</SelectItem>
                     <SelectItem value="beautician">متخصص تجميل</SelectItem>
                     <SelectItem value="clinic">العيادات</SelectItem>

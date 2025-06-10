@@ -46,20 +46,20 @@ export function BanSalonDialog({ salonId, salonName }: BanSalonDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
           <Ban className="h-4 w-4 ml-2" />
-          حظر الصالون
+          حظر المزود
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>حظر الصالون</DialogTitle>
-          <DialogDescription>هل أنت متأكد من رغبتك في حظر صالون {salonName} بشكل دائم؟</DialogDescription>
+          <DialogTitle>حظر المزود</DialogTitle>
+          <DialogDescription>هل أنت متأكد من رغبتك في حظر مزود {salonName} بشكل دائم؟</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="ban-reason">سبب الحظر</Label>
             <Textarea
               id="ban-reason"
-              placeholder="أدخل سبب حظر الصالون"
+              placeholder="أدخل سبب حظر المزود"
               rows={4}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -71,7 +71,7 @@ export function BanSalonDialog({ salonId, salonName }: BanSalonDialogProps) {
             إلغاء
           </Button>
           <Button variant="destructive" onClick={handleBanSalon} disabled={isBanning}>
-            {isBanning ? "جاري الحظر..." : "حظر الصالون"}
+            {isBanning ? "جاري الحظر..." : "حظر المزود"}
           </Button>
         </DialogFooter>
       </DialogContent>

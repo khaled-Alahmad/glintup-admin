@@ -5,7 +5,7 @@ import { Star } from "lucide-react"
 // const salons = [
 //   {
 //     id: "1",
-//     name: "صالون الأميرة",
+//     name: "مزود الأميرة",
 //     logo: "/placeholder.svg?height=40&width=40",
 //     location: "مدينة الكويت، الكويت",
 //     bookingsCount: 124,
@@ -16,7 +16,7 @@ import { Star } from "lucide-react"
 //   },
 //   {
 //     id: "2",
-//     name: "صالون إليت",
+//     name: "مزود إليت",
 //     logo: "/placeholder.svg?height=40&width=40",
 //     location: "جدة، السعودية",
 //     bookingsCount: 96,
@@ -27,7 +27,7 @@ import { Star } from "lucide-react"
 //   },
 //   {
 //     id: "3",
-//     name: "صالون جلام",
+//     name: "مزود جلام",
 //     logo: "/placeholder.svg?height=40&width=40",
 //     location: "الدمام، السعودية",
 //     bookingsCount: 81,
@@ -38,7 +38,7 @@ import { Star } from "lucide-react"
 //   },
 //   {
 //     id: "4",
-//     name: "صالون مس بيوتي",
+//     name: "مزود مس بيوتي",
 //     logo: "/placeholder.svg?height=40&width=40",
 //     location: "مدينة الكويت، الكويت",
 //     bookingsCount: 75,
@@ -49,7 +49,7 @@ import { Star } from "lucide-react"
 //   },
 //   {
 //     id: "5",
-//     name: "صالون روز",
+//     name: "مزود روز",
 //     logo: "/placeholder.svg?height=40&width=40",
 //     location: "جدة، السعودية",
 //     bookingsCount: 68,

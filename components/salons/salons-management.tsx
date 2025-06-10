@@ -94,7 +94,7 @@ export default function SalonsManagement() {
       console.error("Failed to fetch salons:", error);
       toast({
         title: "خطأ في جلب البيانات",
-        description: "حدث خطأ أثناء جلب بيانات الصالونات",
+        description: "حدث خطأ أثناء جلب بيانات المزودين",
         variant: "destructive",
       });
     } finally {
@@ -116,7 +116,7 @@ export default function SalonsManagement() {
       if (response.success) {
         toast({
           title: "تم تحديث الحالة",
-          description: "تم تحديث حالة الصالون بنجاح",
+          description: "تم تحديث حالة المزود بنجاح",
         });
         fetchSalons();
       }
@@ -124,7 +124,7 @@ export default function SalonsManagement() {
       console.error("Failed to update salon status:", error);
       toast({
         title: "خطأ في تحديث الحالة",
-        description: "حدث خطأ أثناء تحديث حالة الصالون",
+        description: "حدث خطأ أثناء تحديث حالة المزود",
         variant: "destructive",
       });
     }
@@ -191,17 +191,17 @@ export default function SalonsManagement() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">إدارة الصالونات</h1>
+        <h1 className="text-3xl font-bold tracking-tight">إدارة المزودين</h1>
         <Button asChild>
-          <Link href="/salons/add">إضافة صالون جديد</Link>
+          <Link href="/salons/add">إضافة مزود جديد</Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>الصالونات المسجلة</CardTitle>
+          <CardTitle>المزودين المسجلين</CardTitle>
           <CardDescription>
-            قائمة بجميع الصالونات المسجلة في النظام
+            قائمة بجميع المزودين المسجلين في النظام
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -210,7 +210,7 @@ export default function SalonsManagement() {
               <div className="relative w-full sm:w-auto flex-1">
                 <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="بحث عن الصالونات..."
+                  placeholder="بحث عن المزودين..."
                   className="pr-9 w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -237,9 +237,9 @@ export default function SalonsManagement() {
               <Table className="min-w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>الصالون</TableHead>
-                    {/* نوع الصالون */}
-                    <TableHead>نوع الصالون</TableHead>
+                    <TableHead>المزود</TableHead>
+                    {/* نوع المزود */}
+                    <TableHead>نوع المزود</TableHead>
 
                     <TableHead>الموقع</TableHead>
                     <TableHead>التواصل</TableHead>
@@ -266,10 +266,10 @@ export default function SalonsManagement() {
                       <TableCell colSpan={8} className="text-center py-8">
                         <div className="flex flex-col items-center gap-2">
                           <p className="text-muted-foreground">
-                            لا توجد صالونات مسجلة
+                            لا توجد مزودات مسجلة
                           </p>
                           <Button asChild variant="link" className="gap-1">
-                            <Link href="/salons/add">إضافة صالون جديد</Link>
+                            <Link href="/salons/add">إضافة مزود جديد</Link>
                           </Button>
                         </div>
                       </TableCell>
@@ -304,7 +304,7 @@ export default function SalonsManagement() {
                           {salon.type === "clinic"
                             ? "عيادة"
                             : salon.type === "salon"
-                            ? "صالون"
+                            ? "مزود"
                             : salon.type === "home_service"
                             ? "خدمة منزلية"
                             : salon.type === "beautician"
@@ -387,7 +387,7 @@ export default function SalonsManagement() {
                                     setShowSuspendDialog(true);
                                   }}
                                 >
-                                  تعليق الصالون
+                                  تعليق المزود
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
@@ -396,7 +396,7 @@ export default function SalonsManagement() {
                                   }
                                   className="text-green-600 cursor-pointer"
                                 >
-                                  تفعيل الصالون
+                                  تفعيل المزود
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
@@ -406,7 +406,7 @@ export default function SalonsManagement() {
                                   setShowBanDialog(true);
                                 }}
                               >
-                                حظر الصالون
+                                حظر المزود
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -470,9 +470,9 @@ export default function SalonsManagement() {
             }}
           >
             <DialogHeader>
-              <DialogTitle>إرسال إشعار للصالون</DialogTitle>
+              <DialogTitle>إرسال إشعار للمزود</DialogTitle>
               <DialogDescription>
-                {/* سيتم إرسال هذا الإشعار إلى صالون {selectedSalon.merchant_legal_name} */}
+                {/* سيتم إرسال هذا الإشعار إلى مزود {selectedSalon.merchant_legal_name} */}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -510,14 +510,14 @@ export default function SalonsManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* نافذة تعليق الصالون */}
+      {/* نافذة تعليق المزود */}
       <Dialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تعليق الصالون</DialogTitle>
+            <DialogTitle>تعليق المزود</DialogTitle>
             <DialogDescription>
               {selectedSalon &&
-                `هل أنت متأكد من رغبتك في تعليق صالون ${selectedSalon.merchant_commercial_name}؟`}
+                `هل أنت متأكد من رغبتك في تعليق مزود ${selectedSalon.merchant_commercial_name}؟`}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -525,7 +525,7 @@ export default function SalonsManagement() {
               <Label htmlFor="suspend-reason">سبب التعليق</Label>
               <Textarea
                 id="suspend-reason"
-                placeholder="أدخل سبب تعليق الصالون"
+                placeholder="أدخل سبب تعليق المزود"
                 rows={4}
               />
             </div>
@@ -556,13 +556,13 @@ export default function SalonsManagement() {
               variant="destructive"
               onClick={() => setShowSuspendDialog(false)}
             >
-              تعليق الصالون
+              تعليق المزود
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* نافذة حظر الصالون */}
+      {/* نافذة حظر المزود */}
       <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
         <DialogContent>
           <form
@@ -597,10 +597,10 @@ export default function SalonsManagement() {
             }}
           >
             <DialogHeader>
-              <DialogTitle>حظر الصالون</DialogTitle>
+              <DialogTitle>حظر المزود</DialogTitle>
               <DialogDescription>
                 {selectedSalon &&
-                  `هل أنت متأكد من رغبتك في حظر صالون ${selectedSalon.merchant_commercial_name} بشكل دائم؟`}
+                  `هل أنت متأكد من رغبتك في حظر مزود ${selectedSalon.merchant_commercial_name} بشكل دائم؟`}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -609,7 +609,7 @@ export default function SalonsManagement() {
                 <Textarea
                   id="ban-reason"
                   name="ban-reason"
-                  placeholder="أدخل سبب حظر الصالون"
+                  placeholder="أدخل سبب حظر المزود"
                   rows={4}
                 />
               </div>
@@ -619,7 +619,7 @@ export default function SalonsManagement() {
                 إلغاء
               </Button>
               <Button variant="destructive" type="submit">
-                حظر الصالون
+                حظر المزود
               </Button>
             </DialogFooter>
           </form>

@@ -1,4 +1,5 @@
-import { parsePhoneNumber, isValidPhoneNumber, formatPhoneNumber, formatPhoneNumberIntl, getCountryCallingCode } from 'libphonenumber-js';
+import { parsePhoneNumber, isValidPhoneNumber, formatNumber, getCountryCallingCode } from 'libphonenumber-js';
+import formatPhoneNumberIntl from 'libphonenumber-js';
 
 /**
  * تحقق من صحة رقم الهاتف
@@ -9,7 +10,7 @@ import { parsePhoneNumber, isValidPhoneNumber, formatPhoneNumber, formatPhoneNum
 export const isValidPhone = (phoneNumber: string, defaultCountry: string = 'KW'): boolean => {
   if (!phoneNumber) return false;
   try {
-    return isValidPhoneNumber(phoneNumber, defaultCountry);
+    return isValidPhoneNumber(phoneNumber, defaultCountry as any);
   } catch (error) {
     return false;
   }
@@ -24,7 +25,7 @@ export const isValidPhone = (phoneNumber: string, defaultCountry: string = 'KW')
 export const formatPhone = (phoneNumber: string, defaultCountry: string = 'KW'): string => {
   if (!phoneNumber) return '';
   try {
-    return formatPhoneNumber(phoneNumber, defaultCountry, 'NATIONAL');
+    return formatNumber(phoneNumber, defaultCountry as any, 'NATIONAL');
   } catch (error) {
     return phoneNumber;
   }
@@ -39,7 +40,8 @@ export const formatPhone = (phoneNumber: string, defaultCountry: string = 'KW'):
 export const formatPhoneIntl = (phoneNumber: string, defaultCountry: string = 'KW'): string => {
   if (!phoneNumber) return '';
   try {
-    return formatPhoneNumberIntl(phoneNumber);
+    const formatted = formatPhoneNumberIntl(phoneNumber);
+    return formatted !== undefined ? formatted.toString() : phoneNumber;
   } catch (error) {
     return phoneNumber;
   }
@@ -87,7 +89,7 @@ export const getNationalNumber = (phoneNumber: string): string => {
 export const formatE164 = (phoneNumber: string, defaultCountry: string = 'KW'): string => {
   if (!phoneNumber) return '';
   try {
-    const parsed = parsePhoneNumber(phoneNumber, defaultCountry);
+    const parsed = parsePhoneNumber(phoneNumber, { defaultCountry: defaultCountry as any });
     return parsed ? parsed.format('E.164') : phoneNumber;
   } catch (error) {
     return phoneNumber;

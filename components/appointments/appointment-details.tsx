@@ -59,7 +59,7 @@ const appointmentData = {
   customerAvatar: "/placeholder.svg?height=64&width=64",
   customerPhone: "050-1234567",
   customerEmail: "sara@example.com",
-  salonName: "صالون الأميرة",
+  salonName: "مزود الأميرة",
   salonLogo: "/placeholder.svg?height=64&width=64",
   salonAddress: "شارع الشيخ زايد، دبي",
   salonPhone: "04-1234567",
@@ -384,7 +384,7 @@ export default function AppointmentDetails({
             <CardDescription>تفاصيل الحجز الأساسية</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* معلومات العميل والصالون */}
+            {/* معلومات العميل والمزود */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">معلومات العميل</h3>
@@ -412,7 +412,7 @@ export default function AppointmentDetails({
                 </div>
               </div>
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">معلومات الصالون</h3>
+                <h3 className="text-lg font-medium">معلومات المزود</h3>
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16 border">
                     <AvatarImage
@@ -573,7 +573,7 @@ export default function AppointmentDetails({
                   {booking.salon_notes && (
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        ملاحظات الصالون
+                        ملاحظات المزود
                       </p>
                       <p className="p-3 bg-muted/20 rounded-md">
                         {booking.salon_notes}
