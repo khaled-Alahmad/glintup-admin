@@ -239,9 +239,9 @@ export default function AddSalon() {
         });
         window.location.href = "/salons";
         setIsLoading(false);
-      }else {
+      } else {
         console.log("Error response:", response);
-        
+
         toast({
           title: "خطأ في الإضافة",
           description: response.message || "حدث خطأ أثناء إضافة المزود",
@@ -1199,15 +1199,31 @@ export default function AddSalon() {
                       id="services_list"
                       type="file"
                       accept="application/pdf"
-                      className="hidden"
-                      onChange={(e) => {
+                      className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setServicesListFile(file);
-                          setFormData((prev) => ({
-                            ...prev,
-                            services_list: file.name,
-                          }));
+                          try {
+                            const uploadFormData = new FormData();
+                            uploadFormData.append("file", file);
+                            uploadFormData.append("folder", "salons");
+
+                            const response = await addData("general/upload-file", uploadFormData);
+
+                            if (response.success) {
+                              setServicesListFile(file);
+                              setFormData((prev) => ({
+                                ...prev,
+                                services_list: response.data.file_name,
+                              }));
+                            }
+                          } catch (error) {
+                            console.error("File upload failed:", error);
+                            toast({
+                              title: "خطأ في رفع الملف",
+                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              variant: "destructive",
+                            });
+                          }
                         }
                       }}
                       required
@@ -1259,15 +1275,31 @@ export default function AddSalon() {
                       id="trade_license"
                       type="file"
                       accept="application/pdf"
-                      className="hidden"
-                      onChange={(e) => {
+                      className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setTradeLicenseFile(file);
-                          setFormData((prev) => ({
-                            ...prev,
-                            trade_license: file.name,
-                          }));
+                          try {
+                            const uploadFormData = new FormData();
+                            uploadFormData.append("file", file);
+                            uploadFormData.append("folder", "salons");
+
+                            const response = await addData("general/upload-file", uploadFormData);
+
+                            if (response.success) {
+                              setTradeLicenseFile(file);
+                              setFormData((prev) => ({
+                                ...prev,
+                                trade_license: response.data.file_name,
+                              }));
+                            }
+                          } catch (error) {
+                            console.error("File upload failed:", error);
+                            toast({
+                              title: "خطأ في رفع الملف",
+                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              variant: "destructive",
+                            });
+                          }
                         }
                       }}
                       required
@@ -1319,15 +1351,31 @@ export default function AddSalon() {
                       id="vat_certificate"
                       type="file"
                       accept="application/pdf"
-                      className="hidden"
-                      onChange={(e) => {
+                      className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setVatCertificateFile(file);
-                          setFormData((prev) => ({
-                            ...prev,
-                            vat_certificate: file.name,
-                          }));
+                          try {
+                            const uploadFormData = new FormData();
+                            uploadFormData.append("file", file);
+                            uploadFormData.append("folder", "salons");
+
+                            const response = await addData("general/upload-file", uploadFormData);
+
+                            if (response.success) {
+                              setVatCertificateFile(file);
+                              setFormData((prev) => ({
+                                ...prev,
+                                vat_certificate: response.data.file_name,
+                              }));
+                            }
+                          } catch (error) {
+                            console.error("File upload failed:", error);
+                            toast({
+                              title: "خطأ في رفع الملف",
+                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              variant: "destructive",
+                            });
+                          }
                         }
                       }}
                       required
@@ -1379,15 +1427,31 @@ export default function AddSalon() {
                       id="bank_account_certificate"
                       type="file"
                       accept="application/pdf"
-                      className="hidden"
-                      onChange={(e) => {
+                      className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setBankAccountCertificateFile(file);
-                          setFormData((prev) => ({
-                            ...prev,
-                            bank_account_certificate: file.name,
-                          }));
+                          try {
+                            const uploadFormData = new FormData();
+                            uploadFormData.append("file", file);
+                            uploadFormData.append("folder", "salons");
+
+                            const response = await addData("general/upload-file", uploadFormData);
+
+                            if (response.success) {
+                              setBankAccountCertificateFile(file);
+                              setFormData((prev) => ({
+                                ...prev,
+                                bank_account_certificate: response.data.file_name,
+                              }));
+                            }
+                          } catch (error) {
+                            console.error("File upload failed:", error);
+                            toast({
+                              title: "خطأ في رفع الملف",
+                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              variant: "destructive",
+                            });
+                          }
                         }
                       }}
                       required
