@@ -77,7 +77,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
     const loadUserPermissions = async () => {
       // Check if permissions are already stored in localStorage
       const storedPermissions = localStorage.getItem('userPermissions');
-      
+
       if (storedPermissions) {
         // If permissions are already stored, use them
         setUserPermissions(JSON.parse(storedPermissions));
@@ -121,6 +121,14 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       icon: Users,
       active: pathname.startsWith("/users"),
       requiredPermission: "users",
+    },
+    // salon-menu-requests
+    {
+      name: "طلبات القائمة",
+      href: "/salon-menu-requests",
+      icon: FileText,
+      active: pathname.startsWith("/salon-menu-requests"),
+      requiredPermission: "salon-menu-requests",
     },
     {
       name: "طاقم العمل",
@@ -216,10 +224,10 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
     isLoading || userPermissions.length === 0
       ? allLinks
       : allLinks.filter(
-          (link) =>
-            userPermissions.includes(link.requiredPermission) ||
-            link.requiredPermission === "dashboard" // Always show dashboard
-        );
+        (link) =>
+          userPermissions.includes(link.requiredPermission) ||
+          link.requiredPermission === "dashboard" // Always show dashboard
+      );
 
   return (
     <div className="flex h-full w-full flex-col bg-sidebar overflow-y-auto">

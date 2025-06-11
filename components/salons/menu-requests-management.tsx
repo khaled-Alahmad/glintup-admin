@@ -73,7 +73,7 @@ interface MenuRequestsInfo {
     };
 }
 
-export default function MenuRequestsTab({ salonId }: { salonId?: string }) {
+export default function MenuRequestsTab() {
     const [menuRequests, setMenuRequests] = useState<MenuRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -93,7 +93,7 @@ export default function MenuRequestsTab({ salonId }: { salonId?: string }) {
     const fetchMenuRequests = async () => {
         try {
             const response = await fetchData(
-                `admin/salon-menu-requests?page=${currentPage}&per_page=${perPage}${salonId ? `&salon_id=${salonId}` : ""}`
+                `admin/salon-menu-requests?page=${currentPage}&per_page=${perPage}}`
             );
             setMenuRequests(response.data);
             setTotalPages(response.meta.last_page);

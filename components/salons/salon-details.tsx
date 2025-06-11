@@ -2930,7 +2930,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             onValueChange={setActiveTab}
           >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-12">
+              <TabsList className="grid w-full grid-cols-11">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -2948,16 +2948,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <TabsTrigger value="coupons">الكوبونات</TabsTrigger>
                 <TabsTrigger value="groups">المجموعات</TabsTrigger>
                 <TabsTrigger value="logs">السجل</TabsTrigger>
-                <TabsTrigger value="requests">طلبات</TabsTrigger>
+                {/* <TabsTrigger value="requests">طلبات</TabsTrigger> */}
                 {/* السجل والبنك */}
 
               </TabsList>
             </CardHeader>
             <CardContent>
-              <TabsContent value="requests" className="space-y-6">
+              {/* <TabsContent value="requests" className="space-y-6">
 
                 <MenuRequestsTab salonId={salonId} />
-              </TabsContent>
+              </TabsContent> */}
               <TabsContent value="logs" className="space-y-6">
                 <SalonActivityLogs salonId={salonId} />
               </TabsContent>
