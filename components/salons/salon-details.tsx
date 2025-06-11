@@ -89,6 +89,7 @@ import SalonCoupons from "./salon-coupons";
 import GroupsTab from "./salon-groups";
 import { useToast } from "@/hooks/use-toast";
 import SalonActivityLogs from "./salon-activity-logs";
+import MenuRequestsTab from "./menu-requests-management";
 interface SalonPermission {
   id: number;
   name: {
@@ -261,6 +262,16 @@ interface Image {
 interface SalonData {
   type: string;
   types: string;
+  service_location: string;
+  bank_name: string;
+  bank_account_number: string;
+  bank_account_holder_name: string;
+  bank_account_iban: string;
+  services_list_url: string;
+  trade_license_url: string;
+  vat_certificate_url: string;
+  bank_account_certificate_url: string;
+  vat_number: string;
   id: number;
   images: Image[];
   name: string;
@@ -1289,14 +1300,14 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-md text-sm font-medium ${payment.status === "confirm"
-                            ? "bg-green-50 text-green-700"
-                            : payment.status === "pending"
-                              ? "bg-amber-50 text-amber-700"
-                              : payment.status === "canceled"
+                          ? "bg-green-50 text-green-700"
+                          : payment.status === "pending"
+                            ? "bg-amber-50 text-amber-700"
+                            : payment.status === "canceled"
+                              ? "bg-red-50 text-red-700"
+                              : payment.status === "rejected"
                                 ? "bg-red-50 text-red-700"
-                                : payment.status === "rejected"
-                                  ? "bg-red-50 text-red-700"
-                                  : "bg-gray-50 text-gray-700"
+                                : "bg-gray-50 text-gray-700"
                           }`}
                       >
                         {payment.status === "confirm"
@@ -2203,8 +2214,8 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
           <Star
             key={i}
             className={`h-4 w-4 ${i < rating
-                ? "text-yellow-500 fill-yellow-500"
-                : "text-gray-300 fill-gray-300"
+              ? "text-yellow-500 fill-yellow-500"
+              : "text-gray-300 fill-gray-300"
               }`}
           />
         ))}
@@ -2919,7 +2930,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             onValueChange={setActiveTab}
           >
             <CardHeader className="w-full overflow-x-auto">
-              <TabsList className="grid w-full grid-cols-11">
+              <TabsList className="grid w-full grid-cols-12">
                 <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
                 <TabsTrigger value="services">الخدمات</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
@@ -2937,10 +2948,16 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 <TabsTrigger value="coupons">الكوبونات</TabsTrigger>
                 <TabsTrigger value="groups">المجموعات</TabsTrigger>
                 <TabsTrigger value="logs">السجل</TabsTrigger>
+                <TabsTrigger value="requests">طلبات</TabsTrigger>
+                {/* السجل والبنك */}
 
               </TabsList>
             </CardHeader>
             <CardContent>
+              <TabsContent value="requests" className="space-y-6">
+
+                <MenuRequestsTab salonId={salonId} />
+              </TabsContent>
               <TabsContent value="logs" className="space-y-6">
                 <SalonActivityLogs salonId={salonId} />
               </TabsContent>
@@ -2972,6 +2989,89 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     {salonData.description}
                   </p>
                 </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">موقع الخدمة</h3>
+                    <Badge variant="outline" className="text-sm">
+                      {salonData.service_location === "in_center" ? "في المركز" :
+                        salonData.service_location === "in_house" ? "في المنزل" :
+                          salonData.service_location === "in_house_and_center" ? "في المركز والمنزل" : "غير محدد"}
+                    </Badge>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">معلومات البنك والمستندات</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-muted-foreground">اسم البنك</h3>
+                        <p>{salonData.bank_name || "غير متوفر"}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-muted-foreground">رقم الحساب</h3>
+                        <p>{salonData.bank_account_number || "غير متوفر"}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-muted-foreground">اسم صاحب الحساب</h3>
+                        <p>{salonData.bank_account_holder_name || "غير متوفر"}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-muted-foreground">رقم الآيبان</h3>
+                        <p style={{ direction: "ltr", textAlign: "right" }}>{salonData.bank_account_iban || "غير متوفر"}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-muted-foreground">رقم ضريبة القيمة المضافة</h3>
+                        <p>{salonData.vat_number || "غير متوفر"}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mt-4">
+                      <h4 className="text-sm font-medium">المستندات</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {salonData.services_list_url && (
+                          <Button variant="outline" size="sm" className="text-sm" asChild>
+                            <a href={salonData.services_list_url} target="_blank" rel="noopener noreferrer">
+                              قائمة الخدمات
+                            </a>
+                          </Button>
+                        )}
+
+                        {salonData.trade_license_url && (
+                          <Button variant="outline" size="sm" className="text-sm" asChild>
+                            <a href={salonData.trade_license_url} target="_blank" rel="noopener noreferrer">
+                              الرخصة التجارية
+                            </a>
+                          </Button>
+                        )}
+
+                        {salonData.vat_certificate_url && (
+                          <Button variant="outline" size="sm" className="text-sm" asChild>
+                            <a href={salonData.vat_certificate_url} target="_blank" rel="noopener noreferrer">
+                              شهادة ضريبة القيمة المضافة
+                            </a>
+                          </Button>
+                        )}
+
+                        {salonData.bank_account_certificate_url && (
+                          <Button variant="outline" size="sm" className="text-sm" asChild>
+                            <a href={salonData.bank_account_certificate_url} target="_blank" rel="noopener noreferrer">
+                              شهادة الحساب البنكي
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">

@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, FileText, Upload, X } from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -31,7 +31,7 @@ import dynamic from "next/dynamic";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { isValidPhone } from "@/lib/phone-utils";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Import the MapComponent dynamically with SSR disabled
 const MapComponent = dynamic(
@@ -82,6 +82,16 @@ export default function AddSalon() {
     types: ["salon"],
     latitude: "",
     longitude: "",
+    service_location: "in_center",
+    bank_name: "",
+    bank_account_number: "",
+    bank_account_holder_name: "",
+    bank_account_iban: "",
+    services_list: "",
+    trade_license: "",
+    vat_certificate: "",
+    bank_account_certificate: "",
+    vat_number: "",
   });
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,6 +191,11 @@ export default function AddSalon() {
     setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
   };
 
+  const [servicesListFile, setServicesListFile] = useState<File | null>(null);
+  const [tradeLicenseFile, setTradeLicenseFile] = useState<File | null>(null);
+  const [vatCertificateFile, setVatCertificateFile] = useState<File | null>(null);
+  const [bankAccountCertificateFile, setBankAccountCertificateFile] = useState<File | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -223,8 +238,17 @@ export default function AddSalon() {
           description: "تم إنشاء المزود الجديد",
         });
         window.location.href = "/salons";
+        setIsLoading(false);
+      }else {
+        console.log("Error response:", response);
+        
+        toast({
+          title: "خطأ في الإضافة",
+          description: response.message || "حدث خطأ أثناء إضافة المزود",
+          variant: "destructive",
+        });
+        setIsLoading(false);
       }
-      setIsLoading(false);
     } catch (error: any) {
       console.error("Error adding salon:", error);
       toast({
@@ -1038,6 +1062,366 @@ export default function AddSalon() {
 
             <Separator />
 
+            {/* معلومات الخدمة والبنك */}
+            <h3 className="text-lg font-medium">معلومات الخدمة والبنك</h3>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="service_location">
+                  موقع تقديم الخدمة <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  required
+                  value={formData.service_location}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      service_location: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger id="service_location">
+                    <SelectValue placeholder="اختر موقع تقديم الخدمة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="in_center">في المركز</SelectItem>
+                    <SelectItem value="in_house">في المنزل</SelectItem>
+                    <SelectItem value="in_house_and_center">في المركز والمنزل</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="bank_name">
+                    اسم البنك <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="bank_name"
+                    value={formData.bank_name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bank_name: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bank_account_number">
+                    رقم الحساب البنكي <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="bank_account_number"
+                    value={formData.bank_account_number}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bank_account_number: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="bank_account_holder_name">
+                    اسم صاحب الحساب البنكي <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="bank_account_holder_name"
+                    value={formData.bank_account_holder_name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bank_account_holder_name: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bank_account_iban">
+                    رقم الآيبان <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="bank_account_iban"
+                    value={formData.bank_account_iban}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        bank_account_iban: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="vat_number">
+                    الرقم الضريبي <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="vat_number"
+                    value={formData.vat_number}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        vat_number: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* قائمة الخدمات PDF */}
+              <div className="space-y-4">
+                <Label htmlFor="services_list">
+                  قائمة الخدمات (PDF) <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <Label htmlFor="services_list" className="mt-4 w-full">
+                    <div className="flex flex-col items-center">
+                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت ملف PDF هنا أو انقر للتصفح
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF حتى 10MB
+                      </p>
+                    </div>
+                    <Input
+                      id="services_list"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setServicesListFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            services_list: file.name,
+                          }));
+                        }
+                      }}
+                      required
+                    />
+                  </Label>
+                  {servicesListFile && (
+                    <div className="flex items-center mt-2">
+                      <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">
+                        {servicesListFile.name}
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => {
+                          setServicesListFile(null);
+                          setFormData((prev) => ({
+                            ...prev,
+                            services_list: "",
+                          }));
+                        }}
+                      >
+                        <span className="sr-only">حذف</span>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* الرخصة التجارية PDF */}
+              <div className="space-y-4">
+                <Label htmlFor="trade_license">
+                  الرخصة التجارية (PDF) <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <Label htmlFor="trade_license" className="mt-4 w-full">
+                    <div className="flex flex-col items-center">
+                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت ملف PDF هنا أو انقر للتصفح
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF حتى 10MB
+                      </p>
+                    </div>
+                    <Input
+                      id="trade_license"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setTradeLicenseFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            trade_license: file.name,
+                          }));
+                        }
+                      }}
+                      required
+                    />
+                  </Label>
+                  {tradeLicenseFile && (
+                    <div className="flex items-center mt-2">
+                      <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">
+                        {tradeLicenseFile.name}
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => {
+                          setTradeLicenseFile(null);
+                          setFormData((prev) => ({
+                            ...prev,
+                            trade_license: "",
+                          }));
+                        }}
+                      >
+                        <span className="sr-only">حذف</span>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* شهادة ضريبة القيمة المضافة PDF */}
+              <div className="space-y-4">
+                <Label htmlFor="vat_certificate">
+                  شهادة ضريبة القيمة المضافة (PDF) <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <Label htmlFor="vat_certificate" className="mt-4 w-full">
+                    <div className="flex flex-col items-center">
+                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت ملف PDF هنا أو انقر للتصفح
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF حتى 10MB
+                      </p>
+                    </div>
+                    <Input
+                      id="vat_certificate"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setVatCertificateFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            vat_certificate: file.name,
+                          }));
+                        }
+                      }}
+                      required
+                    />
+                  </Label>
+                  {vatCertificateFile && (
+                    <div className="flex items-center mt-2">
+                      <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">
+                        {vatCertificateFile.name}
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => {
+                          setVatCertificateFile(null);
+                          setFormData((prev) => ({
+                            ...prev,
+                            vat_certificate: "",
+                          }));
+                        }}
+                      >
+                        <span className="sr-only">حذف</span>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* شهادة الحساب البنكي PDF */}
+              <div className="space-y-4">
+                <Label htmlFor="bank_account_certificate">
+                  شهادة الحساب البنكي (PDF) <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <Label htmlFor="bank_account_certificate" className="mt-4 w-full">
+                    <div className="flex flex-col items-center">
+                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت ملف PDF هنا أو انقر للتصفح
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF حتى 10MB
+                      </p>
+                    </div>
+                    <Input
+                      id="bank_account_certificate"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setBankAccountCertificateFile(file);
+                          setFormData((prev) => ({
+                            ...prev,
+                            bank_account_certificate: file.name,
+                          }));
+                        }
+                      }}
+                      required
+                    />
+                  </Label>
+                  {bankAccountCertificateFile && (
+                    <div className="flex items-center mt-2">
+                      <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">
+                        {bankAccountCertificateFile.name}
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => {
+                          setBankAccountCertificateFile(null);
+                          setFormData((prev) => ({
+                            ...prev,
+                            bank_account_certificate: "",
+                          }));
+                        }}
+                      >
+                        <span className="sr-only">حذف</span>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
             {/* إعدادات متقدمة */}
             <h3 className="text-lg font-medium">إعدادات متقدمة</h3>
             <div className="space-y-4">
@@ -1065,7 +1449,7 @@ export default function AddSalon() {
             <Button variant="outline" type="button" asChild>
               <Link href="/salons">إلغاء</Link>
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" >
               {isLoading ? "جاري الحفظ..." : "حفظ المزود"}
             </Button>
           </CardFooter>

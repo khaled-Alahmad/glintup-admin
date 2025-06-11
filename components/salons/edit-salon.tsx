@@ -1049,6 +1049,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       : "يمكن أن تكون الخدمة متاحة للمنزل أو غير متاحة فقط"}
                   </p>
                 </div> */}
+                
 
                 <Separator />
 
