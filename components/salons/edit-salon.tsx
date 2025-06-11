@@ -10,6 +10,7 @@ import { fetchData, updateData, addData } from "@/lib/apiHelper";
 import dynamic from "next/dynamic";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
+import AsyncSelect from 'react-select/async';
 
 // Import MapComponent dynamically with SSR disabled
 const MapComponent = dynamic(
@@ -49,6 +50,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -68,6 +77,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "../ui/checkbox";
+import { LoyaltyServiceSelector } from "./loyalty-service-selector";
 
 interface EditSalonProps {
   salonId: string;
@@ -91,6 +101,16 @@ interface Service {
   price: number;
   description: string;
   category: string;
+}
+
+interface LoyaltyService {
+  id: number;
+  name: {
+    ar: string;
+    en: string;
+  };
+  price: number;
+  currency: string;
 }
 
 // تعريف نوع البيانات للخدمة في المزود
@@ -186,7 +206,8 @@ export default function EditSalon({ salonId }: EditSalonProps) {
   );
   const [salonSocialMedia, setSalonSocialMedia] = useState<SocialMediaMap>({});
   const [newImagesNames, setNewImagesNames] = useState<string[]>([]);
-  const [loyaltyServices, setLoyaltyServices] = useState<any[]>([]);
+  const [loyaltyServices, setLoyaltyServices] = useState<LoyaltyService[]>([]);
+
 
   const handleGalleryChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -543,6 +564,8 @@ export default function EditSalon({ salonId }: EditSalonProps) {
   const [customDuration, setCustomDuration] = useState<number>(0);
 
   // جلب بيانات المزود
+  // setFilteredLoyaltyServices
+  const [filteredLoyaltyServices, setFilteredLoyaltyServices] = useState<LoyaltyService[]>([]);
   useEffect(() => {
     const fetchSalonData = async () => {
       try {
@@ -558,10 +581,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           setSalonServices(data.services || []);
           setLogoText(data.icon);
           setSelectedCollections(data.collections || []);
-        }
-
-        if (loyaltyResponse.success) {
+        } if (loyaltyResponse.success) {
           setLoyaltyServices(loyaltyResponse.data);
+          setFilteredLoyaltyServices(loyaltyResponse.data);
         }
       } catch (error) {
         console.error("Failed to fetch salon data:", error);
@@ -942,46 +964,37 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     defaultValue={salonData?.bio}
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="loyalty_service_id">خدمة الولاء</Label>
-                  <Select
-                    name="loyalty_service_id"
-                    defaultValue={salonData?.loyalty_service_id?.toString()}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر خدمة الولاء" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {loyaltyServices?.map((service) => (
-                        <SelectItem
-                          key={service.id}
-                          value={service.id.toString()}
-                        >
-                          {service.name.ar} - {service.price} {service.currency}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <LoyaltyServiceSelector
+                  defaultValue={salonData?.loyalty_service_id}
+                  onChange={(value) => {
+                    const loyaltyServiceId = value || "";
+                    const form = new FormData();
+                    form.append("loyalty_service_id", loyaltyServiceId);
+                    setSalonData((prev: any) => ({
+                      ...prev,
+                      loyalty_service_id: loyaltyServiceId,
+                    }));
+                  }
+                  }
+                />
                 <div className="space-y-2">
                   <Label htmlFor="type">
-                  نوع المزود <span className="text-red-500">*</span>
+                    نوع المزود <span className="text-red-500">*</span>
                   </Label>
                   <Select
-                  name="type"
-                  required
-                  defaultValue={salonData?.type || ""}
+                    name="type"
+                    required
+                    defaultValue={salonData?.type || ""}
                   >
-                  <SelectTrigger id="type">
-                    <SelectValue placeholder="اختر نوع المزود" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="salon">مزود</SelectItem>
-                    <SelectItem value="home_service">خدمة منزلية</SelectItem>
-                    <SelectItem value="beautician">متخصص تجميل</SelectItem>
-                    <SelectItem value="clinic">العيادات</SelectItem>
-                  </SelectContent>
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder="اختر نوع المزود" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="salon">مزود</SelectItem>
+                      <SelectItem value="home_service">خدمة منزلية</SelectItem>
+                      <SelectItem value="beautician">متخصص تجميل</SelectItem>
+                      <SelectItem value="clinic">العيادات</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 {/* <div className="space-y-2">
@@ -2236,14 +2249,16 @@ export function WorkingHourForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no_break">بدون راحة</SelectItem>
-                  {Array.from({ length: 24 }).map((_, i) => (
-                    <SelectItem
-                      key={i}
-                      value={`${String(i).padStart(2, "0")}:00`}
-                    >
-                      {`${String(i).padStart(2, "0")}:00`}
-                    </SelectItem>
-                  ))}
+                  {Array.from({ length: 24 }).map(
+                    (_, i) => (
+                      <SelectItem
+                        key={i}
+                        value={`${String(i).padStart(2, "0")}:00`}
+                      >
+                        {`${String(i).padStart(2, "0")}:00`}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
               <Select
@@ -2257,14 +2272,16 @@ export function WorkingHourForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no_break">بدون راحة</SelectItem>
-                  {Array.from({ length: 24 }).map((_, i) => (
-                    <SelectItem
-                      key={i}
-                      value={`${String(i).padStart(2, "0")}:00`}
-                    >
-                      {`${String(i).padStart(2, "0")}:00`}
-                    </SelectItem>
-                  ))}
+                  {Array.from({ length: 24 }).map(
+                    (_, i) => (
+                      <SelectItem
+                        key={i}
+                        value={`${String(i).padStart(2, "0")}:00`}
+                      >
+                        {`${String(i).padStart(2, "0")}:00`}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>

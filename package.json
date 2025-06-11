@@ -66,6 +66,7 @@
     "react-leaflet": "^5.0.0",
     "react-phone-number-input": "^3.3.7",
     "react-resizable-panels": "^2.1.7",
+    "react-select": "^5.10.1",
     "recharts": "latest",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
