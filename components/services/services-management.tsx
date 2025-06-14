@@ -51,6 +51,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  MeasuringStrategy,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -194,48 +195,79 @@ export default function ServicesManagement() {
     } catch (error) {
       console.error("Failed to delete group:", error);
     }
-  };
-
-  // sensors for dnd-kit
+  };  // sensors for dnd-kit with improved responsiveness
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { 
+      activationConstraint: { 
+        distance: 2, // مسافة أقل لبدء السحب بشكل أسرع
+        tolerance: 3, // تسامح أقل لدقة أكبر
+        delay: 30, // تأخير أقل للاستجابة الأسرع
+      } 
+    })
   );
 
-  // دالة تغيير ترتيب المجموعات dnd-kit
+  // دالة تغيير ترتيب المجموعات dnd-kit - Enhanced with animations
   const handleDndKitDragEnd = async (event: any) => {
     if (!event.active || !event.over) {
+      setIsDragging(false);
       return;
     }
 
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) {
+      setIsDragging(false);
+      return;
+    }
+    
+    // Find indices and create the new array
     const oldIndex = groups.findIndex((g) => g.id === active.id);
     const newIndex = groups.findIndex((g) => g.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
-    const newGroups = arrayMove(groups, oldIndex, newIndex);
+    if (oldIndex === -1 || newIndex === -1) {
+      setIsDragging(false);
+      return;
+    }
+    
+    // Update UI immediately for better user experience
+    setGroups((prevGroups) => arrayMove([...prevGroups], oldIndex, newIndex));
+    
     // تحديد orders الجديد (من العنصر الذي سنأخذ مكانه)
+    const newGroups = arrayMove([...groups], oldIndex, newIndex);
     let newOrdersValue: any = null;
     if (newIndex === 0 && newGroups.length > 1) {
       newOrdersValue = newGroups[1].orders;
     } else if (newIndex > 0) {
       newOrdersValue = newGroups[newIndex - 1].orders;
     }
+    
     const reorderBody = { orders: newOrdersValue };
     try {
       await addData(`admin/groups/${active.id}/reorder`, reorderBody);
-      setGroups(newGroups);
       setIsDragging(false);
+      // toast({
+      //   title: "تم تحديث الترتيب",
+      //   description: "تم تحديث ترتيب المجموعات بنجاح",
+      //   variant: "default",
+      // });
     } catch (error) {
+      // Revert to original order on error
+      await fetchGroups(); // Reload from server
       toast({
         title: "خطأ في الترتيب",
         description: "حدث خطأ أثناء تحديث الترتيب",
         variant: "destructive",
       });
+      setIsDragging(false);
     }
   };
 
-  // عند بدء السحب
-  const handleDragStart = () => setIsDragging(true);
+  // عند بدء السحب - with feedback
+  const handleDragStart = () => {
+    setIsDragging(true);
+    // Add haptic feedback if available
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50); // Light vibration on mobile
+    }
+  };
 
   // Update the useEffect to fetch groups
   useEffect(() => {
@@ -331,17 +363,21 @@ export default function ServicesManagement() {
                 إضافة مجموعة جديدة
               </Button>
             </div>
-          ) : (
-            <DndContext
+          ) : (            <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDndKitDragEnd}
+              onDragStart={handleDragStart}
+              measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
             >
               <SortableContext
                 items={groups.map((g) => g.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="flex flex-col gap-4">
+                <div className={`flex flex-col gap-4 ${isDragging ? 'relative cursor-grabbing' : ''}`}>
+                  {isDragging && (
+                    <div className="absolute inset-0 pointer-events-none rounded-md border-2 border-dashed border-primary/30 bg-primary/5 -m-3 p-3"></div>
+                  )}
                   {groups.map((group, idx) => (
                     <SortableGroupCard
                       key={group.id}
@@ -388,23 +424,7 @@ export default function ServicesManagement() {
           </DialogHeader>
           <form onSubmit={handleAddGroup}>
             <div className="grid gap-4 py-4">
-              {/* <div className="space-y-2">
-                <Label htmlFor="salon_id">المزود</Label>
-                <Select name="salon_id" defaultValue="5">
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="اختر المزود" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {salons.map((salon) => (
-                        <SelectItem key={salon.id} value={salon.id.toString()}>
-                          {salon.merchant_commercial_name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div> */}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name_ar">اسم المجموعة (عربي)</Label>
@@ -443,23 +463,7 @@ export default function ServicesManagement() {
           {editingGroup && (
             <form onSubmit={handleEditGroup}>
               <div className="grid gap-4 py-4">
-                {/* <div className="space-y-2">
-                  <Label htmlFor="salon_id">المزود</Label>
-                  <Select name="salon_id" defaultValue={editingGroup.salon_id.toString()}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="اختر المزود" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {salons.map((salon) => (
-                          <SelectItem key={salon.id} value={salon.id.toString()}>
-                            {salon.merchant_commercial_name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div> */}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name_ar">اسم المجموعة (عربي)</Label>
@@ -539,30 +543,38 @@ interface GroupCardProps {
   group: ServiceGroup;
   onEdit: () => void;
   onDelete: () => void;
+  isDragging?: boolean;
 }
 
-function GroupCard({ group, onEdit, onDelete, dragHandleProps }: GroupCardProps & { dragHandleProps?: React.HTMLAttributes<HTMLDivElement> }) {
-  return (
-    <Card className="h-full flex flex-col select-none">
-      <CardHeader>
+function GroupCard({ group, onEdit, onDelete, dragHandleProps, isDragging }: GroupCardProps & { dragHandleProps?: React.HTMLAttributes<HTMLDivElement> }) {
+  return (    <Card className={`h-full flex flex-col select-none transition-all duration-100 
+      ${isDragging 
+        ? 'border-primary shadow-lg bg-primary/5 border-2' 
+        : 'hover:border-primary/30 hover:shadow-md'
+      }`}>
+      <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div className="flex flex-col flex-1">
             <div className="flex items-center w-full mb-1">
-              {/* Drag handle */}
-              <div
+              <CardTitle className="text-lg flex justify-between items-center w-full">
+                <span className="font-bold mr-2">{group.name.ar}</span>
+              </CardTitle>
+              
+              {/* Drag handle - moved to right side for better RTL experience */}              <div
                 {...dragHandleProps}
-                className="cursor-grab active:cursor-grabbing mr-2 p-1 rounded hover:bg-muted transition"
+                className={`cursor-grab active:cursor-grabbing mr-0 p-1.5 rounded-md transition-all duration-100 
+                  ${isDragging 
+                    ? 'bg-primary/15 text-primary rotate-3 scale-110' 
+                    : 'hover:bg-primary/10 hover:text-primary hover:scale-105'
+                  }`}
                 title="اسحب لتحريك المجموعة"
                 style={{ userSelect: 'none' }}
               >
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="6" r="1.5" /><circle cx="5" cy="10" r="1.5" /><circle cx="5" cy="14" r="1.5" /><circle cx="10" cy="6" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="10" cy="14" r="1.5" /></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2ZM6 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2ZM18 16c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2ZM6 16c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2Z" />
+                  <path d="M6 16v4M6 8v4M18 16v4M18 8v4M6 12h12" strokeDasharray={isDragging ? "1 3" : "0"} />
+                </svg>
               </div>
-              <CardTitle className="text-lg flex justify-between items-center w-full">
-                <span className="font-bold">{group.name.ar}</span>
-                {/* <Badge className="ml-2 " variant="secondary">
-                  {group.orders} الترتيب
-                </Badge> */}
-              </CardTitle>
             </div>
             <CardDescription className="text-xs text-muted-foreground mt-1">
               {group.name.en}
@@ -570,15 +582,20 @@ function GroupCard({ group, onEdit, onDelete, dragHandleProps }: GroupCardProps 
           </div>
         </div>
       </CardHeader>
-      <CardFooter className="flex justify-end gap-2 pt-2 border-t mt-auto">
-        <Button variant="ghost" size="sm" onClick={onEdit}>
+      <CardFooter className="flex justify-end gap-2 pt-3 border-t mt-auto">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onEdit}
+          className="hover:bg-blue-50 hover:text-blue-600 transition-colors"
+        >
           <Edit className="h-4 w-4 ml-1" />
           تعديل
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+          className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
           onClick={onDelete}
         >
           <Trash2 className="h-4 w-4 ml-1" />
@@ -589,34 +606,47 @@ function GroupCard({ group, onEdit, onDelete, dragHandleProps }: GroupCardProps 
   );
 }
 
-function SortableGroupCard({ group, onEdit, onDelete, index }: { group: ServiceGroup, onEdit: () => void, onDelete: () => void, index: number }) {
-  const {
+function SortableGroupCard({ group, onEdit, onDelete, index }: { group: ServiceGroup, onEdit: () => void, onDelete: () => void, index: number }) {  const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: group.id });
+  } = useSortable({ 
+    id: group.id,
+    transition: {
+      duration: 150, // أسرع (كان 200 مللي ثانية)
+      easing: "cubic-bezier(0.2, 0, 0.4, 1)" // تسارع أكبر في البداية للحركة
+    }
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    boxShadow: isDragging ? '0 0 10px #aaa' : undefined,
+    boxShadow: isDragging ? '0 5px 15px rgba(0, 0, 0, 0.15)' : undefined, // improved shadow
     minWidth: '300px',
     margin: '8px',
     userSelect: 'none',
     background: isDragging ? '#f9fafb' : undefined,
     zIndex: isDragging ? 100 : undefined,
+    opacity: isDragging ? 0.9 : 1, // slight opacity during drag for better feedback
+    scale: isDragging ? 1.02 : 1, // slight scale effect during drag
   };
 
   return (
-    <div ref={setNodeRef} style={{ ...style, userSelect: 'none' as any }} {...attributes}>
+    <div 
+      ref={setNodeRef} 
+      style={{ ...style, userSelect: 'none' as any }} 
+      {...attributes}
+      className={`transition-all duration-150 ${isDragging ? 'rotate-1' : ''}`}
+    >
       <GroupCard
         group={group}
         onEdit={onEdit}
         onDelete={onDelete}
         dragHandleProps={listeners}
+        isDragging={isDragging}
       />
     </div>
   );

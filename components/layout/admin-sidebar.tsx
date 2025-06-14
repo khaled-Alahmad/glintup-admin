@@ -76,17 +76,19 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     const loadUserPermissions = async () => {
-      // Always fetch fresh permissions on component mount/page refresh
-      await fetchAndUpdatePermissions();
+      // Check if permissions are already stored in localStorage
+      const storedPermissions = localStorage.getItem('userPermissions');
 
-      // You can still use localStorage as a fallback if API request fails
-      if (userPermissions.length === 0) {
-        const storedPermissions = localStorage.getItem('userPermissions');
-        if (storedPermissions) {
-          setUserPermissions(JSON.parse(storedPermissions));
-        }
+      if (storedPermissions) {
+        // If permissions are already stored, use them
+        setUserPermissions(JSON.parse(storedPermissions));
+        setIsLoading(false);
+      } else {
+        // If not, fetch them from the server
+        await fetchAndUpdatePermissions();
       }
     };
 

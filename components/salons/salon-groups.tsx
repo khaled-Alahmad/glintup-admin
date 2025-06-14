@@ -75,25 +75,48 @@ function SortableGroupRow({ group, onEdit, onDelete }: { group: SalonGroup, onEd
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: group.id });
+  } = useSortable({
+    id: group.id,
+    transition: {
+      duration: 150, // أسرع حركة (كانت افتراضيًا 250 مللي ثانية)
+      easing: "cubic-bezier(0.2, 0, 0.4, 1)" // تسارع أكبر في البداية للحركة
+    }
+  });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     background: isDragging ? '#f9fafb' : undefined,
     zIndex: isDragging ? 100 : undefined,
+    opacity: isDragging ? 0.9 : 1, // لشفافية خفيفة أثناء السحب
+    boxShadow: isDragging ? '0 5px 15px rgba(0, 0, 0, 0.15)' : undefined, // ظل أفضل
   };
+
   return (
-    <TableRow ref={setNodeRef} style={style} key={group.id} {...attributes}>
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      key={group.id}
+      {...attributes}
+      className={`transition-all duration-150 ${isDragging ? 'bg-primary/5' : 'hover:bg-muted/50'}`}
+    >
       <TableCell className="font-medium flex items-center gap-2">
         <div
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 transition border text-center bg-white shadow mr-2"
+          className={`cursor-grab active:cursor-grabbing p-1.5 rounded-md transition-all duration-100
+            ${isDragging
+              ? 'bg-primary/15 text-primary rotate-1 scale-110'
+              : 'hover:bg-primary/10 hover:text-primary hover:scale-105'
+            } border text-center bg-white shadow mr-2`}
           title="اسحب لتحريك المجموعة"
           style={{ userSelect: 'none' }}
         >
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="6" r="1.5" /><circle cx="5" cy="10" r="1.5" /><circle cx="5" cy="14" r="1.5" /><circle cx="10" cy="6" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="10" cy="14" r="1.5" /></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2ZM6 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2ZM18 16c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2ZM6 16c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2Z" />
+            <path d="M6 16v4M6 8v4M18 16v4M18 8v4M6 12h12" strokeDasharray={isDragging ? "1 3" : "0"} />
+          </svg>
         </div>
-        {group.name.ar}
+        <span className={`${isDragging ? 'font-bold text-primary' : ''}`}>{group.name.ar}</span>
       </TableCell>
       {group.orders !== undefined && <TableCell>{group.orders}</TableCell>}
       <TableCell>{new Date(group.created_at).toLocaleDateString("ar-EG")}</TableCell>
@@ -103,6 +126,7 @@ function SortableGroupRow({ group, onEdit, onDelete }: { group: SalonGroup, onEd
             variant="ghost"
             size="icon"
             onClick={onEdit}
+            className="hover:bg-blue-50 hover:text-blue-600 transition-colors"
           >
             <Edit className="h-4 w-4" />
             <span className="sr-only">تعديل</span>
@@ -111,6 +135,7 @@ function SortableGroupRow({ group, onEdit, onDelete }: { group: SalonGroup, onEd
             variant="ghost"
             size="icon"
             onClick={onDelete}
+            className="hover:bg-red-50 hover:text-red-600 transition-colors"
           >
             <Trash2 className="h-4 w-4 text-red-600" />
             <span className="sr-only">حذف</span>
@@ -138,10 +163,15 @@ export default function GroupsTab({ salonId }: GroupsTabProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentGroup, setCurrentGroup] = useState<SalonGroup | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // DnD-kit sensors (must be before any conditional return)
+  // DnD-kit sensors with improved responsiveness
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 2, // مسافة أقل لبدء السحب بشكل أسرع
+        tolerance: 3, // تسامح أقل لدقة أكبر
+        delay: 30, // تأخير أقل للاستجابة الأسرع
+      }
+    })
   );
   const [isDragging, setIsDragging] = useState(false);
 
@@ -278,32 +308,66 @@ export default function GroupsTab({ salonId }: GroupsTabProps) {
     // Navigate to the group members page
     window.location.href = `/admin/groups/${group.id}/members?salon_id=${salonId}`;
   };
-
-  // DnD reorder handler
+  // DnD reorder handler - Enhanced with animations and better user experience
   const handleDndKitDragEnd = async (event: any) => {
-    if (!event.active || !event.over) return;
-    const oldIndex = groups.findIndex((g) => g.id === event.active.id);
-    const newIndex = groups.findIndex((g) => g.id === event.over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
-    const newGroups = arrayMove(groups, oldIndex, newIndex);
+    if (!event.active || !event.over) {
+      setIsDragging(false);
+      return;
+    }
+
+    const { active, over } = event;
+    if (!over || active.id === over.id) {
+      setIsDragging(false);
+      return;
+    }
+
+    // Find indices and create the new array
+    const oldIndex = groups.findIndex((g) => g.id === active.id);
+    const newIndex = groups.findIndex((g) => g.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) {
+      setIsDragging(false);
+      return;
+    }
+
+    // Update UI immediately for better user experience
+    setGroups((prevGroups) => arrayMove([...prevGroups], oldIndex, newIndex));
+
     // تحديد orders الجديد (من العنصر الذي سنأخذ مكانه)
+    const newGroups = arrayMove([...groups], oldIndex, newIndex);
     let newOrdersValue: any = null;
     if (newIndex === 0 && newGroups.length > 1) {
       newOrdersValue = newGroups[1]?.orders ?? null;
     } else if (newIndex > 0) {
       newOrdersValue = newGroups[newIndex - 1]?.orders ?? null;
     }
+
     const reorderBody = { orders: newOrdersValue };
     try {
-      await addData(`admin/groups/${event.active.id}/reorder`, reorderBody);
-      setGroups(newGroups);
+      await addData(`admin/groups/${active.id}/reorder`, reorderBody);
       setIsDragging(false);
+      // toast({
+      //   title: "تم تحديث الترتيب",
+      //   description: "تم تحديث ترتيب المجموعات بنجاح",
+      //   variant: "default",
+      // });
     } catch (error) {
+      // Revert to original order on error
+      await fetchGroups(); // Reload from server
       toast({
         title: "خطأ في الترتيب",
         description: "حدث خطأ أثناء تحديث الترتيب",
         variant: "destructive",
       });
+      setIsDragging(false);
+    }
+  };
+
+  // عند بدء السحب - with feedback
+  const handleDragStart = () => {
+    setIsDragging(true);
+    // Add haptic feedback if available
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50); // اهتزاز خفيف على الأجهزة المحمولة
     }
   };
 
@@ -349,47 +413,50 @@ export default function GroupsTab({ salonId }: GroupsTabProps) {
             إضافة مجموعة جديدة
           </Button>
         </div>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDndKitDragEnd}
-          onDragStart={() => setIsDragging(true)}
+      ) : (<DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDndKitDragEnd}
+        onDragStart={handleDragStart}
+        measuring={{ droppable: { strategy: "rects" } }}
+      >
+        <SortableContext
+          items={groups.map((g) => g.id)}
+          strategy={verticalListSortingStrategy}
         >
-          <SortableContext
-            items={groups.map((g) => g.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="rounded-md border bg-white">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>اسم المجموعة</TableHead>
-                    {groups.some(g => g.orders !== undefined) && <TableHead>الترتيب</TableHead>}
-                    <TableHead>تاريخ الإنشاء</TableHead>
-                    <TableHead>إجراءات</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {groups.map((group) => (
-                    <SortableGroupRow
-                      key={group.id}
-                      group={group}
-                      onEdit={() => {
-                        setCurrentGroup(group);
-                        setIsEditDialogOpen(true);
-                      }}
-                      onDelete={() => {
-                        setCurrentGroup(group);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </SortableContext>
-        </DndContext>
+          <div className={`rounded-md border bg-white relative ${isDragging ? 'cursor-grabbing' : ''}`}>
+            {isDragging && (
+              <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-primary/30 bg-primary/5 rounded-md"></div>
+            )}
+            <Table>
+              <TableHeader>
+                <TableRow className={isDragging ? 'relative z-10 bg-white' : ''}>
+                  <TableHead>اسم المجموعة</TableHead>
+                  {groups.some(g => g.orders !== undefined) && <TableHead>الترتيب</TableHead>}
+                  <TableHead>تاريخ الإنشاء</TableHead>
+                  <TableHead>إجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {groups.map((group) => (
+                  <SortableGroupRow
+                    key={group.id}
+                    group={group}
+                    onEdit={() => {
+                      setCurrentGroup(group);
+                      setIsEditDialogOpen(true);
+                    }}
+                    onDelete={() => {
+                      setCurrentGroup(group);
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </SortableContext>
+      </DndContext>
       )}
 
       {!isLoading && groups.length > 0 && totalPages > 1 && (
