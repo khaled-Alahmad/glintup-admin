@@ -29,11 +29,49 @@ import { fetchData, handleLogout } from "@/lib/apiHelper";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
+interface AdminProfileData {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  balance: number;
+  full_phone: string;
+  gender: string;
+  birth_date: string;
+  age: string;
+  avatar: string | null;
+  phone_code: string;
+  phone: string;
+  email: string;
+  email_offers: boolean;
+  role: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  otp_expire_at: string | null;
+  notes: string;
+  admin_permissions: Array<{
+    id: number;
+    name: {
+      en: string;
+      ar: string;
+    };
+    key: string;
+    order: number | null;
+    created_at: string;
+  }>;
+  register_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function AdminProfile() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<AdminProfileData | null>(null);
 
   // نموذج للأنشطة (سيتم استبداله بـ API لاحقًا)
   const activities = [
@@ -237,8 +275,7 @@ export default function AdminProfile() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {profile.admin_permissions &&
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">                    {profile.admin_permissions &&
                     profile.admin_permissions.length > 0 ? (
                       profile.admin_permissions.map((permission: any) => (
                         <div
@@ -246,7 +283,7 @@ export default function AdminProfile() {
                           className="flex items-center gap-2 p-2 rounded-md border"
                         >
                           <Shield className="h-4 w-4 text-primary" />
-                          <span>{permission.name.ar.ar}</span>
+                          <span>{permission.name.ar}</span>
                         </div>
                       ))
                     ) : (

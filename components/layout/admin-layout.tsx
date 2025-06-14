@@ -5,7 +5,7 @@ import type React from "react";
 import { Suspense, useEffect, useState } from "react";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Button } from "@/components/ui/button";
-import { Bell, DoorClosed, DoorOpen, LogOutIcon, Menu, Search } from "lucide-react";
+import { Bell, DoorClosed, DoorOpen, LogOutIcon, Menu, Search, Settings, User } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -34,6 +34,14 @@ interface Notification {
   created_at: string;
 }
 
+interface UserProfile {
+  id: number;
+  full_name: string;
+  email: string;
+  avatar: string | null;
+  role: string;
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -41,6 +49,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetchData("general/profile");
+        if (response.success) {
+          setUserProfile({
+            id: response.data.id,
+            full_name: response.data.full_name,
+            email: response.data.email,
+            avatar: response.data.avatar,
+            role: response.data.role
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
   useEffect(() => {
     const fetchNotifications = async () => {
       setIsLoading(true);
@@ -227,9 +257,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     >
                       <div className="flex w-full items-start gap-2">
                         <div
-                          className={`h-2 w-2 mt-1.5 rounded-full ${
-                            notification.is_read ? "bg-gray-300" : "bg-blue-500"
-                          } flex-shrink-0`}
+                          className={`h-2 w-2 mt-1.5 rounded-full ${notification.is_read ? "bg-gray-300" : "bg-blue-500"
+                            } flex-shrink-0`}
                         ></div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">
@@ -276,45 +305,76 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {/* Logout Button with Confirm Modal */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8"
-              onClick={() => setShowLogoutModal(true)}
-            >
-              <span className="mr-2">
-              <LogOutIcon className="me-2" />
-              </span>
-            </Button>
+
+            {/* User Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-8 w-8 border cursor-pointer">
+                  <AvatarImage src={userProfile?.avatar || "/placeholder-user.jpg"} alt={userProfile?.full_name || "User"} />
+                  <AvatarFallback>{userProfile?.full_name?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+                {/* <div className="hidden md:flex flex-col items-start">
+                    <span className="text-sm font-medium">{userProfile?.full_name || "Loading..."}</span>
+                    <span className="text-xs text-muted-foreground">{userProfile?.email || ""}</span>
+                  </div> */}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuLabel className="flex flex-col gap-1 pt-2 pb-3">
+                  <span>{userProfile?.full_name}</span>
+                  <span className="font-normal text-xs text-muted-foreground">{userProfile?.email}</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer flex items-center">
+                    <User className="ml-2 h-4 w-4" />
+                    <span>الملف الشخصي</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer flex items-center">
+                    <Settings className="ml-2 h-4 w-4" />
+                    <span>الإعدادات</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setShowLogoutModal(true)}
+                  className="cursor-pointer text-red-500 focus:text-red-500 flex items-center"
+                >
+                  <LogOutIcon className="ml-2 h-4 w-4" />
+                  <span>تسجيل الخروج</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {/* Logout button moved to user dropdown */}
             {/* Confirm Logout Modal */}
             {showLogoutModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-xs">
-                <h2 className="text-lg font-semibold mb-2 text-center">تأكيد تسجيل الخروج</h2>
-                <p className="text-sm text-muted-foreground mb-4 text-center">
-                هل أنت متأكد أنك تريد تسجيل الخروج؟
-                </p>
-                <div className="flex justify-between gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowLogoutModal(false)}
-                >
-                  إلغاء
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => {
-                  setShowLogoutModal(false);
-                  handleLogoutClick();
-                  }}
-                >
-                  تسجيل الخروج
-                </Button>
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-xs">
+                  <h2 className="text-lg font-semibold mb-2 text-center">تأكيد تسجيل الخروج</h2>
+                  <p className="text-sm text-muted-foreground mb-4 text-center">
+                    هل أنت متأكد أنك تريد تسجيل الخروج؟
+                  </p>
+                  <div className="flex justify-between gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setShowLogoutModal(false)}
+                    >
+                      إلغاء
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => {
+                        setShowLogoutModal(false);
+                        handleLogoutClick();
+                      }}
+                    >
+                      تسجيل الخروج
+                    </Button>
+                  </div>
                 </div>
-              </div>
               </div>
             )}
           </div>

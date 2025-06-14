@@ -42,14 +42,19 @@ export default function EditAdminProfile() {
   const [profile, setProfile] = useState<any>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [formData, setFormData] = useState({
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
     full_name: "",
     email: "",
     phone: "",
+    phone_code: "",
+    gender: "",
+    birth_date: "",
     role: "",
     address: "",
     image_name: "",
+    email_offers: false
   });
 
   // Cargar datos del perfil desde la API
@@ -60,14 +65,19 @@ export default function EditAdminProfile() {
         const response = await fetchData("general/profile");
         if (response.success) {
           const profileData = response.data;
-          setProfile(profileData);
-          setFormData({
+          setProfile(profileData);          setFormData({
+            first_name: profileData.first_name || "",
+            last_name: profileData.last_name || "",
             full_name: profileData.full_name || "",
             email: profileData.email || "",
-            phone: profileData.full_phone || "",
+            phone: profileData.phone || "",
+            phone_code: profileData.phone_code || "",
+            gender: profileData.gender || "",
+            birth_date: profileData.birth_date || "",
             role: profileData.role || "",
             address: profileData.address || "",
             image_name: profileData.avatar || "",
+            email_offers: profileData.email_offers || false
           });
           setAvatarPreview(
             profileData.avatar || "/placeholder.svg?height=128&width=128"
@@ -249,23 +259,40 @@ export default function EditAdminProfile() {
                 <CardTitle>المعلومات الشخصية</CardTitle>
                 <CardDescription>تعديل معلوماتك الشخصية</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CardContent className="space-y-6">                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="full_name">
-                      الاسم <span className="text-red-500">*</span>
+                    <Label htmlFor="first_name">
+                      الاسم الأول <span className="text-red-500">*</span>
                     </Label>
                     <div className="relative">
                       <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        id="full_name"
-                        value={formData.full_name}
+                        id="first_name"
+                        value={formData.first_name}
                         onChange={handleInputChange}
                         className="pr-9"
                         required
                       />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">
+                      الاسم الأخير <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="last_name"
+                        value={formData.last_name}
+                        onChange={handleInputChange}
+                        className="pr-9"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="email">
                       البريد الإلكتروني <span className="text-red-500">*</span>
@@ -282,9 +309,19 @@ export default function EditAdminProfile() {
                       />
                     </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="birth_date">
+                      تاريخ الميلاد
+                    </Label>
+                    <Input
+                      id="birth_date"
+                      type="date"
+                      value={formData.birth_date}
+                      onChange={handleInputChange}
+                      className="pr-9"
+                    />
+                  </div>
+                </div>                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="phone">رقم الهاتف</Label>
                     <div className="phone-input-container">
@@ -325,9 +362,33 @@ export default function EditAdminProfile() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role">الدور الوظيفي</Label>
-                    <Input id="role" value={formData.role} readOnly disabled />
+                    <Label htmlFor="gender">الجنس</Label>
+                    <select 
+                      id="gender" 
+                      value={formData.gender}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                    >
+                      <option value="">اختر الجنس</option>
+                      <option value="male">ذكر</option>
+                      <option value="female">أنثى</option>
+                    </select>
                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="role">الدور الوظيفي</Label>
+                    <Input id="role" value={formData.role === 'admin' ? 'مدير النظام' : formData.role} readOnly disabled />
+                  </div>
+                  {/* <div className="flex items-center space-x-2 space-x-reverse">
+                    <Switch 
+                      id="email_offers" 
+                      checked={formData.email_offers} 
+                      onCheckedChange={(checked) => setFormData({...formData, email_offers: checked})}
+                    />
+                    <Label htmlFor="email_offers">استلام إشعارات البريد الإلكتروني</Label>
+                  </div> */}
                 </div>
 
                 <div className="space-y-2">
