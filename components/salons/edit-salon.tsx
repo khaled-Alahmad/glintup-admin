@@ -50,6 +50,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SalonBankInfo } from "@/components/salons/salon-bank-info";
 import {
   Command,
   CommandEmpty,
@@ -182,12 +183,17 @@ export default function EditSalon({ salonId }: EditSalonProps) {
   const [imagesToRemove, setImagesToRemove] = useState<number[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [salonData, setSalonData] = useState<any>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [salonData, setSalonData] = useState<any>(null); const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoText, setLogoText] = useState<string | null>(null);
 
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+
+  // Bank info and documents related files
+  const [servicesListFile, setServicesListFile] = useState<File | null>(null);
+  const [tradeLicenseFile, setTradeLicenseFile] = useState<File | null>(null);
+  const [vatCertificateFile, setVatCertificateFile] = useState<File | null>(null);
+  const [bankAccountCertificateFile, setBankAccountCertificateFile] = useState<File | null>(null);
   const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [availableDays, setAvailableDays] = useState<string[]>(DAYS_OF_WEEK);
@@ -408,10 +414,6 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
       await Promise.all(
         workingHoursData.map(async (hour) => {
-          const hoursResponse = await updateData(
-            `admin/working-hours/${hour.id}`,
-            hour
-          );
         })
       );
       const salonResponse = await updateData(
@@ -623,7 +625,6 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       }
     }
   };
-
   const handleSubmitBasic = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -665,6 +666,53 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       toast({
         title: "خطأ في التحديث",
         description: "حدث خطأ أثناء تحديث بيانات المزود",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmitBank = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    try {
+      setIsLoading(true);
+
+      if (!salonData) {
+        throw new Error("بيانات المزود غير متوفرة");
+      }
+
+      const updateDataToSend = {
+        service_location: salonData.service_location,
+        bank_name: salonData.bank_name,
+        bank_account_number: salonData.bank_account_number,
+        bank_account_holder_name: salonData.bank_account_holder_name,
+        bank_account_iban: salonData.bank_account_iban,
+        vat_number: salonData.vat_number,
+        services_list: salonData.services_list,
+        trade_license: salonData.trade_license,
+        vat_certificate: salonData.vat_certificate,
+        bank_account_certificate: salonData.bank_account_certificate,
+      };
+
+      const response = await updateData(
+        `admin/salons/${salonId}`,
+        updateDataToSend
+      );
+
+      if (response.success) {
+        toast({
+          title: "تم التحديث بنجاح",
+          description: "تم تحديث بيانات البنك والمستندات بنجاح",
+        });
+        router.push(`/salons/${salonId}`);
+      }
+    } catch (error) {
+      console.error("Failed to update salon bank info:", error);
+      toast({
+        title: "خطأ في التحديث",
+        description: "حدث خطأ أثناء تحديث بيانات البنك والمستندات",
         variant: "destructive",
       });
     } finally {
@@ -860,13 +908,42 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       </div>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic">معلومات أساسية</TabsTrigger>
           <TabsTrigger value="contact">معلومات الاتصال</TabsTrigger>
           <TabsTrigger value="media">الصور والوسائط</TabsTrigger>
+          {/* السجل والبنك */}
+          <TabsTrigger value="bank">السجل والبنك</TabsTrigger>
           {/* <TabsTrigger value="services">الخدمات</TabsTrigger>
           <TabsTrigger value="collections">المجموعات</TabsTrigger> */}
         </TabsList>
+        <TabsContent value="bank" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>معلومات الخدمة والبنك</CardTitle>
+              <CardDescription>تعديل معلومات الخدمة والبنك والملفات الرسمية</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SalonBankInfo
+                formData={salonData || {}}
+                setFormData={setSalonData}
+                servicesListFile={servicesListFile}
+                setServicesListFile={setServicesListFile}
+                tradeLicenseFile={tradeLicenseFile}
+                setTradeLicenseFile={setTradeLicenseFile}
+                vatCertificateFile={vatCertificateFile}
+                setVatCertificateFile={setVatCertificateFile}
+                bankAccountCertificateFile={bankAccountCertificateFile}
+                setBankAccountCertificateFile={setBankAccountCertificateFile}
+              />
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button onClick={handleSubmitBank} disabled={isLoading}>
+                {isLoading ? "جاري الحفظ..." : "حفظ التغييرات"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="basic" className="mt-4">
           <form onSubmit={handleSubmitBasic}>
@@ -1049,7 +1126,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       : "يمكن أن تكون الخدمة متاحة للمنزل أو غير متاحة فقط"}
                   </p>
                 </div> */}
-                
+
 
                 <Separator />
 
@@ -1272,7 +1349,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                               if (longitudeInput)
                                 longitudeInput.value = longitude;
                             },
-                            (error) => {
+                            () => {
                               toast({
                                 title: "تعذر الحصول على الموقع",
                                 description:

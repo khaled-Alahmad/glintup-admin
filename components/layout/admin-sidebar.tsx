@@ -50,6 +50,10 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
         const permissionKeys = response.data?.admin_permissions.map(
           (permission: any) => permission.key
         );
+        console.log("Fetched permissions:", permissionKeys)
+        console.log("User permissions:", response.data?.admin_permissions);
+        ;
+
         // Store permissions in localStorage
         localStorage.setItem('userPermissions', JSON.stringify(permissionKeys));
         setUserPermissions(permissionKeys);
@@ -217,7 +221,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
   ];
 
   // Filter links based on user permissions
-  console.log("userPermissions:", userPermissions);
+  // console.log("userPermissions:", userPermissions);
 
   // Show all links if user has no permissions data loaded yet or during loading
   const links =
