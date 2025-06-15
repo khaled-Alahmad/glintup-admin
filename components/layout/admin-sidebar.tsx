@@ -128,7 +128,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
     },
     // salon-menu-requests
     {
-      name: "طلبات القائمة",
+      name: "طلبات تعبئة قائمة الخدمات",
       href: "/salon-menu-requests",
       icon: FileText,
       active: pathname.startsWith("/salon-menu-requests"),

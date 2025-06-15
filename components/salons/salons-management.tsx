@@ -48,9 +48,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addData, fetchData, updateData } from "@/lib/apiHelper";
-import { useToast } from "../ui/use-toast";
 import { PaginationWithInfo } from "../ui/pagination-with-info";
 import { Skeleton } from "../ui/skeleton";
+import { da } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 export default function SalonsManagement() {
   const [salons, setSalons] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,11 +107,13 @@ export default function SalonsManagement() {
   const updateSalonStatus = async (
     salonId: number,
     status: string,
-    reason?: string
+    reason?: string,
+    data?: { reason?: string; duration?: string }
   ) => {
     try {
       const response = await updateData(`admin/salons/${salonId}`, {
-        is_active: status === "نشط" ? "1" : "0",
+        is_active: status === "نشط" ? 1 : 0,
+        data: data || {},
         reason,
       });
       if (response.success) {
@@ -154,16 +157,16 @@ export default function SalonsManagement() {
   // })
 
   const getStatusBadge = (status: boolean, isApproved: boolean) => {
-    if (!isApproved) {
-      return (
-        <Badge
-          variant="outline"
-          className="bg-amber-50 text-amber-700 border-amber-200"
-        >
-          قيد المراجعة
-        </Badge>
-      );
-    }
+    // if (!isApproved) {
+    //   return (
+    //     <Badge
+    //       variant="outline"
+    //       className="bg-amber-50 text-amber-700 border-amber-200"
+    //     >
+    //       قيد المراجعة
+    //     </Badge>
+    //   );
+    // }
     switch (status) {
       case true:
         return (
@@ -304,12 +307,12 @@ export default function SalonsManagement() {
                           {salon.type === "clinic"
                             ? "عيادة"
                             : salon.type === "salon"
-                            ? "مزود"
-                            : salon.type === "home_service"
-                            ? "خدمة منزلية"
-                            : salon.type === "beautician"
-                            ? "أخصائية تجميل"
-                            : salon.type}
+                              ? "مزود"
+                              : salon.type === "home_service"
+                                ? "خدمة منزلية"
+                                : salon.type === "beautician"
+                                  ? "أخصائية تجميل"
+                                  : salon.type}
                         </TableCell>
                         <TableCell>
                           {salon.city_street_name || salon.address}
@@ -379,35 +382,25 @@ export default function SalonsManagement() {
                                 إرسال إشعار
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              {salon.status === "نشط" ? (
+                              {salon.is_active === true ? (
                                 <DropdownMenuItem
-                                  className="text-amber-600 cursor-pointer"
+                                  className="text-red-600 cursor-pointer"
                                   onClick={() => {
                                     setSelectedSalon(salon);
-                                    setShowSuspendDialog(true);
+                                    setShowBanDialog(true);
                                   }}
                                 >
-                                  تعليق المزود
+                                  حظر المزود
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    updateSalonStatus(salon.id, "نشط")
-                                  }
+                                  onClick={() => updateSalonStatus(salon.id, "نشط")}
                                   className="text-green-600 cursor-pointer"
                                 >
                                   تفعيل المزود
                                 </DropdownMenuItem>
                               )}
-                              <DropdownMenuItem
-                                className="text-red-600 cursor-pointer"
-                                onClick={() => {
-                                  setSelectedSalon(salon);
-                                  setShowBanDialog(true);
-                                }}
-                              >
-                                حظر المزود
-                              </DropdownMenuItem>
+
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -554,7 +547,24 @@ export default function SalonsManagement() {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => setShowSuspendDialog(false)}
+              onClick={() => {
+                if (selectedSalon) {
+                  const reasonEl = document.getElementById("suspend-reason") as HTMLTextAreaElement;
+                  const durationEl = document.getElementById("suspend-duration") as HTMLSelectElement;
+
+                  updateSalonStatus(
+                    selectedSalon.id,
+                    "غير نشط",
+                    reasonEl?.value,
+                    {
+                      reason: reasonEl?.value,
+                      duration: durationEl?.value
+                    }
+                  );
+
+                  setShowSuspendDialog(false);
+                }
+              }}
             >
               تعليق المزود
             </Button>
@@ -575,16 +585,17 @@ export default function SalonsManagement() {
                   `admin/salons/${selectedSalon.id}`,
                   {
                     is_active: 0,
-                    message: formData.get("ban-reason"),
+                    block_message: formData.get("ban-reason"),
                   }
                 );
 
                 if (response.success) {
                   toast({
                     title: "تم بنجاح",
-                    description: "تم إرسال الإشعار بنجاح",
+                    description: response.message || "تم حظر المزود بنجاح",
                   });
                   setShowBanDialog(false);
+                  fetchSalons(); // Refresh the salon list after banning
                 }
               } catch (error) {
                 console.error("Failed to send notification:", error);

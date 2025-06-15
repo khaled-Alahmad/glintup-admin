@@ -695,6 +695,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
         vat_certificate: salonData.vat_certificate,
         bank_account_certificate: salonData.bank_account_certificate,
       };
+      console.log("updateDataToSend", updateDataToSend);
 
       const response = await updateData(
         `admin/salons/${salonId}`,
@@ -955,7 +956,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
               <CardContent className="space-y-6">
                 {/* المعلومات الأساسية */}
                 <h3 className="text-lg font-medium">المعلومات الأساسية</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">
                       اسم المزود <span className="text-red-500">*</span>
@@ -967,9 +968,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       required
                     />
                   </div>
-                </div>
+                </div> */}
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="description">وصف المزود</Label>
                   <Textarea
                     id="description"
@@ -977,7 +978,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     defaultValue={salonData?.description}
                     rows={4}
                   />
-                </div>
+                </div> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="merchant_legal_name">
@@ -1042,6 +1043,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   />
                 </div>
                 <LoyaltyServiceSelector
+                  salonId={salonId}
                   defaultValue={salonData?.loyalty_service_id}
                   onChange={(value) => {
                     const loyaltyServiceId = value || "";
@@ -1067,7 +1069,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                       <SelectValue placeholder="اختر نوع المزود" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="salon">مزود</SelectItem>
+                      <SelectItem value="salon">صالون</SelectItem>
                       <SelectItem value="home_service">خدمة منزلية</SelectItem>
                       <SelectItem value="beautician">متخصص تجميل</SelectItem>
                       <SelectItem value="clinic">العيادات</SelectItem>

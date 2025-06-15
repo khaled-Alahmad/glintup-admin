@@ -566,7 +566,7 @@ export default function AddSalon() {
                     <SelectValue placeholder="اختر نوع المزود" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="salon">مزود</SelectItem>
+                    <SelectItem value="salon">صالون</SelectItem>
                     <SelectItem value="home_service">خدمة منزلية</SelectItem>
                     <SelectItem value="beautician">خبيرة تجميل</SelectItem>
                     <SelectItem value="clinic">عيادة</SelectItem>
@@ -1065,31 +1065,32 @@ export default function AddSalon() {
             {/* معلومات الخدمة والبنك */}
             <h3 className="text-lg font-medium">معلومات الخدمة والبنك</h3>
             <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="service_location">
-                  موقع تقديم الخدمة <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  required
-                  value={formData.service_location}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      service_location: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger id="service_location">
-                    <SelectValue placeholder="اختر موقع تقديم الخدمة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="in_center">في المركز</SelectItem>
-                    <SelectItem value="in_house">في المنزل</SelectItem>
-                    <SelectItem value="in_house_and_center">في المركز والمنزل</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
+              {formData.type === "beautician" && (
+                <div className="space-y-2">
+                  <Label htmlFor="service_location">
+                    موقع تقديم الخدمة <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    required
+                    value={formData.service_location}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        service_location: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger id="service_location">
+                      <SelectValue placeholder="اختر موقع تقديم الخدمة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in_center">في المركز</SelectItem>
+                      <SelectItem value="in_house">في المنزل</SelectItem>
+                      <SelectItem value="in_house_and_center">في المركز والمنزل</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="bank_name">

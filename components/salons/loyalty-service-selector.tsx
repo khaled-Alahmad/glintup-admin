@@ -6,6 +6,7 @@ import { fetchData } from "@/lib/apiHelper";
 
 interface LoyaltyServiceSelectorProps {
   defaultValue?: string;
+  salonId?: string;
   onChange: (serviceId: string | null) => void;
 }
 
@@ -19,7 +20,7 @@ interface LoyaltyService {
   currency: string;
 }
 
-export function LoyaltyServiceSelector({ defaultValue, onChange }: LoyaltyServiceSelectorProps) {
+export function LoyaltyServiceSelector({ defaultValue, onChange, salonId }: LoyaltyServiceSelectorProps) {
   const [initialOptions, setInitialOptions] = useState<Array<{ value: string; label: string }>>([]);
   const [selectedOption, setSelectedOption] = useState<{ value: string; label: string } | null>(null);
 
@@ -27,14 +28,14 @@ export function LoyaltyServiceSelector({ defaultValue, onChange }: LoyaltyServic
   useEffect(() => {
     const loadInitialServices = async () => {
       try {
-        const response = await fetchData('admin/services');
+        const response = await fetchData('admin/services?salon_id=' + salonId);
         if (response.success) {
           const options = response.data.map((service: LoyaltyService) => ({
             value: service.id.toString(),
             label: `${service.name.ar} - ${service.price} ${service.currency}`
           }));
           setInitialOptions(options);
-          
+
           // Si hay un valor por defecto, busca el servicio correspondiente
           if (defaultValue) {
             const defaultService = response.data.find(
@@ -52,7 +53,7 @@ export function LoyaltyServiceSelector({ defaultValue, onChange }: LoyaltyServic
         console.error("Error cargando servicios iniciales:", error);
       }
     };
-    
+
     loadInitialServices();
   }, [defaultValue]);
 
@@ -108,7 +109,7 @@ export function LoyaltyServiceSelector({ defaultValue, onChange }: LoyaltyServic
           isClearable
           isRtl={true}
         />
-        
+
         {/* Hidden input for form submission */}
         <Input
           id="loyalty_service_id"
