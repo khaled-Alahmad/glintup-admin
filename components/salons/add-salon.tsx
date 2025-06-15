@@ -534,7 +534,7 @@ export default function AddSalon() {
               />
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="bio">نبذة عن المزود</Label>
               <Textarea
                 id="bio"
@@ -545,7 +545,7 @@ export default function AddSalon() {
                 placeholder="أدخل نبذة عن المزود"
                 rows={4}
               />
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">

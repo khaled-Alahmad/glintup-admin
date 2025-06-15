@@ -713,7 +713,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       console.error("Failed to update salon bank info:", error);
       toast({
         title: "خطأ في التحديث",
-        description: "حدث خطأ أثناء تحديث بيانات البنك والمستندات",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء تحديث بيانات البنك والمستندات",
         variant: "destructive",
       });
     } finally {
@@ -1033,7 +1033,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="bio">نبذة عن المزود</Label>
                   <Textarea
                     id="bio"
@@ -1041,7 +1041,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     rows={3}
                     defaultValue={salonData?.bio}
                   />
-                </div>
+                </div> */}
                 <LoyaltyServiceSelector
                   salonId={salonId}
                   defaultValue={salonData?.loyalty_service_id}

@@ -199,6 +199,7 @@ export function SalonBankInfo({
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 services_list: response.data.file_name,
+                                                services_list_url: response.data.file_url,
                                             }));
                                         }
                                     } catch (error) {
@@ -275,6 +276,7 @@ export function SalonBankInfo({
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 trade_license: response.data.file_name,
+                                                trade_license_url: response.data.file_url,
                                             }));
                                         }
                                     } catch (error) {
@@ -293,7 +295,7 @@ export function SalonBankInfo({
                     {formData.trade_license && (
                         <div className="flex items-center mt-2">
                             <FileText className="h-3 w-5 text-gray-500 mr-2" />
-                            <a href={formData.trade_license_url} className="text-sm text-gray-700">
+                            <a href={formData.trade_license_url} target="_blank" className="text-sm text-gray-700">
                                 {formData.trade_license}
                             </a>
                             <Button
@@ -351,6 +353,7 @@ export function SalonBankInfo({
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 vat_certificate: response.data.file_name,
+                                                vat_certificate_url: response.data.file_url,
                                             }));
                                         }
                                     } catch (error) {
@@ -369,7 +372,7 @@ export function SalonBankInfo({
                     {formData.vat_certificate && (
                         <div className="flex items-center mt-2">
                             <FileText className="h-5 w-5 text-gray-500 mr-2" />
-                            <a href={formData.vat_certificate_url} className="text-sm text-gray-700">
+                            <a href={formData.vat_certificate_url} target="_blank" className="text-sm text-gray-700">
                                 {formData.vat_certificate}
                             </a>
                             <Button
@@ -427,6 +430,7 @@ export function SalonBankInfo({
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 bank_account_certificate: response.data.file_name,
+                                                bank_account_certificate_url: response.data.file_url,
                                             }));
                                         }
                                     } catch (error) {
@@ -446,7 +450,7 @@ export function SalonBankInfo({
                         .bank_account_certificate && (
                             <div className="flex items-center mt-2">
                                 <FileText className="h-5 w-5 text-gray-500 mr-2" />
-                                <a href={formData.bank_account_certificate_url} className="text-sm text-gray-700">
+                                <a href={formData.bank_account_certificate_url} target="_blank" className="text-sm text-gray-700">
                                     {formData.bank_account_certificate}
                                 </a>
                                 <Button
