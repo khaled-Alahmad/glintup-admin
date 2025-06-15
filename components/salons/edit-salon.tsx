@@ -305,7 +305,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       console.error("Error updating media:", error);
       toast({
         title: "خطأ في التحديث",
-        description: "حدث خطأ أثناء تحديث الصور",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء تحديث الوسائط",
         variant: "destructive",
       });
     } finally {
