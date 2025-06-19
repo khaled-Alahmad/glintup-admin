@@ -25,6 +25,8 @@ import { PaginationWithInfo } from "../ui/pagination-with-info"
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "../ui/date-range-picker"
 import { format } from "date-fns"
+import { Switch } from "@radix-ui/react-switch"
+import { Checkbox } from "@radix-ui/react-checkbox"
 interface Advertisement {
   id: number;
   salon_id: number | null;
@@ -54,79 +56,6 @@ interface Advertisement {
   updated_at: string;
 }
 
-const advertisements = [
-  {
-    id: "1",
-    title: "عروض الصيف المميزة",
-    image: "/placeholder.svg?height=80&width=160",
-    salonName: "مزود الأميرة",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    startDate: "2024-06-01",
-    endDate: "2024-08-31",
-    status: "نشط",
-    views: 1245,
-    clicks: 320,
-    amount: "1,200 د.إ",
-    position: "الصفحة الرئيسية",
-  },
-  {
-    id: "2",
-    title: "خصم 30% على جميع الخدمات",
-    image: "/placeholder.svg?height=80&width=160",
-    salonName: "مزود إليت",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    startDate: "2024-05-15",
-    endDate: "2024-06-15",
-    status: "نشط",
-    views: 980,
-    clicks: 210,
-    amount: "800 د.إ",
-    position: "صفحة المزودين",
-  },
-  {
-    id: "3",
-    title: "باقات العناية بالشعر",
-    image: "/placeholder.svg?height=80&width=160",
-    salonName: "مزود جلام",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    startDate: "2024-05-01",
-    endDate: "2024-05-30",
-    status: "منتهي",
-    views: 750,
-    clicks: 180,
-    amount: "600 د.إ",
-    position: "الصفحة الرئيسية",
-  },
-  {
-    id: "4",
-    title: "عروض العناية بالبشرة",
-    image: "/placeholder.svg?height=80&width=160",
-    salonName: "مزود مس بيوتي",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    startDate: "2024-06-10",
-    endDate: "2024-07-10",
-    status: "قيد المراجعة",
-    views: 0,
-    clicks: 0,
-    amount: "900 د.إ",
-    position: "صفحة المزودين",
-  },
-  {
-    id: "5",
-    title: "خصومات العيد",
-    image: "/placeholder.svg?height=80&width=160",
-    salonName: "مزود روز",
-    salonLogo: "/placeholder.svg?height=32&width=32",
-    startDate: "2024-06-15",
-    endDate: "2024-07-15",
-    status: "مرفوض",
-    views: 0,
-    clicks: 0,
-    amount: "750 د.إ",
-    position: "الصفحة الرئيسية",
-  },
-]
-
 export default function AdvertisementsManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
@@ -136,15 +65,18 @@ export default function AdvertisementsManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  // add filter for get_app_ads_available and it 1 or 0
+  const [availableFilter, setAvailableFilter] = useState(0);
+
   const [perPage, setPerPage] = useState(10);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   // Add fetch function
   const fetchAdvertisements = async () => {
     try {
       setIsLoading(true);
-      const searchParam = searchQuery ? `&search=${searchQuery}` : '';
+      let searchParam = searchQuery ? `&search=${searchQuery}` : '';
       const statusParam = statusFilter != "all" ? `&is_active=${statusFilter}` : '';
-      
+
       // Add date range params
       let dateFromParam = '';
       let dateToParam = '';
@@ -153,6 +85,10 @@ export default function AdvertisementsManagement() {
       }
       if (dateRange?.to) {
         dateToParam = `&valid_to=${format(dateRange.to, 'yyyy-MM-dd')}`;
+      }
+      if (availableFilter !== 0) {
+        searchParam += `&get_app_ads_available=${availableFilter}`;
+
       }
 
       const response = await fetchData(`admin/promotion-ads?page=${currentPage}&limit=${perPage}${searchParam}${statusParam}${dateFromParam}${dateToParam}`);
@@ -172,7 +108,7 @@ export default function AdvertisementsManagement() {
   // Add useEffect for fetching data
   useEffect(() => {
     fetchAdvertisements();
-  }, [currentPage, searchQuery, statusFilter, dateRange]);
+  }, [currentPage, searchQuery, statusFilter, dateRange, availableFilter, perPage]);
 
   const handleStatusUpdate = async (adId: number, action: Boolean) => {
     try {
@@ -290,36 +226,48 @@ export default function AdvertisementsManagement() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">            <div className="flex flex-col sm:flex-row gap-4 justify-between">
-              <div className="relative w-full sm:w-auto">
-                <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="بحث عن الإعلانات..."
-                  className="pr-9 w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col md:flex-row gap-2 items-end">
-                <DateRangePicker
-                  value={dateRange}
-                  onChange={setDateRange}
-                  placeholder="تصفية حسب فترة الإعلان"
-                />
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      <SelectValue placeholder="جميع الحالات" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="1">نشط</SelectItem>
-                    <SelectItem value="0">غير نشط</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="بحث عن الإعلانات..."
+                className="pr-9 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
+            <div className="flex flex-col md:flex-row gap-2 items-end">
+              <DateRangePicker
+                value={dateRange}
+                onChange={setDateRange}
+                placeholder="تصفية حسب فترة الإعلان"
+              />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <SelectValue placeholder="جميع الحالات" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="1">نشط</SelectItem>
+                  <SelectItem value="0">غير نشط</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={availableFilter.toString()} onValueChange={(value) => setAvailableFilter(parseInt(value))}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="ظهور الإعلانات" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">جميع الإعلانات</SelectItem>
+                  <SelectItem value="1">ظاهرة في التطبيق</SelectItem>
+                  {/* <SelectItem value="2">غير ظاهرة في التطبيق</SelectItem> */}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
             <div className="rounded-md border overflow-hidden">
               <Table>
