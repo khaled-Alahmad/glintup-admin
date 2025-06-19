@@ -14,6 +14,8 @@ import {
   Calendar,
   Clock,
   Edit,
+  FileText,
+  Download,
   Printer,
   Trash,
   XCircle,
@@ -105,6 +107,23 @@ interface Salon {
   location: string;
 }
 
+interface Invoice {
+  id: number;
+  code: string;
+  booking_id: number;
+  tax: number;
+  total_before_discount: number;
+  total_amount: number;
+  total_paid: number;
+  discount: number;
+  coupon_discount: string;
+  status: string;
+  invoice_url: string;
+  invoice_pdf_url: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface Booking {
   id: number;
   code: string;
@@ -119,6 +138,7 @@ interface Booking {
   user: User;
   salon: Salon;
   booking_services: BookingService[];
+  invoice: Invoice | null;
   created_at: string;
   updated_at: string;
 }
@@ -551,9 +571,7 @@ export default function AppointmentDetails({
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            {/* ملاحظات */}
+            </div>            {/* ملاحظات */}
             {/* Notes */}
             {(booking.notes || booking.salon_notes) && (
               <>
@@ -583,25 +601,182 @@ export default function AppointmentDetails({
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
 
-        {/* معلومات إضافية */}
-        <Card>
-          <CardHeader>
-            <CardTitle>معلومات إضافية</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">رقم الحجز</span>
-                <span className="font-medium">{booking.code}</span>
+            {/* الفاتورة */}
+            {booking.invoice && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">الفاتورة</h3>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(booking.invoice!.invoice_url, "_blank")}
+                        className="flex items-center gap-2"
+                      >
+                        <FileText className="h-4 w-4 ml-1" />
+                        عرض الفاتورة
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            // Fetch the file and convert to blob
+                            const response = await fetch(booking.invoice!.invoice_pdf_url);
+                            const blob = await response.blob();
+
+                            // Create a local URL for the blob
+                            const url = window.URL.createObjectURL(blob);
+
+                            // Create download link
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `invoice-${booking.invoice!.code}.pdf`;
+
+                            // Trigger download
+                            document.body.appendChild(link);
+                            link.click();
+
+                            // Clean up
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                          } catch (error) {
+                            console.error("Download failed:", error);
+                            toast({
+                              title: "خطأ في التنزيل",
+                              description: "فشل في تنزيل الفاتورة، يرجى المحاولة مرة أخرى",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4 ml-1" />
+                        تنزيل PDF
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          try {
+                            // Open PDF in a new window
+                            const printWindow = window.open(booking.invoice!.invoice_pdf_url, '_blank');
+                            
+                            if (printWindow) {
+                              // Wait a moment for the PDF to load then print
+                              printWindow.addEventListener('load', () => {
+                                printWindow.print();
+                              }, { once: true });
+                              
+                              // Fallback if load event doesn't fire
+                              setTimeout(() => {
+                                try {
+                                  printWindow.print();
+                                } catch (err) {
+                                  console.error("Print timeout failed:", err);
+                                }
+                              }, 1500);
+                            } else {
+                              toast({
+                                title: "تنبيه",
+                                description: "يرجى السماح بفتح النوافذ المنبثقة للطباعة",
+                                variant: "default",
+                              });
+                            }
+                          } catch (error) {
+                            console.error("Print failed:", error);
+                            toast({
+                              title: "خطأ في الطباعة",
+                              description: "فشل في طباعة الفاتورة، يرجى المحاولة مرة أخرى",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Printer className="h-4 w-4 ml-1" />
+                        طباعة
+                      </Button>
+                  </div>
+                </div>
+
+                <div className="bg-muted/20 p-4 rounded-lg space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">رقم الفاتورة:</span>
+                    <span className="font-medium">{booking.invoice.code}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">المبلغ الإجمالي:</span>
+                    <span className="font-medium">{booking.invoice.total_amount} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">المبلغ المدفوع:</span>
+                    <span className="font-medium">{booking.invoice.total_paid} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                  </div>
+                  {booking.invoice.discount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الخصم:</span>
+                      <span className="font-medium text-green-600">{booking.invoice.discount} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                    </div>
+                  )}
+                  {booking.invoice.coupon_discount && booking.invoice.coupon_discount !== "0 AED" && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">خصم الكوبون:</span>
+                      <span className="font-medium text-green-600">{booking.invoice.coupon_discount}</span>
+                    </div>
+                  )}
+                  {booking.invoice.tax > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الضريبة:</span>
+                      <span className="font-medium">{booking.invoice.tax} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="text-muted-foreground">حالة الفاتورة:</span>
+                    <Badge
+                      variant="outline"
+                      className={`
+                          ${booking.invoice.status === "paid" ? "bg-green-50 text-green-700 border-green-200" : "bg-amber-50 text-amber-700 border-amber-200"}
+                        `}
+                    >
+                      {booking.invoice.status === "paid" ? "مدفوع" : "غير مدفوع"}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">تاريخ الفاتورة:</span>
+                    <span className="font-medium">
+                      {new Date(booking.invoice.created_at).toLocaleDateString("ar-AE")}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">حالة الحجز</span>
-                <span>{getStatusBadge(booking.status)}</span>
-              </div>
-              {/* <div className="flex justify-between items-center">
+          </>
+            )}
+
+          {/* الفاتورة */}
+
+        </CardContent>
+      </Card>
+
+      {/* معلومات إضافية */}
+      <Card>
+        <CardHeader>
+          <CardTitle>معلومات إضافية</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">رقم الحجز</span>
+              <span className="font-medium">{booking.code}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">حالة الحجز</span>
+              <span>{getStatusBadge(booking.status)}</span>
+            </div>
+            {/* <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">حالة الدفع</span>
                 <Badge
                   variant="outline"
@@ -612,79 +787,79 @@ export default function AppointmentDetails({
                   {booking.payment_status === "paid" ? "مدفوع" : "غير مدفوع"}
                 </Badge>
               </div> */}
-              {/* <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">طريقة الدفع</span>
                 <span>{appointmentData.paymentMethod}</span>
               </div> */}
-              <Separator />
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">تاريخ الإنشاء</span>
-                <span>
-                  {new Date(booking.created_at).toLocaleDateString("en-US")}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">آخر تحديث</span>
-                <span>
-                  {new Date(booking.updated_at).toLocaleDateString("en-US")}
-                </span>
-              </div>
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">تاريخ الإنشاء</span>
+              <span>
+                {new Date(booking.created_at).toLocaleDateString("en-US")}
+              </span>
             </div>
-          </CardContent>
-          <CardFooter className="flex-col gap-2">
-            <Dialog
-              open={isStatusDialogOpen}
-              onOpenChange={setIsStatusDialogOpen}
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">آخر تحديث</span>
+              <span>
+                {new Date(booking.updated_at).toLocaleDateString("en-US")}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <Dialog
+            open={isStatusDialogOpen}
+            onOpenChange={setIsStatusDialogOpen}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>تأكيد تغيير الحالة</DialogTitle>
+                <DialogDescription>
+                  {pendingStatusChange === "cancelled" &&
+                    "هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟"}
+                  {pendingStatusChange === "confirmed" &&
+                    "هل تريد تأكيد هذا الحجز؟"}
+                  {pendingStatusChange === "completed" &&
+                    "هل تريد تحديد هذا الحجز كمكتمل؟"}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsStatusDialogOpen(false);
+                    setPendingStatusChange(null);
+                  }}
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  variant={
+                    pendingStatusChange === "cancelled"
+                      ? "destructive"
+                      : "default"
+                  }
+                  onClick={() => handleStatusChange(pendingStatusChange!)}
+                >
+                  تأكيد
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          {booking.status === "pending" && (
+            <Button
+              className="w-full"
+              variant="default"
+              onClick={() => {
+                setPendingStatusChange("confirmed");
+                setIsStatusDialogOpen(true);
+              }}
             >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>تأكيد تغيير الحالة</DialogTitle>
-                  <DialogDescription>
-                    {pendingStatusChange === "cancelled" &&
-                      "هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟"}
-                    {pendingStatusChange === "confirmed" &&
-                      "هل تريد تأكيد هذا الحجز؟"}
-                    {pendingStatusChange === "completed" &&
-                      "هل تريد تحديد هذا الحجز كمكتمل؟"}
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsStatusDialogOpen(false);
-                      setPendingStatusChange(null);
-                    }}
-                  >
-                    إلغاء
-                  </Button>
-                  <Button
-                    variant={
-                      pendingStatusChange === "cancelled"
-                        ? "destructive"
-                        : "default"
-                    }
-                    onClick={() => handleStatusChange(pendingStatusChange!)}
-                  >
-                    تأكيد
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            {booking.status === "pending" && (
-              <Button
-                className="w-full"
-                variant="default"
-                onClick={() => {
-                  setPendingStatusChange("confirmed");
-                  setIsStatusDialogOpen(true);
-                }}
-              >
-                تأكيد الحجز
-              </Button>
-            )}
-            {(booking.status === "pending" ||
-              booking.status === "confirmed") && (
+              تأكيد الحجز
+            </Button>
+          )}
+          {(booking.status === "pending" ||
+            booking.status === "confirmed") && (
               <Button
                 className="w-full"
                 variant="destructive"
@@ -696,7 +871,7 @@ export default function AppointmentDetails({
                 إلغاء الحجز
               </Button>
             )}
-            {/* {booking.status === "confirmed" && (
+          {/* {booking.status === "confirmed" && (
               <Button
                 className="w-full"
                 variant="default"
@@ -708,9 +883,9 @@ export default function AppointmentDetails({
                 تحديد كمكتمل
               </Button>
             )} */}
-          </CardFooter>
-        </Card>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
+    </div >
   );
 }
