@@ -373,7 +373,7 @@ export default function ReviewsManagement() {
             <div className="flex items-center">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               <span className="text-sm font-medium ml-1">
-                {reviewsInfo.average_rating ? reviewsInfo.average_rating.toFixed(1) : "0.0"}
+                {reviewsInfo.average_rating ? reviewsInfo.average_rating.toFixed(2) : "0.0"}
               </span>
             </div>
           </CardHeader>
