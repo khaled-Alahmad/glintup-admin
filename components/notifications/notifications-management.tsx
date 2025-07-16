@@ -331,7 +331,7 @@ export default function NotificationsManagement() {
   // تعيين الإشعار كمقروء
   const handleMarkAsRead = async (id: number) => {
     try {
-      const response = await updateData(`admin/notifications/${id}/read`, {});
+      const response = await addData(`general/notifications/${id}/read`, {});
       if (response.success) {
         toast({
           title: "نجاح",
@@ -509,7 +509,7 @@ export default function NotificationsManagement() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAllAsRead}
@@ -517,7 +517,7 @@ export default function NotificationsManagement() {
               >
                 <CheckCircle2 className="ml-2 h-4 w-4" />
                 تعيين الكل كمقروء
-              </Button>
+              </Button> */}
             </div>
           </div>
         </CardHeader>
