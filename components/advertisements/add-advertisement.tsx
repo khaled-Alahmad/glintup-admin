@@ -129,7 +129,7 @@ export default function AddAdvertisement() {
       formData.set('title[ar]', formData.get('title_ar') as string);
       formData.set('title[en]', formData.get('title_en') as string);
       formData.set('button_text[ar]', formData.get('description_ar') as string);
-      formData.set('button_text[en]', formData.get('title_en') as string);
+      formData.set('button_text[en]', formData.get('description_en') as string);
       formData.set('is_active', isActive ? '1' : '0');
       formData.set('status', status);
       if (uploadedImageName) {

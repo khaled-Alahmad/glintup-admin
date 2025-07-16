@@ -359,7 +359,7 @@ export default function AppointmentsManagement() {
                   />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <Button
+                  {/* <Button
                     variant="outline"
                     onClick={() =>
                       generateMonthlyBookingReport(bookings, selectedDateFrom)
@@ -368,7 +368,7 @@ export default function AppointmentsManagement() {
                   >
                     <FileText className="h-4 w-4" />
                     تصدير PDF
-                  </Button>
+                  </Button> */}
                   <DatePicker
                     selected={selectedDateFrom}
                     onSelect={(date) => {
