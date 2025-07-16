@@ -91,6 +91,7 @@ import GroupsTab from "./salon-groups";
 import { useToast } from "@/hooks/use-toast";
 import SalonActivityLogs from "./salon-activity-logs";
 import MenuRequestsTab from "./menu-requests-management";
+import { PhoneInput } from "react-international-phone";
 interface SalonPermission {
   id: number;
   name: {
@@ -728,7 +729,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         console.error("Error adding staff:", error);
         toast({
           title: "خطأ",
-          description: "فشل في إضافة الموظف",
+          description: error instanceof Error ? error.message : "حدث خطأ غير معروف",
           variant: "destructive",
         });
       }
@@ -946,7 +947,36 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       />
                     </div>
                   </div> */}
+                  {/* add phone by use PhoneInput */}
 
+          <div className="phone-input-container">
+                    <Label htmlFor="phone">رقم الهاتف</Label>
+                    <PhoneInput
+                      name="phone"
+                      defaultCountry="ae"
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        height: '40px',
+                        fontSize: '0.875rem',
+                        borderRadius: '0.375rem',
+                      }}
+                      onChange={(value) => {
+                        const input = document.querySelector(
+                          'input[name="phone"]'
+                        ) as HTMLInputElement;
+                        input.value = value;
+                      }}
+                      value=""
+                      className="w-full"
+
+                      inputProps={{
+                        required: true,
+                      }}
+                    />
+
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="gender">الجنس</Label>
