@@ -252,7 +252,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   notifications.map((notification, index) => (
                     <DropdownMenuItem
                       key={index}
-                      className="flex flex-col items-start py-2 px-4 cursor-pointer focus:bg-accent"
+                      className="flex flex-col items-start py-2 px-4 cursor-pointer hover:bg-accent focus:bg-accent"
                       onClick={() => handleMarkAsRead(notification.id)}
                     >
                       <div className="flex w-full items-start gap-2">
@@ -264,10 +264,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           <p className="text-sm font-medium">
                             {notification.title}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-medium">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs font-medium mt-1">
                             {new Date(notification.created_at).toLocaleString(
                               "ar-SA",
                               {
