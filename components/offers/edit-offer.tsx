@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Upload, Percent } from "lucide-react"
+import { ArrowLeft, Upload, Percent, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
@@ -56,7 +56,7 @@ export default function EditOffer({ offerId }: EditOfferProps) {
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
           <Link href={`/offers/${offerId}`}>
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">تعديل العرض</h1>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   AlertCircle,
   ArrowLeft,
+  ArrowRight,
   Calendar,
   Clock,
   Edit,
@@ -375,7 +376,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
           <Link href="/users">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
@@ -845,21 +846,21 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                             <TableCell>
                               {point.taken_at
                                 ? new Date(point.taken_at).toLocaleDateString(
-                                    "en-US"
-                                  )
+                                  "en-US"
+                                )
                                 : "-"}
                             </TableCell>
                             <TableCell>
                               {point.used_at
                                 ? new Date(point.used_at).toLocaleDateString(
-                                    "en-US"
-                                  )
+                                  "en-US"
+                                )
                                 : "-"}
                             </TableCell>
                             <TableCell>
                               {point.points >= 5 &&
-                              point.used_at &&
-                              point.free_service ? (
+                                point.used_at &&
+                                point.free_service ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="text-sm font-medium">
                                     {point.free_service.service.name.ar}

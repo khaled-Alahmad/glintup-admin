@@ -19,6 +19,7 @@ import {
   Printer,
   Trash,
   XCircle,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -343,7 +344,7 @@ export default function AppointmentDetails({
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
             <Link href="/appointments">
-              <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">

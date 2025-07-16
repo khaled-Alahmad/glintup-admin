@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, Upload, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Upload, X } from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -273,7 +273,7 @@ export default function AddSalon() {
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
           <Link href="/salons">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">

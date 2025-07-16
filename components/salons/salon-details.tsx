@@ -20,6 +20,7 @@ import {
   Eye,
   Pencil,
   Copy,
+  ArrowRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -2321,7 +2322,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" asChild>
           <Link href="/salons">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
@@ -3113,7 +3114,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <h3 className="text-sm font-medium text-muted-foreground">
                       رقم جهة الاتصال
                     </h3>
-                    <p>{salonData.contact_number}</p>
+                    <p style={{ unicodeBidi: "plaintext" }}>{salonData.contact_number}</p>
                   </div>
 
                   <div className="space-y-1">
@@ -3134,7 +3135,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     <h3 className="text-sm font-medium text-muted-foreground">
                       رقم جهة الأعمال
                     </h3>
-                    <p>{salonData.business_contact_number}</p>
+                    <p style={{ unicodeBidi: "plaintext" }}>{salonData.business_contact_number}</p>
                   </div>
 
                   <div className="space-y-1">
