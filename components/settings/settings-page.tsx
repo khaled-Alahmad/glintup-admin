@@ -306,8 +306,11 @@ export default function SettingsPage() {
             <nav className="flex flex-col space-y-1 px-2">
               <Button
                 variant={activeTab === "general" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "general" ? "" : "hover:bg-muted"
-                  }`}
+                className={`justify-start transition-colors duration-200 ${
+                  activeTab === "general" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary hover:text-accent-foreground"
+                }`}
                 onClick={() => setActiveTab("general")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -317,8 +320,11 @@ export default function SettingsPage() {
                 variant={
                   activeTab === "experience_artists" ? "default" : "ghost"
                 }
-                className={`justify-start ${activeTab === "general" ? "" : "hover:bg-muted"
-                  }`}
+                className={`justify-start transition-colors duration-200 ${
+                  activeTab === "experience_artists" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary hover:text-accent-foreground"
+                }`}
                 onClick={() => setActiveTab("experience_artists")}
               >
                 <Settings className="h-4 w-4 ml-2" />
@@ -326,8 +332,11 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "commissions" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "commissions" ? "" : "hover:bg-muted"
-                  }`}
+                className={`justify-start transition-colors duration-200 ${
+                  activeTab === "commissions" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary hover:text-accent-foreground"
+                }`}
                 onClick={() => setActiveTab("commissions")}
               >
                 <Percent className="h-4 w-4 ml-2" />
@@ -335,8 +344,11 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "app" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "app" ? "" : "hover:bg-muted"
-                  }`}
+                className={`justify-start transition-colors duration-200 ${
+                  activeTab === "app" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary hover:text-accent-foreground"
+                }`}
                 onClick={() => setActiveTab("app")}
               >
                 <Smartphone className="h-4 w-4 ml-2" />
@@ -344,8 +356,11 @@ export default function SettingsPage() {
               </Button>
               <Button
                 variant={activeTab === "social-media" ? "default" : "ghost"}
-                className={`justify-start ${activeTab === "social-media" ? "" : "hover:bg-muted"
-                  }`}
+                className={`justify-start transition-colors duration-200 ${
+                  activeTab === "social-media" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-primary hover:text-accent-foreground"
+                }`}
                 onClick={() => setActiveTab("social-media")}
               >
                 <Settings className="h-4 w-4 ml-2" />
