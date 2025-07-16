@@ -2039,6 +2039,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         setIconPreview("");
       }
     } catch (error) {
+      toast({
+        title: "خطأ في الإضافة",
+        description: error instanceof Error ? error.message : "حدث خطأ غير معروف",
+        variant: "destructive",
+      });
       console.error("Failed to add service:", error);
     }
   };
@@ -3697,198 +3702,167 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       </div>
       {/* مربع حوار إضافة خدمة جديدة */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>إضافة خدمة جديدة</DialogTitle>
-            <DialogDescription>أدخل تفاصيل الخدمة الجديدة</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleAddService}>
-            <div className="grid gap-4 py-4">
-              {/* <div className="space-y-2">
-                <Label htmlFor="salon_id">الصالون</Label>
-                <Select name="salon_id" defaultValue="5">
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="اختر الصالون" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <div className="flex items-center px-3 pb-2">
-                      <Search className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+          <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:max-w-[500px] w-[90vw] max-h-[80vh] bg-white rounded-lg shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] z-50 flex flex-col">
+            <DialogHeader className="px-6 pt-6 pb-2">
+              <DialogTitle>إضافة خدمة جديدة</DialogTitle>
+              <DialogDescription>أدخل تفاصيل الخدمة الجديدة</DialogDescription>
+            </DialogHeader>
+            <div className="overflow-y-auto px-6">
+              <form onSubmit={handleAddService}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name_ar">اسم الخدمة (عربي)</Label>
+                      <Input id="name_ar" name="name_ar" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="name_en">Service Name (English)</Label>
+                      <Input id="name_en" name="name_en" required />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="description_ar">وصف الخدمة (عربي)</Label>
+                      <Textarea
+                        id="description_ar"
+                        name="description_ar"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description_en">Description (English)</Label>
+                      <Textarea
+                        id="description_en"
+                        name="description_en"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="duration_minutes">المدة (بالدقائق)</Label>
                       <Input
-                        className="h-8"
-                        placeholder="ابحث عن صالون..."
-                        value={salonSearchTerm}
+                        id="duration_minutes"
+                        name="duration_minutes"
+                        type="number"
+                        min="1"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="price">السعر (د.إ)</Label>
+                      <Input
+                        id="price"
+                        name="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="capacity">عدد المقاعد</Label>
+                    <Input
+                      id="capacity"
+                      name="capacity"
+                      type="number"
+                      min="1"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">الفئة المستهدفة</Label>
+                    <Select name="gender" defaultValue="both">
+                      <SelectTrigger id="gender">
+                        <SelectValue placeholder="اختر الفئة المستهدفة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">رجال</SelectItem>
+                        <SelectItem value="female">نساء</SelectItem>
+                        <SelectItem value="both">الجميع</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    {salonData.types.includes("home_service") && (
+                      <>
+                        <Checkbox
+                          id="is_home_service"
+                          name="is_home_service"
+                          className="ml-2 h-4 w-4 text-muted-foreground"
+                        />
+                        <Label htmlFor="is_home_service">
+                          خدمة منزلية (Home Service)
+                        </Label>
+                      </>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {salonData.types.includes("beautician") && (
+                      <>
+                        <Checkbox
+                          id="is_beautician"
+                          name="is_beautician"
+                          className="ml-2 h-4 w-4 text-muted-foreground"
+                        />
+                        <Label htmlFor="is_beautician">
+                          خدمة خبيرة تجميل (Beautician Service)
+                        </Label>
+                      </>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="icon">أيقونة الخدمة</Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id="icon"
+                        name="icon"
+                        type="file"
+                        accept="image/*"
                         onChange={(e) => {
-                          setSalonSearchTerm(e.target.value);
-                          fetchSalons(e.target.value);
+                          const file = e.target.files?.[0];
+                          if (file) handleIconUpload(file);
                         }}
+                        className="flex-1"
                       />
+                      {iconPreview && (
+                        <div className="relative w-12 h-12">
+                          <img
+                            src={iconPreview}
+                            alt="Icon preview"
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                        </div>
+                      )}
                     </div>
-                    <SelectGroup>
-                      {salons.map((salon) => (
-                        <SelectItem key={salon.id} value={salon.id.toString()}>
-                          {salon.merchant_commercial_name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div> */}
-              {/* بخدمات الصالونات اذا كان الصالون يحتوي بشكل (فرعي) على خدمات منزلية ف هنا نضيف خيار ان الخدمة منزلية is_home_service */}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name_ar">اسم الخدمة (عربي)</Label>
-                  <Input id="name_ar" name="name_ar" required />
+                    <Input type="hidden" name="icon" value={uploadedIcon} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="name_en">Service Name (English)</Label>
-                  <Input id="name_en" name="name_en" required />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="description_ar">وصف الخدمة (عربي)</Label>
-                  <Textarea
-                    id="description_ar"
-                    name="description_ar"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description_en">Description (English)</Label>
-                  <Textarea
-                    id="description_en"
-                    name="description_en"
-                    required
-                  />
-                </div>
-              </div>
-              {/* <div className="space-y-2">
-                <Label htmlFor="icon">أيقونة الخدمة</Label>
-                <Input id="icon" name="icon" required />
-              </div> */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration_minutes">المدة (بالدقائق)</Label>
-                  <Input
-                    id="duration_minutes"
-                    name="duration_minutes"
-                    type="number"
-                    min="1"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price">السعر (د.إ)</Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-              </div>
-              {/* capacity */}
-              <div className="space-y-2">
-                <Label htmlFor="capacity">عدد المقاعد</Label>
-                <Input
-                  id="capacity"
-                  name="capacity"
-                  type="number"
-                  min="1"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="gender">الفئة المستهدفة</Label>
-                <Select name="gender" defaultValue="both">
-                  <SelectTrigger id="gender">
-                    <SelectValue placeholder="اختر الفئة المستهدفة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">رجال</SelectItem>
-                    <SelectItem value="female">نساء</SelectItem>
-                    <SelectItem value="both">الجميع</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                {salonData.types.includes("home_service") && (
-                  <>
-                    <Checkbox
-                      id="is_home_service"
-                      name="is_home_service"
-                      className="ml-2 h-4 w-4 text-muted-foreground"
-                    />
-                    <Label htmlFor="is_home_service">
-                      خدمة منزلية (Home Service)
-                    </Label>
-                  </>
-                )}
-              </div>
-              {/* بخدمات الصالونات اذا كان الصالون يحتوي بشكل (فرعي) على خبيرة تجميل ف هنا نضيف خيار ان الخدمة لخبيرة تجميل is_beautician */}
-              <div className="space-y-2">
-                {salonData.types.includes("beautician") && (
-                  <>
-                    <Checkbox
-                      id="is_beautician"
-                      name="is_beautician"
-                      className="ml-2 h-4 w-4 text-muted-foreground"
-                    />
-                    <Label htmlFor="is_beautician">
-                      خدمة خبيرة تجميل (Beautician Service)
-                    </Label>
-                  </>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="icon">أيقونة الخدمة</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id="icon"
-                    name="icon"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleIconUpload(file);
-                    }}
-                    className="flex-1"
-                  />
-                  {iconPreview && (
-                    <div className="relative w-12 h-12">
-                      <img
-                        src={iconPreview}
-                        alt="Icon preview"
-                        className="w-full h-full object-cover rounded-md"
-                      />
-                    </div>
-                  )}
-                </div>
-                <Input type="hidden" name="icon" value={uploadedIcon} />
-              </div>
+                <DialogFooter className="px-0 pb-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddDialogOpen(false)}
+                  >
+                    إلغاء
+                  </Button>
+                  <Button type="submit">إضافة الخدمة</Button>
+                </DialogFooter>
+              </form>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsAddDialogOpen(false)}
-              >
-                إلغاء
-              </Button>
-              <Button type="submit">إضافة الخدمة</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
+          </DialogContent>
+        </DialogPortal>
       </Dialog>
+
 
       {/* مربع حوار تعديل خدمة */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[80%]">
           <DialogHeader>
             <DialogTitle>تعديل الخدمة</DialogTitle>
             <DialogDescription>تعديل تفاصيل الخدمة</DialogDescription>
