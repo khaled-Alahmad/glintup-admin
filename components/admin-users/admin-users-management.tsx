@@ -126,9 +126,8 @@ import { se } from "date-fns/locale";
 interface AdminPermission {
   id: number;
   name: {
-    ar: {
-      ar: string;
-    };
+    ar: string;
+    en?: string;
   };
   key: string;
 }
@@ -148,15 +147,7 @@ const mockPermissions = [
   { id: 10, name: { ar: { ar: "الإعدادات" } }, key: "settings" },
 ];
 
-interface AdminPermission {
-  id: number;
-  name: {
-    ar: {
-      ar: string;
-    };
-  };
-  key: string;
-}
+// This interface is already defined above, so removing the duplicate declaration
 
 interface AdminUser {
   id: number;
@@ -266,8 +257,8 @@ export default function AdminUsersManagement() {
           selectedStatus == "active"
             ? 1
             : selectedStatus == "inactive"
-            ? 0
-            : undefined,
+              ? 0
+              : undefined,
         permissions:
           selectedPermissions.length > 0 ? selectedPermissions : undefined,
         ...filters,
@@ -304,8 +295,8 @@ export default function AdminUsersManagement() {
         selectedStatus == "active"
           ? 1
           : selectedStatus == "inactive"
-          ? 0
-          : undefined,
+            ? 0
+            : undefined,
       permissions:
         selectedPermissions.length > 0 ? selectedPermissions : undefined,
     });
@@ -567,7 +558,7 @@ export default function AdminUsersManagement() {
                           htmlFor={`permission-${permission.id}`}
                           className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          {permission.name.ar.ar}
+                          {permission.name.ar}
                         </label>
                       </div>
                     ))}
@@ -732,7 +723,7 @@ export default function AdminUsersManagement() {
                                   variant="outline"
                                   className="rounded-md"
                                 >
-                                  {permission.name.ar.ar}
+                                  {permission.name.ar}
                                 </Badge>
                               ))
                           )}
@@ -924,7 +915,7 @@ export default function AdminUsersManagement() {
                     {selectedUser.admin_permissions.map(
                       (permission: AdminPermission) => (
                         <Badge key={permission.id} variant="outline">
-                          {permission.name.ar.ar}
+                          {permission.name.ar}
                         </Badge>
                       )
                     )}
@@ -1064,7 +1055,7 @@ export default function AdminUsersManagement() {
                       className="flex flex-1 cursor-pointer items-center gap-2"
                     >
                       <span className="font-medium">
-                        {permission.name.ar.ar}
+                        {permission.name.ar}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         ({permission.key})
