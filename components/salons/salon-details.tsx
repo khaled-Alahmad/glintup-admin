@@ -3892,14 +3892,14 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
 
       {/* مربع حوار تعديل خدمة */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[80%]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>تعديل الخدمة</DialogTitle>
             <DialogDescription>تعديل تفاصيل الخدمة</DialogDescription>
           </DialogHeader>
           {editingService && (
-            <form onSubmit={handleEditService}>
-              <div className="grid gap-4 py-4">
+            <form onSubmit={handleEditService} className="flex flex-col flex-1 overflow-hidden">
+              <div className="grid gap-4 py-4 overflow-y-auto flex-1 px-1">
                 {/* <div className="space-y-2">
                   <Label htmlFor="salon_id">الصالون</Label>
                   <Select name="salon_id" defaultValue={editingService.salon_id.toString()}>
@@ -4111,7 +4111,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   />
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex-shrink-0 mt-4">
                 <Button
                   type="button"
                   variant="outline"

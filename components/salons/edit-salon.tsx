@@ -1045,11 +1045,11 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                 </div> */}
                 <LoyaltyServiceSelector
                   salonId={salonId}
-                  defaultValue={salonData?.loyalty_service_id}
+                  defaultValue={salonData?.loyalty_service?.id?.toString()}
                   onChange={(value) => {
                     const loyaltyServiceId = value || "";
                     const form = new FormData();
-                    form.append("loyalty_service_id", loyaltyServiceId);
+                    form.append("loyalty_service.id", loyaltyServiceId);
                     setSalonData((prev: any) => ({
                       ...prev,
                       loyalty_service_id: loyaltyServiceId,

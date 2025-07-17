@@ -154,21 +154,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       const response = await addData("admin/auth/logout", {});
       console.log("Logout response:", response);
 
-      // Show success message
-      if (response.success) {
+      // Show success message only if response is successful
+      if (response?.success) {
         toast({
           title: "تم تسجيل الخروج بنجاح",
           description: "شكرًا لك على استخدام خدمتنا. نتمنى لك يوماً رائعًا!",
           variant: "default",
         });
+        
+        // Delay logout to show toast message
+        setTimeout(() => {
+          handleLogout();
+        }, 1000);
+      } else {
+        // If no success response, logout immediately
+        handleLogout();
       }
-
-      // Always call handleLogout regardless of API response
-      // This function will clear localStorage and cookies, and redirect to login
-      handleLogout();
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if API call fails, attempt to log out locally
+      // If API call fails, attempt to log out locally immediately
       handleLogout();
     }
   };
