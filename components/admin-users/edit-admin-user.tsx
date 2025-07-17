@@ -597,7 +597,7 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
                           className="flex flex-1 cursor-pointer items-center gap-2"
                         >
                           <Shield className="h-4 w-4 text-muted-foreground" />
-                          <span>{permission.name.ar.ar}</span>
+                          <span>{permission.name.ar}</span>
                         </label>
                       </div>
                     ))}
