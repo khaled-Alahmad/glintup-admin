@@ -63,7 +63,7 @@ const Notification = ({
                     </div>
 
                     {/* Optional image */}
-                    {image && (
+                    {/* {image && (
                         <div className="mt-3">
                             <img
                                 src={image}
@@ -71,7 +71,7 @@ const Notification = ({
                                 className="w-full h-auto rounded-md"
                             />
                         </div>
-                    )}
+                    )} */}
                 </div>
             </div>
         </div>
