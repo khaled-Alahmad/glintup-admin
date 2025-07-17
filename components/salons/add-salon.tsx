@@ -188,7 +188,8 @@ export default function AddSalon() {
   };
 
   const removeGalleryImage = (index: number) => {
-    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== index));
+    setSalonImages(salonImages.filter((_, i) => i !== index));
+    setNewImages(newImages.filter((_, i) => i !== index));
   };
 
   const [servicesListFile, setServicesListFile] = useState<File | null>(null);
