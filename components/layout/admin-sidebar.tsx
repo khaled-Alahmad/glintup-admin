@@ -155,6 +155,13 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       active: pathname.startsWith("/gift-cards"),
       requiredPermission: "gift-cards",
     },
+    {
+      name: "الهدايا",
+      href: "/gifts",
+      icon: Gift,
+      active: pathname.startsWith("/gifts"),
+      requiredPermission: "gifts",
+    },
     // {
     //   name: "الأحداث",
     //   href: "/events",
