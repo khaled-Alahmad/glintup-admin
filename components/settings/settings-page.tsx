@@ -145,8 +145,8 @@ export default function SettingsPage() {
       });
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Settings updated successfully",
+          title: "نجاح",
+          description: response.message,
         });
         // Update local settings
         setSettings((prev) =>

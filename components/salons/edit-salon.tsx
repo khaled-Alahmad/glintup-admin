@@ -182,7 +182,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     []
   );
   const [imagesToRemove, setImagesToRemove] = useState<number[]>([]);
-  const [newImages, setNewImages] = useState<File[]>([]);
+  const [imageFileMap, setImageFileMap] = useState<Map<number, { file: File; imageName: string }>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [salonData, setSalonData] = useState<any>(null); const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoText, setLogoText] = useState<string | null>(null);
@@ -222,19 +222,21 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     if (e.target.files) {
       try {
         const files = Array.from(e.target.files);
-        setNewImages((prev) => [...prev, ...files]);
 
         // Upload each image and store their names and URLs
-        const uploadPromises = files.map(async (file) => {
+        const uploadPromises = files.map(async (file, index) => {
           const formData = new FormData();
           formData.append("image", file);
           formData.append("folder", "salons");
 
           const response = await addData("general/upload-image", formData);
           if (response.success) {
+            const imageId = Date.now() + index;
             return {
+              id: imageId,
               name: response.data.image_name,
               url: response.data.image_url,
+              file: file,
             };
           }
           return null;
@@ -242,13 +244,21 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
         const imageResults = await Promise.all(uploadPromises);
         const validResults = imageResults.filter(
-          (result): result is { name: string; url: string } => result !== null
+          (result): result is { id: number; name: string; url: string; file: File } => result !== null
         );
+
+        // حفظ في الخريطة
+        validResults.forEach(result => {
+          setImageFileMap(prev => new Map(prev.set(result.id, { 
+            file: result.file, 
+            imageName: result.name 
+          })));
+        });
 
         setSalonImages((prev) => [
           ...prev,
-          ...validResults.map((r, index) => ({
-            id: Date.now() + index, // Convert to number
+          ...validResults.map((r) => ({
+            id: r.id,
             url: r.url,
           })),
         ]);
@@ -267,20 +277,12 @@ export default function EditSalon({ salonId }: EditSalonProps) {
     try {
       setIsLoading(true);
 
-      const uploadedImages = await Promise.all(
-        newImages.map(async (file) => {
-          const imageFormData = new FormData();
-          imageFormData.append("image", file);
-          imageFormData.append("folder", "salons");
-
-          const response = await addData("general/upload-image", imageFormData);
-          return response.data.image_name;
-        })
-      );
+      // الحصول على أسماء الصور المحلية المتبقية (غير المحذوفة)
+      const remainingLocalImageNames = Array.from(imageFileMap.values()).map(item => item.imageName);
 
       // Prepare final update data
       const updateDataToSend = {
-        images: uploadedImages,
+        images: remainingLocalImageNames,
         images_remove: imagesToRemove,
         icon: logoText,
       };
@@ -296,9 +298,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           description: "تم تحديث صور المزود بنجاح",
         });
         // Reset states
-        setNewImages([]);
         setNewImagesNames([]);
         setImagesToRemove([]);
+        setImageFileMap(new Map());
         // Refresh images
         fetchSalonImages();
       }
@@ -1811,7 +1813,23 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           type="button"
                           className="absolute top-2 right-2 h-6 w-6"
                           onClick={() => {
-                            setImagesToRemove((prev) => [...prev, image.id]);
+                            // فقط إضافة الصور التي لها id من الخادم إلى مصفوفة الحذف
+                            // الصور المحلية لها id مؤقت من Date.now() (رقم كبير)
+                            // الصور من قاعدة البيانات لها id صغير (عادة أقل من 1000000)
+                            const isLocalImage = image.id > 1000000000000; // إذا كان ID أكبر من هذا الرقم، فهو مؤقت
+                            
+                            if (!isLocalImage) {
+                              // صورة من الخادم - أضفها لمصفوفة الحذف
+                              setImagesToRemove((prev) => [...prev, image.id]);
+                            } else {
+                              // صورة محلية - احذفها من الخريطة
+                              setImageFileMap(prev => {
+                                const newMap = new Map(prev);
+                                newMap.delete(image.id);
+                                return newMap;
+                              });
+                            }
+                            
                             setSalonImages((prev) =>
                               prev.filter((img) => img.id !== image.id)
                             );
