@@ -50,7 +50,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { PaginationWithInfo } from "@/components/ui/pagination-with-info";
 import { useToast } from "@/hooks/use-toast";
-import { fetchData, deleteData, updateData } from "@/lib/apiHelper";
+import { fetchData, deleteData, updateData, addData } from "@/lib/apiHelper";
 import { AdminUsersSkeleton } from "./admin-users-skeleton";
 import { se } from "date-fns/locale";
 
@@ -361,8 +361,8 @@ export default function AdminUsersManagement() {
     // console.log(permissionsToUpdate);
 
     try {
-      const response = await updateData(
-        `admin/admin-users/${selectedUser.id}`,
+      const response = await addData(
+        `admin/admin-users/${selectedUser.id}/update-permissions`,
         {
           admin_id: selectedUser.id,
           permissions: permissionsToUpdate,

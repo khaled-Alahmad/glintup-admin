@@ -21,7 +21,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchData, updateData } from "@/lib/apiHelper";
+import { addData, fetchData, updateData } from "@/lib/apiHelper";
 import { useToast } from "@/hooks/use-toast";
 import { PhoneInput } from "react-international-phone";
 import { isValidPhone } from "@/lib/phone-utils";
@@ -176,6 +176,41 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
         : prev.admin_permissions.filter((id) => id !== permissionId),
     }));
   };
+
+  const handlePermissionsUpdate = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await addData(
+        `admin/admin-users/${id}/update-permissions`,
+        {
+          permissions: formData.admin_permissions,
+        }
+      );
+
+      if (response.success) {
+        toast({
+          title: "تم تحديث الصلاحيات بنجاح",
+          description: response.message,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "حدث خطأ",
+          description: response.message || "فشل في تحديث الصلاحيات",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating permissions:", error);
+      toast({
+        variant: "destructive",
+        title: "حدث خطأ",
+        description: "فشل في تحديث الصلاحيات، يرجى المحاولة مرة أخرى",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -224,7 +259,7 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
     setIsSubmitting(true);
 
     try {
-      // Prepare data for API submission
+      // Prepare data for API submission (excluding permissions)
       const dataToSubmit: any = {
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -233,7 +268,6 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
         birth_date: formData.birth_date,
         gender: formData.gender,
         is_active: formData.is_active,
-        admin_permissions: formData.admin_permissions,
       };
 
       // Only include password if it's provided
@@ -601,6 +635,17 @@ export default function EditAdminUser({ id }: EditAdminUserProps) {
                         </label>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      type="button"
+                      onClick={handlePermissionsUpdate}
+                      disabled={isSubmitting}
+                      className="min-w-[120px]"
+                    >
+                      {isSubmitting ? "جاري الحفظ..." : "حفظ الصلاحيات"}
+                    </Button>
                   </div>
                 </TabsContent>
               </Tabs>
