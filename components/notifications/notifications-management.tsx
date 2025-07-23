@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  ArrowRight,
   Bell,
   CheckCircle,
   CheckCircle2,
@@ -35,6 +36,7 @@ import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
 import { fetchData, updateData, deleteData, addData } from "@/lib/apiHelper";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -253,6 +255,7 @@ export default function NotificationsManagement() {
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [notificationForm, setNotificationForm] = useState({
@@ -289,6 +292,62 @@ export default function NotificationsManagement() {
     } finally {
       setIsSending(false);
     }
+  };
+
+  // إعادة التوجيه إلى صفحة التفاصيل بناءً على نوع الكيان
+  const handleNavigateToDetails = (notification: Notification) => {
+    if (!notification.notificationable_type || !notification.notificationable_id) {
+      toast({
+        title: "تنبيه",
+        description: "لا يمكن الانتقال، لا توجد تفاصيل مرتبطة بهذا الإشعار",
+        variant: "default",
+      });
+      return;
+    }
+
+    const id = notification.notificationable_id;
+    let path = "";
+
+    switch (notification.notificationable_type) {
+      case "User":
+        path = `/users/${id}`;
+        break;
+      case "PromotionAd":
+        path = `/advertisements/${id}`;
+        break;
+      case "Booking":
+        path = `/appointments/${id}`;
+        break;
+      case "GiftCard":
+        path = `/gift-cards`;
+        break;
+      case "LoyaltyPoint":
+        path = `/users/${notification.user_id}`;
+        break;
+      case "SalonMenuRequest":
+        path = `/salon-menu-requests`;
+        break;
+      case "Review":
+        path = `/reviews`;
+        break;
+      case "Complaint":
+        path = `/complaints`;
+        break;
+      default:
+        toast({
+          title: "تنبيه",
+          description: `نوع الكيان ${notification.notificationable_type} غير مدعوم حاليًا`,
+          variant: "default",
+        });
+        return;
+    }
+
+    // تعيين الإشعار كمقروء قبل التوجيه
+    if (!notification.is_read) {
+      handleMarkAsRead(notification.id);
+    }
+
+    router.push(path);
   };
 
   // جلب البيانات من الخادم
@@ -421,9 +480,17 @@ export default function NotificationsManagement() {
 
     const typeMap: Record<string, string> = {
       "App\\Models\\Salons\\Salon": "مزود",
-      "App\\Models\\Reviews\\Review": "تقييم",
+      "App\\Models\\Reviews\\Review": "تقييم", 
       "App\\Models\\Appointments\\Appointment": "موعد",
       "App\\Models\\Users\\User": "مستخدم",
+      "User": "مستخدم",
+      "PromotionAd": "إعلان",
+      "Booking": "حجز",
+      "GiftCard": "بطاقة هدية",
+      "LoyaltyPoint": "نقاط ولاء",
+      "SalonMenuRequest": "طلب قائمة مزود",
+      "Review": "تقييم",
+      "Complaint": "شكوى",
     };
 
     return typeMap[type] || type.split("\\").pop() || "";
@@ -596,11 +663,18 @@ export default function NotificationsManagement() {
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-4 rounded-lg border relative transition-colors ${
+                    className={`p-4 rounded-lg border relative transition-colors cursor-pointer hover:bg-muted/50 ${
                       notification.is_read
                         ? "bg-background"
                         : "bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800"
                     }`}
+                    onClick={() => {
+                      if (notification.notificationable_type && notification.notificationable_id) {
+                        handleNavigateToDetails(notification);
+                      } else {
+                        handleViewDetails(notification);
+                      }
+                    }}
                   >
                     {!notification.is_read && (
                       <div className="absolute right-4 top-4 h-2 w-2 rounded-full bg-blue-500" />
@@ -617,14 +691,31 @@ export default function NotificationsManagement() {
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-medium">{notification.title}</h3>
                           <div className="flex gap-2 shrink-0">
+                            {notification.notificationable_type && 
+                             notification.notificationable_id && (
+                              <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleNavigateToDetails(notification);
+                              }}
+                              title="الانتقال إلى التفاصيل"
+                              >
+                              <ArrowRight className="h-4 w-4 text-green-500" />
+                              <span className="sr-only">الانتقال إلى التفاصيل</span>
+                              </Button>
+                            )}
                             {!notification.is_read && (
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 rounded-full"
-                                onClick={() =>
-                                  handleMarkAsRead(notification.id)
-                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAsRead(notification.id);
+                                }}
                               >
                                 <CheckCircle className="h-4 w-4 text-blue-500" />
                                 <span className="sr-only">تعيين كمقروء</span>
@@ -634,7 +725,10 @@ export default function NotificationsManagement() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-full"
-                              onClick={() => handleViewDetails(notification)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(notification);
+                              }}
                             >
                               <Eye className="h-4 w-4" />
                               <span className="sr-only">عرض التفاصيل</span>
@@ -643,9 +737,10 @@ export default function NotificationsManagement() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                              onClick={() =>
-                                handleDeleteNotification(notification.id)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNotification(notification.id);
+                              }}
                             >
                               <Trash className="h-4 w-4" />
                               <span className="sr-only">حذف</span>
@@ -832,9 +927,16 @@ export default function NotificationsManagement() {
                         </p>
                       </div>
                       <div>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            handleNavigateToDetails(selectedNotification);
+                            setSelectedNotification(null);
+                          }}
+                        >
                           <Eye className="h-4 w-4 ml-1" />
-                          عرض الكيان المرتبط
+                          الانتقال إلى التفاصيل
                         </Button>
                       </div>
                     </div>

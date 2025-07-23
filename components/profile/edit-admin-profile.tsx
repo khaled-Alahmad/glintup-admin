@@ -50,6 +50,7 @@ export default function EditAdminProfile() {
     email: "",
     phone: "",
     phone_code: "",
+    full_phone: "",
     gender: "",
     birth_date: "",
     role: "",
@@ -73,6 +74,7 @@ export default function EditAdminProfile() {
             email: profileData.email || "",
             phone: profileData.phone || "",
             phone_code: profileData.phone_code || "",
+            full_phone: profileData.full_phone || "",
             gender: profileData.gender || "",
             birth_date: profileData.birth_date || "",
             role: profileData.role || "",
@@ -334,7 +336,7 @@ export default function EditAdminProfile() {
                           fontSize: "0.875rem",
                           borderRadius: "0.375rem",
                         }}
-                        value={formData.phone}
+                        value={formData.full_phone}
                         onChange={(phone) => {
                           // Verificar validez usando libphonenumber-js
                           const isValid = isValidPhone(phone);
@@ -347,7 +349,7 @@ export default function EditAdminProfile() {
                           // Actualizar el estado
                           setFormData({
                             ...formData,
-                            phone: phone,
+                            full_phone: phone,
                           });
                         }}
                         inputProps={{

@@ -227,7 +227,7 @@ export default function PaymentsManagement() {
         </div> */}
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
@@ -275,7 +275,7 @@ export default function PaymentsManagement() {
             <p className="text-xs text-muted-foreground mt-1">بحاجة للمراجعة</p>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       <Card>
         <CardHeader>

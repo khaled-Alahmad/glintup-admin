@@ -28,8 +28,11 @@ interface AdminLayoutProps {
 }
 interface Notification {
   id: number;
+  user_id: number;
   title: string;
   message: string;
+  notificationable_id: number | null;
+  notificationable_type: string | null;
   is_read: boolean;
   created_at: string;
 }
@@ -146,6 +149,62 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
+  // إعادة التوجيه إلى صفحة التفاصيل بناءً على نوع الكيان
+  const handleNavigateToDetails = (notification: Notification) => {
+    if (!notification.notificationable_type || !notification.notificationable_id) {
+      toast({
+        title: "تنبيه",
+        description: "لا يمكن الانتقال، لا توجد تفاصيل مرتبطة بهذا الإشعار",
+        variant: "default",
+      });
+      return;
+    }
+
+    const id = notification.notificationable_id;
+    let path = "";
+
+    switch (notification.notificationable_type) {
+      case "User":
+        path = `/users/${id}`;
+        break;
+      case "PromotionAd":
+        path = `/advertisements/${id}`;
+        break;
+      case "Booking":
+        path = `/appointments/${id}`;
+        break;
+      case "GiftCard":
+        path = `/gift-cards`;
+        break;
+      case "LoyaltyPoint":
+        path = `/users/${notification.user_id}`;
+        break;
+      case "SalonMenuRequest":
+        path = `/salon-menu-requests`;
+        break;
+      case "Review":
+        path = `/reviews`;
+        break;
+      case "Complaint":
+        path = `/complaints`;
+        break;
+      default:
+        toast({
+          title: "تنبيه",
+          description: `نوع الكيان ${notification.notificationable_type} غير مدعوم حاليًا`,
+          variant: "default",
+        });
+        return;
+    }
+
+    // تعيين الإشعار كمقروء قبل التوجيه
+    if (!notification.is_read) {
+      handleMarkAsRead(notification.id);
+    }
+
+    router.push(path);
+  };
+
   const router = useRouter();
   const { toast } = useToast();
   const handleLogoutClick = async () => {
@@ -257,7 +316,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <DropdownMenuItem
                       key={index}
                       className="flex flex-col items-start py-2 px-4 cursor-pointer hover:bg-accent focus:bg-accent"
-                      onClick={() => handleMarkAsRead(notification.id)}
+                      onClick={() => {
+                        if (notification.notificationable_type && notification.notificationable_id) {
+                          handleNavigateToDetails(notification);
+                        } else {
+                          handleMarkAsRead(notification.id);
+                        }
+                      }}
                     >
                       <div className="flex w-full items-start gap-2">
                         <div

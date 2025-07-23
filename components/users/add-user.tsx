@@ -94,7 +94,6 @@ export default function AddUser() {
       const userData = {
         ...formData,
         // phone_code: formData.phone_code,
-        phone: formData.phone,
         is_active: formData.is_active,
       };
 
@@ -125,7 +124,7 @@ export default function AddUser() {
       console.error("Error adding user:", error);
       toast({
         title: "خطأ",
-        description: "فشل في إضافة المستخدم",
+        description: error instanceof Error ? error.message : "حدث خطأ أثناء إضافة المستخدم",
         variant: "destructive",
       });
     }
@@ -243,7 +242,7 @@ export default function AddUser() {
                     onChange={(phone) => {
                       setFormData((prev) => ({
                         ...prev,
-                        user: { ...prev, phone },
+                        phone: phone,
                       }));
 
                       // Verificar validez usando libphonenumber-js

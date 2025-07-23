@@ -393,7 +393,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                     </SelectTrigger>
                     <SelectContent>
                       {/* <SelectItem value="draft">مسودة</SelectItem> */}
-                      <SelectItem value="in_review">قيد المراجعة</SelectItem>
+                      {/* <SelectItem value="in_review">قيد المراجعة</SelectItem> */}
                       <SelectItem value="approved">موافق عليه</SelectItem>
                       <SelectItem value="rejected">مرفوض</SelectItem>
                     </SelectContent>
