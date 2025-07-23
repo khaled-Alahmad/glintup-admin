@@ -112,6 +112,7 @@ interface LoyaltyService {
     en: string;
   };
   price: number;
+  discount_percentage: number;
   currency: string;
 }
 

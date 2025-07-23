@@ -337,6 +337,7 @@ interface Service {
   icon: string;
   duration_minutes: number;
   price: number;
+  discount_percentage: number;
   final_price: number;
   currency: string;
   icon_url: string;
@@ -949,7 +950,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </div> */}
                   {/* add phone by use PhoneInput */}
 
-          <div className="phone-input-container">
+                  <div className="phone-input-container">
                     <Label htmlFor="phone">رقم الهاتف</Label>
                     <PhoneInput
                       name="phone"
@@ -2049,6 +2050,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       icon: uploadedIcon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
+      discount_percentage: Number(formData.get("discount_percentage")) || 0,
       gender: formData.get("gender") as "male" | "female" | "both",
       is_active: 1,
       currency: "AED",
@@ -2114,6 +2116,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       icon: uploadedIcon || editingService.icon,
       duration_minutes: Number(formData.get("duration_minutes")),
       price: Number(formData.get("price")),
+      discount_percentage: Number(formData.get("discount_percentage")) || 0,
       is_home_service: formData.get("is_home_service") === "on" ? 1 : 0,
       is_beautician: formData.get("is_beautician") === "on" ? 1 : 0,
       gender: formData.get("gender") as "male" | "female" | "both",
@@ -3794,6 +3797,19 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                         required
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="discount_percentage">نسبة الخصم (%)</Label>
+                      <Input
+                        id="discount_percentage"
+                        name="discount_percentage"
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="capacity">عدد المقاعد</Label>
@@ -4002,6 +4018,20 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                       step="0.01"
                       defaultValue={editingService.price}
                       required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="discount_percentage">نسبة الخصم (%)</Label>
+                    <Input
+                      id="discount_percentage"
+                      name="discount_percentage"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      defaultValue={editingService.discount_percentage || 0}
+                      placeholder="0"
                     />
                   </div>
                 </div>
@@ -4215,7 +4245,7 @@ function ServiceCard({
               </CardDescription>
             </div>
           </div>
-          <Badge variant={service.is_active ? "default" : "secondary"}>
+          <Badge variant={service.is_active ? "default" : "secondary"} className="text-nowrap">
             {service.is_active ? "نشط" : "غير نشط"}
           </Badge>
         </div>
@@ -4239,7 +4269,20 @@ function ServiceCard({
             </div>
             <div className="space-y-1">
               <p className="text-xs font-medium">السعر:</p>
-              <span className="font-medium text-sm">{service.price} د.إ</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">{service.price} د.إ</span>
+
+              </div>
+              {service.discount_percentage > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  خصم {service.discount_percentage}%
+                </Badge>
+              )}
+              {service.discount_percentage > 0 && (
+                <p className="text-xs text-green-600 font-medium">
+                  السعر بعد الخصم: {service.final_price} د.إ
+                </p>
+              )}
             </div>
             <div className="space-y-1">
               <p className="text-xs font-medium">الفئة:</p>
