@@ -268,7 +268,7 @@ export default function AddAdminUser() {
                     </Label>
                     <div className="phone-input-container">
                       <PhoneInput
-                        defaultCountry="kw"
+                        defaultCountry="ae"
                         style={{
                           width: "100%",
                           height: "40px",

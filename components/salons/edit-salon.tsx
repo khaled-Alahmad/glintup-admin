@@ -407,17 +407,38 @@ export default function EditSalon({ salonId }: EditSalonProps) {
       };
 
       const workingHoursData = workingHours.map((hour) => {
+        // إنشاء كائن جديد مع تنظيف قيم فترة الراحة بشكل صحيح
+        const cleanedHour = {
+          ...hour,
+          salon_id: Number(salonId),
+        };
+        
+        // إضافة break_start و break_end فقط إذا كانت موجودة وليست "no_break"
+        if (hour.break_start && hour.break_start !== "no_break") {
+          cleanedHour.break_start = hour.break_start;
+        }
+        if (hour.break_end && hour.break_end !== "no_break") {
+          cleanedHour.break_end = hour.break_end;
+        }
+        
+        // فلترة القيم الفارغة
         const filteredHour = Object.fromEntries(
-          Object.entries({
-            ...hour,
-            salon_id: Number(salonId),
-          }).filter(([_, value]) => value !== "" && value !== null)
+          Object.entries(cleanedHour).filter(([key, value]) => {
+            return value !== "" && value !== null && value !== undefined;
+          })
         );
         return filteredHour;
       });
 
       await Promise.all(
         workingHoursData.map(async (hour) => {
+          if (hour.id) {
+            // تحديث ساعة عمل موجودة
+            return updateData(`admin/working-hours/${hour.id}`, hour);
+          } else {
+            // إضافة ساعة عمل جديدة
+            return addData('admin/working-hours', hour);
+          }
         })
       );
       const salonResponse = await updateData(
@@ -1197,7 +1218,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <Label htmlFor="contact_number">رقم جهة الاتصال</Label>
                     <div className="phone-input-container">
                       <PhoneInput
-                        defaultCountry="kw"
+                        defaultCountry="ae"
                         style={{
                           width: '100%',
                           height: '40px',
@@ -1242,7 +1263,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     </Label>
                     <div className="phone-input-container">
                       <PhoneInput
-                        defaultCountry="kw"
+                        defaultCountry="ae"
                         style={{
                           width: '100%',
                           height: '40px',
@@ -1594,12 +1615,16 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                 <Label>فترة الراحة</Label>
                                 <div className="flex gap-2 items-center">
                                   <Select
-                                    value={workDay.break_start || ""}
+                                    value={workDay.break_start && workDay.break_start !== "null" ? workDay.break_start : "no_break"}
                                     onValueChange={(value) => {
                                       setWorkingHours((hours) =>
                                         hours.map((h) =>
                                           h.day_of_week === workDay.day_of_week
-                                            ? { ...h, break_start: value }
+                                            ? { 
+                                                ...h, 
+                                                break_start: (value === "no_break" ? undefined : value) as string | undefined,
+                                                break_end: value === "no_break" ? undefined : h.break_end
+                                              }
                                             : h
                                         )
                                       );
@@ -1609,7 +1634,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                       <SelectValue placeholder="من" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="aa">
+                                      <SelectItem value="no_break">
                                         بدون راحة
                                       </SelectItem>
                                       {Array.from({ length: 24 }).map(
@@ -1629,12 +1654,15 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                   </Select>
                                   <span>إلى</span>
                                   <Select
-                                    value={workDay.break_end || ""}
+                                    value={workDay.break_end && workDay.break_end !== "null" ? workDay.break_end : "no_break"}
                                     onValueChange={(value) => {
                                       setWorkingHours((hours) =>
                                         hours.map((h) =>
                                           h.day_of_week === workDay.day_of_week
-                                            ? { ...h, break_end: value }
+                                            ? { 
+                                                ...h, 
+                                                break_end: (value === "no_break" ? undefined : value) as string | undefined
+                                              }
                                             : h
                                         )
                                       );
@@ -1644,7 +1672,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                       <SelectValue placeholder="إلى" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="aa">
+                                      <SelectItem value="no_break">
                                         بدون راحة
                                       </SelectItem>
                                       {Array.from({ length: 24 }).map(

@@ -263,7 +263,7 @@ export default function EditUser({ userId }: EditUserProps) {
                 <Label htmlFor="full_phone">رقم  الهاتف</Label>
                 <div className="phone-input-container">
                   <PhoneInput
-                    defaultCountry="kw"
+                    defaultCountry="ae"
                     style={{
                       width: "100%",
                       height: "40px",

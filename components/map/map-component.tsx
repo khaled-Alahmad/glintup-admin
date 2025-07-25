@@ -47,8 +47,8 @@ export default function MapComponent({
   onMapClick,
 }: MapComponentProps) {
   // Initialize with default position for Kuwait if not provided
-  const defaultLat = 29.3759;
-  const defaultLng = 47.9774;
+  const defaultLat = 24.4539; // Abu Dhabi, UAE coordinates
+  const defaultLng = 54.3773;
 
   // Convert string inputs to numbers
   const lat = latitude ? parseFloat(latitude) : defaultLat;
