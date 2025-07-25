@@ -408,17 +408,25 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
       const workingHoursData = workingHours.map((hour) => {
         // إنشاء كائن جديد مع تنظيف قيم فترة الراحة بشكل صحيح
-        const cleanedHour = {
+        const cleanedHour: any = {
           ...hour,
           salon_id: Number(salonId),
         };
         
-        // إضافة break_start و break_end فقط إذا كانت موجودة وليست "no_break"
-        if (hour.break_start && hour.break_start !== "no_break") {
+        // التحقق من وجود فترة راحة أم لا
+        const hasBreakTime = hour.break_start && 
+                           hour.break_start !== "no_break" && 
+                           hour.break_end && 
+                           hour.break_end !== "no_break";
+        
+        if (hasBreakTime) {
+          // إضافة أوقات الراحة إذا كانت موجودة
           cleanedHour.break_start = hour.break_start;
-        }
-        if (hour.break_end && hour.break_end !== "no_break") {
           cleanedHour.break_end = hour.break_end;
+          cleanedHour.delete_break_time = false;
+        } else {
+          // إرسال إشارة لحذف فترة الراحة
+          cleanedHour.delete_break_time = true;
         }
         
         // فلترة القيم الفارغة

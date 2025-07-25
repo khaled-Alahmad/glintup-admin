@@ -307,7 +307,7 @@ export default function SalonsManagement() {
                           {salon.type === "clinic"
                             ? "عيادة"
                             : salon.type === "salon"
-                              ? "مزود"
+                              ? "صالون"
                               : salon.type === "home_service"
                                 ? "خدمة منزلية"
                                 : salon.type === "beautician"
