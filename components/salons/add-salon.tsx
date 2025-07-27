@@ -111,6 +111,10 @@ export default function AddSalon() {
           ...prev,
           icon: response.data.image_name,
         }));
+        // Clear logo error when logo is uploaded
+        if (fieldErrors.logo) {
+          setFieldErrors(prev => ({ ...prev, logo: '' }));
+        }
       }
       setIsLoading(false);
     } catch (error) {
@@ -175,6 +179,12 @@ export default function AddSalon() {
             url: r.url,
           })),
         ]);
+
+        // Clear gallery error when images are added
+        if (fieldErrors.gallery && validResults.length > 0) {
+          setFieldErrors(prev => ({ ...prev, gallery: '' }));
+        }
+
         setIsLoading(false);
       } catch (error) {
         console.error("Error uploading images:", error);
@@ -197,15 +207,197 @@ export default function AddSalon() {
   const [vatCertificateFile, setVatCertificateFile] = useState<File | null>(null);
   const [bankAccountCertificateFile, setBankAccountCertificateFile] = useState<File | null>(null);
 
+  // Form validation errors
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+
+  // Function to validate all required fields
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {};
+
+    // Owner information validation
+    if (!formData.user.first_name.trim()) {
+      errors['first_name'] = 'الاسم الأول مطلوب';
+    }
+    if (!formData.user.last_name.trim()) {
+      errors['last_name'] = 'الاسم الأخير مطلوب';
+    }
+    if (!formData.user.password.trim()) {
+      errors['password'] = 'كلمة المرور مطلوبة';
+    }
+    if (formData.user.password.length < 8) {
+      errors['password'] = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+    }
+    if (!formData.user.password_confirmation.trim()) {
+      errors['password_confirmation'] = 'تأكيد كلمة المرور مطلوب';
+    }
+    if (formData.user.password !== formData.user.password_confirmation) {
+      errors['password_confirmation'] = 'كلمة المرور وتأكيدها غير متطابقتين';
+    }
+    if (!formData.user.phone.trim()) {
+      errors['phone'] = 'رقم الهاتف مطلوب';
+    } else if (!isValidPhone(formData.user.phone)) {
+      errors['phone'] = 'رقم الهاتف غير صحيح';
+    }
+    if (!formData.user.birth_date.trim()) {
+      errors['birth_date'] = 'تاريخ الميلاد مطلوب';
+    }
+
+    // Provider information validation
+    if (!formData.merchant_legal_name.trim()) {
+      errors['merchant_legal_name'] = 'الاسم القانوني مطلوب';
+    }
+    if (!formData.merchant_commercial_name.trim()) {
+      errors['merchant_commercial_name'] = 'الاسم التجاري مطلوب';
+    }
+    if (!formData.type.trim()) {
+      errors['type'] = 'نوع المزود مطلوب';
+    }
+
+    // Contact information validation
+    if (!formData.contact_email.trim()) {
+      errors['contact_email'] = 'البريد الإلكتروني للتواصل مطلوب';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email)) {
+      errors['contact_email'] = 'البريد الإلكتروني غير صحيح';
+    }
+    if (!formData.contact_number.trim()) {
+      errors['contact_number'] = 'رقم هاتف التواصل مطلوب';
+    } else if (!isValidPhone(formData.contact_number)) {
+      errors['contact_number'] = 'رقم هاتف التواصل غير صحيح';
+    }
+    if (!formData.business_contact_email.trim()) {
+      errors['business_contact_email'] = 'البريد الإلكتروني للأعمال مطلوب';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.business_contact_email)) {
+      errors['business_contact_email'] = 'البريد الإلكتروني للأعمال غير صحيح';
+    }
+    if (!formData.business_contact_number.trim()) {
+      errors['business_contact_number'] = 'رقم هاتف الأعمال مطلوب';
+    } else if (!isValidPhone(formData.business_contact_number)) {
+      errors['business_contact_number'] = 'رقم هاتف الأعمال غير صحيح';
+    }
+    if (!formData.contact_name.trim()) {
+      errors['contact_name'] = 'اسم جهة الاتصال مطلوب';
+    }
+    if (!formData.business_contact_name.trim()) {
+      errors['business_contact_name'] = 'اسم جهة الاتصال للأعمال مطلوب';
+    }
+
+    // Address validation
+    if (!formData.address.trim()) {
+      errors['address'] = 'العنوان مطلوب';
+    }
+    if (!formData.city_street_name.trim()) {
+      errors['city_street_name'] = 'اسم الشارع والمدينة مطلوب';
+    }
+    if (!formData.latitude.trim()) {
+      errors['latitude'] = 'خط العرض مطلوب';
+    }
+    if (!formData.longitude.trim()) {
+      errors['longitude'] = 'خط الطول مطلوب';
+    }
+
+    // Logo validation
+    if (!formData.icon.trim() && !logoPreview) {
+      errors['logo'] = 'شعار المزود مطلوب';
+    }
+
+    // Gallery images validation
+    if (salonImages.length === 0) {
+      errors['gallery'] = 'يجب إضافة صورة واحدة على الأقل للمعرض';
+    }
+
+    // Bank information validation
+    if (!formData.bank_name.trim()) {
+      errors['bank_name'] = 'اسم البنك مطلوب';
+    }
+    if (!formData.bank_account_number.trim()) {
+      errors['bank_account_number'] = 'رقم الحساب البنكي مطلوب';
+    }
+    if (!formData.bank_account_holder_name.trim()) {
+      errors['bank_account_holder_name'] = 'اسم صاحب الحساب البنكي مطلوب';
+    }
+    if (!formData.bank_account_iban.trim()) {
+      errors['bank_account_iban'] = 'رقم الآيبان مطلوب';
+    }
+    if (!formData.vat_number.trim()) {
+      errors['vat_number'] = 'الرقم الضريبي مطلوب';
+    }
+
+    // Files validation
+    if (!formData.services_list.trim() && !servicesListFile) {
+      errors['services_list'] = 'قائمة الخدمات مطلوبة';
+    }
+    if (!formData.trade_license.trim() && !tradeLicenseFile) {
+      errors['trade_license'] = 'الرخصة التجارية مطلوبة';
+    }
+    if (!formData.vat_certificate.trim() && !vatCertificateFile) {
+      errors['vat_certificate'] = 'شهادة ضريبة القيمة المضافة مطلوبة';
+    }
+    if (!formData.bank_account_certificate.trim() && !bankAccountCertificateFile) {
+      errors['bank_account_certificate'] = 'شهادة الحساب البنكي مطلوبة';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validar el número de teléfono antes de enviar
+    // Clear previous errors
+    setFieldErrors({});
+    setPhoneError(null);
+    setContactPhoneError(null);
+    setBusinessContactPhoneError(null);
+
+    // Validate all required fields
+    const isValid = validateForm();
+    if (!isValid) {
+      // Scroll to first error after state update
+      setTimeout(() => {
+        const firstErrorField = Object.keys(fieldErrors)[0];
+        if (firstErrorField) {
+          const element = document.getElementById(firstErrorField);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }, 100);
+
+      // Show toast with validation errors
+      toast({
+        title: "يرجى تصحيح الأخطاء التالية",
+        description: "يرجى ملء جميع الحقول المطلوبة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Additional phone validation
     if (!isValidPhone(formData.user.phone)) {
       setPhoneError("يرجى إدخال رقم هاتف صحيح");
       toast({
         title: "خطأ في البيانات",
         description: "يرجى إدخال رقم هاتف صحيح للمالك",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidPhone(formData.contact_number)) {
+      setContactPhoneError("يرجى إدخال رقم هاتف تواصل صحيح");
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال رقم هاتف تواصل صحيح",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidPhone(formData.business_contact_number)) {
+      setBusinessContactPhoneError("يرجى إدخال رقم هاتف أعمال صحيح");
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى إدخال رقم هاتف أعمال صحيح",
         variant: "destructive",
       });
       return;
@@ -254,9 +446,10 @@ export default function AddSalon() {
       console.error("Error adding salon:", error);
       toast({
         title: "خطأ",
-        description: error.response.message,
+        description: error.response?.message || "حدث خطأ غير متوقع",
         variant: "destructive",
       });
+      setIsLoading(false);
     }
   };
   //gulfPhoneCodes
@@ -300,14 +493,22 @@ export default function AddSalon() {
                 <Input
                   id="first_name"
                   value={formData.user.first_name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       user: { ...prev.user, first_name: e.target.value },
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.first_name) {
+                      setFieldErrors(prev => ({ ...prev, first_name: '' }));
+                    }
+                  }}
+                  className={fieldErrors.first_name ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.first_name && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.first_name}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="last_name">
@@ -316,14 +517,22 @@ export default function AddSalon() {
                 <Input
                   id="last_name"
                   value={formData.user.last_name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       user: { ...prev.user, last_name: e.target.value },
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.last_name) {
+                      setFieldErrors(prev => ({ ...prev, last_name: '' }));
+                    }
+                  }}
+                  className={fieldErrors.last_name ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.last_name && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.last_name}</p>
+                )}
               </div>
             </div>
 
@@ -336,14 +545,22 @@ export default function AddSalon() {
                   id="password"
                   type="password"
                   value={formData.user.password}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       user: { ...prev.user, password: e.target.value },
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.password) {
+                      setFieldErrors(prev => ({ ...prev, password: '' }));
+                    }
+                  }}
+                  className={fieldErrors.password ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.password && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.password}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password_confirmation">
@@ -353,17 +570,25 @@ export default function AddSalon() {
                   id="password_confirmation"
                   type="password"
                   value={formData.user.password_confirmation}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       user: {
                         ...prev.user,
                         password_confirmation: e.target.value,
                       },
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.password_confirmation) {
+                      setFieldErrors(prev => ({ ...prev, password_confirmation: '' }));
+                    }
+                  }}
+                  className={fieldErrors.password_confirmation ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.password_confirmation && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.password_confirmation}</p>
+                )}
               </div>
             </div>
 
@@ -395,71 +620,21 @@ export default function AddSalon() {
                       } else {
                         setPhoneError(null);
                       }
+
+                      // Clear field error when user starts typing
+                      if (fieldErrors.phone) {
+                        setFieldErrors(prev => ({ ...prev, phone: '' }));
+                      }
                     }}
                     inputProps={{
                       placeholder: "أدخل رقم الهاتف",
-                      required: true,
+                      className: fieldErrors.phone || phoneError ? "border-red-500" : "",
                     }}
                   />
-                  {phoneError && (
-                    <p className="text-sm text-red-500 mt-1">{phoneError}</p>
-                  )}
                 </div>
-              </div>
-              {/* <div className="space-y-2">
-                <Label htmlFor="phone_code">
-                  رمز الهاتف <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={formData.user.phone_code}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      user: { ...prev.user, phone_code: value },
-                    }))
-                  }
-                  required
-                >
-                  <SelectTrigger id="phone_code">
-                    <SelectValue placeholder="اختر رمز الهاتف" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gulfPhoneCodes.map((code) => (
-                      <SelectItem
-                        key={code.id}
-                        value={code.code}
-                        style={{ unicodeBidi: "plaintext" }}
-                      >
-                        {code.code} {code.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>*/}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="gender">
-                  الجنس <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={formData.user.gender}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      user: { ...prev.user, gender: value },
-                    }))
-                  }
-                >
-                  <SelectTrigger id="gender">
-                    <SelectValue placeholder="اختر الجنس" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">ذكر</SelectItem>
-                    <SelectItem value="female">أنثى</SelectItem>
-                  </SelectContent>
-                </Select>
+                {(phoneError || fieldErrors.phone) && (
+                  <p className="text-sm text-red-500 mt-1">{phoneError || fieldErrors.phone}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="birth_date">
@@ -469,14 +644,22 @@ export default function AddSalon() {
                   id="birth_date"
                   type="date"
                   value={formData.user.birth_date}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       user: { ...prev.user, birth_date: e.target.value },
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.birth_date) {
+                      setFieldErrors(prev => ({ ...prev, birth_date: '' }));
+                    }
+                  }}
+                  className={fieldErrors.birth_date ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.birth_date && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.birth_date}</p>
+                )}
               </div>
             </div>
 
@@ -492,14 +675,22 @@ export default function AddSalon() {
                 <Input
                   id="merchant_legal_name"
                   value={formData.merchant_legal_name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       merchant_legal_name: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.merchant_legal_name) {
+                      setFieldErrors(prev => ({ ...prev, merchant_legal_name: '' }));
+                    }
+                  }}
+                  className={fieldErrors.merchant_legal_name ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.merchant_legal_name && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.merchant_legal_name}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="merchant_commercial_name">
@@ -508,14 +699,22 @@ export default function AddSalon() {
                 <Input
                   id="merchant_commercial_name"
                   value={formData.merchant_commercial_name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       merchant_commercial_name: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.merchant_commercial_name) {
+                      setFieldErrors(prev => ({ ...prev, merchant_commercial_name: '' }));
+                    }
+                  }}
+                  className={fieldErrors.merchant_commercial_name ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.merchant_commercial_name && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.merchant_commercial_name}</p>
+                )}
               </div>
             </div>
 
@@ -556,14 +755,18 @@ export default function AddSalon() {
                 <Select
                   required
                   value={formData.type}
-                  onValueChange={(value) =>
+                  onValueChange={(value) => {
                     setFormData((prev) => ({
                       ...prev,
                       type: value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user selects
+                    if (fieldErrors.type) {
+                      setFieldErrors(prev => ({ ...prev, type: '' }));
+                    }
+                  }}
                 >
-                  <SelectTrigger id="type">
+                  <SelectTrigger id="type" className={fieldErrors.type ? "border-red-500" : ""}>
                     <SelectValue placeholder="اختر نوع المزود" />
                   </SelectTrigger>
                   <SelectContent>
@@ -573,6 +776,9 @@ export default function AddSalon() {
                     <SelectItem value="clinic">عيادة</SelectItem>
                   </SelectContent>
                 </Select>
+                {fieldErrors.type && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.type}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status">
@@ -605,14 +811,22 @@ export default function AddSalon() {
                   id="contact_email"
                   type="email"
                   value={formData.contact_email}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       contact_email: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.contact_email) {
+                      setFieldErrors(prev => ({ ...prev, contact_email: '' }));
+                    }
+                  }}
+                  className={fieldErrors.contact_email ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.contact_email && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.contact_email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="contact_number">
@@ -639,15 +853,19 @@ export default function AddSalon() {
                       } else {
                         setContactPhoneError(null);
                       }
+                      // Clear field error when user starts typing
+                      if (fieldErrors.contact_number) {
+                        setFieldErrors(prev => ({ ...prev, contact_number: '' }));
+                      }
                     }}
                     inputProps={{
                       placeholder: "أدخل رقم هاتف التواصل",
-                      required: true,
+                      className: fieldErrors.contact_number || contactPhoneError ? "border-red-500" : "",
                     }}
                   />
-                  {contactPhoneError && (
+                  {(contactPhoneError || fieldErrors.contact_number) && (
                     <p className="text-sm text-red-500 mt-1">
-                      {contactPhoneError}
+                      {contactPhoneError || fieldErrors.contact_number}
                     </p>
                   )}
                 </div>
@@ -664,14 +882,22 @@ export default function AddSalon() {
                   id="business_contact_email"
                   type="email"
                   value={formData.business_contact_email}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       business_contact_email: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.business_contact_email) {
+                      setFieldErrors(prev => ({ ...prev, business_contact_email: '' }));
+                    }
+                  }}
+                  className={fieldErrors.business_contact_email ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.business_contact_email && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.business_contact_email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="business_contact_number">
@@ -698,15 +924,19 @@ export default function AddSalon() {
                       } else {
                         setBusinessContactPhoneError(null);
                       }
+                      // Clear field error when user starts typing
+                      if (fieldErrors.business_contact_number) {
+                        setFieldErrors(prev => ({ ...prev, business_contact_number: '' }));
+                      }
                     }}
                     inputProps={{
                       placeholder: "أدخل رقم هاتف الأعمال",
-                      required: true,
+                      className: fieldErrors.business_contact_number || businessContactPhoneError ? "border-red-500" : "",
                     }}
                   />
-                  {businessContactPhoneError && (
+                  {(businessContactPhoneError || fieldErrors.business_contact_number) && (
                     <p className="text-sm text-red-500 mt-1">
-                      {businessContactPhoneError}
+                      {businessContactPhoneError || fieldErrors.business_contact_number}
                     </p>
                   )}
                 </div>
@@ -721,14 +951,22 @@ export default function AddSalon() {
                 <Input
                   id="contact_name"
                   value={formData.contact_name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       contact_name: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.contact_name) {
+                      setFieldErrors(prev => ({ ...prev, contact_name: '' }));
+                    }
+                  }}
+                  className={fieldErrors.contact_name ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.contact_name && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.contact_name}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="business_contact_name">
@@ -738,14 +976,22 @@ export default function AddSalon() {
                 <Input
                   id="business_contact_name"
                   value={formData.business_contact_name}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       business_contact_name: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.business_contact_name) {
+                      setFieldErrors(prev => ({ ...prev, business_contact_name: '' }));
+                    }
+                  }}
+                  className={fieldErrors.business_contact_name ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.business_contact_name && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.business_contact_name}</p>
+                )}
               </div>
             </div>
 
@@ -756,13 +1002,20 @@ export default function AddSalon() {
               <Textarea
                 id="address"
                 value={formData.address}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, address: e.target.value }))
-                }
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, address: e.target.value }));
+                  // Clear error when user starts typing
+                  if (fieldErrors.address) {
+                    setFieldErrors(prev => ({ ...prev, address: '' }));
+                  }
+                }}
                 placeholder="العنوان التفصيلي"
-                className="min-h-[80px]"
+                className={`min-h-[80px] ${fieldErrors.address ? "border-red-500" : ""}`}
                 required
               />
+              {fieldErrors.address && (
+                <p className="text-sm text-red-500 mt-1">{fieldErrors.address}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -772,14 +1025,22 @@ export default function AddSalon() {
               <Input
                 id="city_street_name"
                 value={formData.city_street_name}
-                onChange={(e) =>
+                onChange={(e) => {
                   setFormData((prev) => ({
                     ...prev,
                     city_street_name: e.target.value,
-                  }))
-                }
+                  }));
+                  // Clear error when user starts typing
+                  if (fieldErrors.city_street_name) {
+                    setFieldErrors(prev => ({ ...prev, city_street_name: '' }));
+                  }
+                }}
+                className={fieldErrors.city_street_name ? "border-red-500" : ""}
                 required
               />
+              {fieldErrors.city_street_name && (
+                <p className="text-sm text-red-500 mt-1">{fieldErrors.city_street_name}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -790,15 +1051,23 @@ export default function AddSalon() {
                 <Input
                   id="latitude"
                   value={formData.latitude}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       latitude: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.latitude) {
+                      setFieldErrors(prev => ({ ...prev, latitude: '' }));
+                    }
+                  }}
                   placeholder="مثال: 24.431126"
+                  className={fieldErrors.latitude ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.latitude && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.latitude}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="longitude">
@@ -807,15 +1076,23 @@ export default function AddSalon() {
                 <Input
                   id="longitude"
                   value={formData.longitude}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((prev) => ({
                       ...prev,
                       longitude: e.target.value,
-                    }))
-                  }
+                    }));
+                    // Clear error when user starts typing
+                    if (fieldErrors.longitude) {
+                      setFieldErrors(prev => ({ ...prev, longitude: '' }));
+                    }
+                  }}
                   placeholder="مثال: 54.649244"
+                  className={fieldErrors.longitude ? "border-red-500" : ""}
                   required
                 />
+                {fieldErrors.longitude && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.longitude}</p>
+                )}
               </div>
             </div>
 
@@ -915,7 +1192,7 @@ export default function AddSalon() {
                 <Label htmlFor="logo">
                   شعار المزود <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.logo ? "border-red-500" : "border-gray-300"}`}>
                   {logoPreview ? (
                     <div className="relative w-full">
                       <img
@@ -928,7 +1205,17 @@ export default function AddSalon() {
                         variant="destructive"
                         size="sm"
                         className="absolute top-2 right-2"
-                        onClick={() => setLogoPreview(null)}
+                        onClick={() => {
+                          setLogoPreview(null);
+                          setFormData((prev) => ({
+                            ...prev,
+                            icon: "",
+                          }));
+                          // Clear error when logo is removed
+                          if (fieldErrors.logo) {
+                            setFieldErrors(prev => ({ ...prev, logo: '' }));
+                          }
+                        }}
                       >
                         حذف
                       </Button>
@@ -951,19 +1238,21 @@ export default function AddSalon() {
                           accept="image/*"
                           className="hidden"
                           onChange={handleLogoChange}
-                          required
                         />
                       </Label>
                     )
                   )}
                 </div>
+                {fieldErrors.logo && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.logo}</p>
+                )}
               </div>
               <div className="space-y-4">
                 {/* <h3 className="text-lg font-medium"</h3> */}
-                <Label htmlFor="logo">
+                <Label htmlFor="gallery">
                   عدة صور للغلاف<span className="text-red-500">*</span>
                 </Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.gallery ? "border-red-500" : "border-gray-300"}`}>
                   <Label htmlFor="gallery" className="mt-4">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -985,6 +1274,9 @@ export default function AddSalon() {
                     {/* s */}
                   </Label>
                 </div>
+                {fieldErrors.gallery && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.gallery}</p>
+                )}
 
                 {salonImages.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -1003,7 +1295,13 @@ export default function AddSalon() {
                           size="icon"
                           type="button"
                           className="absolute top-2 right-2 h-6 w-6"
-                          onClick={() => removeGalleryImage(index)}
+                          onClick={() => {
+                            removeGalleryImage(index);
+                            // Clear gallery error if at least one image remains
+                            if (fieldErrors.gallery && salonImages.length > 1) {
+                              setFieldErrors(prev => ({ ...prev, gallery: '' }));
+                            }
+                          }}
                         >
                           <span className="sr-only">حذف</span>
                           <svg
@@ -1101,14 +1399,22 @@ export default function AddSalon() {
                   <Input
                     id="bank_name"
                     value={formData.bank_name}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         bank_name: e.target.value,
-                      }))
-                    }
+                      }));
+                      // Clear error when user starts typing
+                      if (fieldErrors.bank_name) {
+                        setFieldErrors(prev => ({ ...prev, bank_name: '' }));
+                      }
+                    }}
+                    className={fieldErrors.bank_name ? "border-red-500" : ""}
                     required
                   />
+                  {fieldErrors.bank_name && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_name}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bank_account_number">
@@ -1117,14 +1423,22 @@ export default function AddSalon() {
                   <Input
                     id="bank_account_number"
                     value={formData.bank_account_number}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         bank_account_number: e.target.value,
-                      }))
-                    }
+                      }));
+                      // Clear error when user starts typing
+                      if (fieldErrors.bank_account_number) {
+                        setFieldErrors(prev => ({ ...prev, bank_account_number: '' }));
+                      }
+                    }}
+                    className={fieldErrors.bank_account_number ? "border-red-500" : ""}
                     required
                   />
+                  {fieldErrors.bank_account_number && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_number}</p>
+                  )}
                 </div>
               </div>
 
@@ -1136,14 +1450,22 @@ export default function AddSalon() {
                   <Input
                     id="bank_account_holder_name"
                     value={formData.bank_account_holder_name}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         bank_account_holder_name: e.target.value,
-                      }))
-                    }
+                      }));
+                      // Clear error when user starts typing
+                      if (fieldErrors.bank_account_holder_name) {
+                        setFieldErrors(prev => ({ ...prev, bank_account_holder_name: '' }));
+                      }
+                    }}
+                    className={fieldErrors.bank_account_holder_name ? "border-red-500" : ""}
                     required
                   />
+                  {fieldErrors.bank_account_holder_name && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_holder_name}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bank_account_iban">
@@ -1152,14 +1474,22 @@ export default function AddSalon() {
                   <Input
                     id="bank_account_iban"
                     value={formData.bank_account_iban}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         bank_account_iban: e.target.value,
-                      }))
-                    }
+                      }));
+                      // Clear error when user starts typing
+                      if (fieldErrors.bank_account_iban) {
+                        setFieldErrors(prev => ({ ...prev, bank_account_iban: '' }));
+                      }
+                    }}
+                    className={fieldErrors.bank_account_iban ? "border-red-500" : ""}
                     required
                   />
+                  {fieldErrors.bank_account_iban && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_iban}</p>
+                  )}
                 </div>
               </div>
 
@@ -1171,14 +1501,22 @@ export default function AddSalon() {
                   <Input
                     id="vat_number"
                     value={formData.vat_number}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
                         vat_number: e.target.value,
-                      }))
-                    }
+                      }));
+                      // Clear error when user starts typing
+                      if (fieldErrors.vat_number) {
+                        setFieldErrors(prev => ({ ...prev, vat_number: '' }));
+                      }
+                    }}
+                    className={fieldErrors.vat_number ? "border-red-500" : ""}
                     required
                   />
+                  {fieldErrors.vat_number && (
+                    <p className="text-sm text-red-500 mt-1">{fieldErrors.vat_number}</p>
+                  )}
                 </div>
               </div>
 
@@ -1187,7 +1525,7 @@ export default function AddSalon() {
                 <Label htmlFor="services_list">
                   قائمة الخدمات (PDF) <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.services_list ? "border-red-500" : "border-gray-300"}`}>
                   <Label htmlFor="services_list" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -1218,6 +1556,10 @@ export default function AddSalon() {
                                 ...prev,
                                 services_list: response.data.file_name,
                               }));
+                              // Clear error when file is uploaded
+                              if (fieldErrors.services_list) {
+                                setFieldErrors(prev => ({ ...prev, services_list: '' }));
+                              }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
@@ -1229,7 +1571,6 @@ export default function AddSalon() {
                           }
                         }
                       }}
-                      required
                     />
                   </Label>
                   {servicesListFile && (
@@ -1256,6 +1597,9 @@ export default function AddSalon() {
                     </div>
                   )}
                 </div>
+                {fieldErrors.services_list && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.services_list}</p>
+                )}
               </div>
 
               {/* الرخصة التجارية PDF */}
@@ -1263,7 +1607,7 @@ export default function AddSalon() {
                 <Label htmlFor="trade_license">
                   الرخصة التجارية (PDF) <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.trade_license ? "border-red-500" : "border-gray-300"}`}>
                   <Label htmlFor="trade_license" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -1294,6 +1638,10 @@ export default function AddSalon() {
                                 ...prev,
                                 trade_license: response.data.file_name,
                               }));
+                              // Clear error when file is uploaded
+                              if (fieldErrors.trade_license) {
+                                setFieldErrors(prev => ({ ...prev, trade_license: '' }));
+                              }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
@@ -1305,7 +1653,6 @@ export default function AddSalon() {
                           }
                         }
                       }}
-                      required
                     />
                   </Label>
                   {tradeLicenseFile && (
@@ -1332,6 +1679,9 @@ export default function AddSalon() {
                     </div>
                   )}
                 </div>
+                {fieldErrors.trade_license && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.trade_license}</p>
+                )}
               </div>
 
               {/* شهادة ضريبة القيمة المضافة PDF */}
@@ -1339,7 +1689,7 @@ export default function AddSalon() {
                 <Label htmlFor="vat_certificate">
                   شهادة ضريبة القيمة المضافة (PDF) <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.vat_certificate ? "border-red-500" : "border-gray-300"}`}>
                   <Label htmlFor="vat_certificate" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -1370,6 +1720,10 @@ export default function AddSalon() {
                                 ...prev,
                                 vat_certificate: response.data.file_name,
                               }));
+                              // Clear error when file is uploaded
+                              if (fieldErrors.vat_certificate) {
+                                setFieldErrors(prev => ({ ...prev, vat_certificate: '' }));
+                              }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
@@ -1381,7 +1735,6 @@ export default function AddSalon() {
                           }
                         }
                       }}
-                      required
                     />
                   </Label>
                   {vatCertificateFile && (
@@ -1409,6 +1762,9 @@ export default function AddSalon() {
                     </div>
                   )}
                 </div>
+                {fieldErrors.vat_certificate && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.vat_certificate}</p>
+                )}
               </div>
 
               {/* شهادة الحساب البنكي PDF */}
@@ -1416,7 +1772,7 @@ export default function AddSalon() {
                 <Label htmlFor="bank_account_certificate">
                   شهادة الحساب البنكي (PDF) <span className="text-red-500">*</span>
                 </Label>
-                <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.bank_account_certificate ? "border-red-500" : "border-gray-300"}`}>
                   <Label htmlFor="bank_account_certificate" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -1447,6 +1803,10 @@ export default function AddSalon() {
                                 ...prev,
                                 bank_account_certificate: response.data.file_name,
                               }));
+                              // Clear error when file is uploaded
+                              if (fieldErrors.bank_account_certificate) {
+                                setFieldErrors(prev => ({ ...prev, bank_account_certificate: '' }));
+                              }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
@@ -1458,7 +1818,6 @@ export default function AddSalon() {
                           }
                         }
                       }}
-                      required
                     />
                   </Label>
                   {bankAccountCertificateFile && (
@@ -1485,6 +1844,9 @@ export default function AddSalon() {
                     </div>
                   )}
                 </div>
+                {fieldErrors.bank_account_certificate && (
+                  <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_certificate}</p>
+                )}
               </div>
             </div>
 
