@@ -504,7 +504,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.first_name ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.first_name && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.first_name}</p>
@@ -528,7 +528,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.last_name ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.last_name && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.last_name}</p>
@@ -556,7 +556,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.password ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.password && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.password}</p>
@@ -584,7 +584,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.password_confirmation ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.password_confirmation && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.password_confirmation}</p>
@@ -628,7 +628,7 @@ export default function AddSalon() {
                     }}
                     inputProps={{
                       placeholder: "أدخل رقم الهاتف",
-                      className: fieldErrors.phone || phoneError ? "border-red-500" : "",
+                      // className: fieldErrors.phone || phoneError ? "border-red-500" : "",
                     }}
                   />
                 </div>
@@ -655,7 +655,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.birth_date ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.birth_date && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.birth_date}</p>
@@ -686,7 +686,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.merchant_legal_name ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.merchant_legal_name && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.merchant_legal_name}</p>
@@ -710,7 +710,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.merchant_commercial_name ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.merchant_commercial_name && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.merchant_commercial_name}</p>
@@ -753,7 +753,7 @@ export default function AddSalon() {
                   نوع المزود <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  required
+                  // required
                   value={formData.type}
                   onValueChange={(value) => {
                     setFormData((prev) => ({
@@ -822,7 +822,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.contact_email ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.contact_email && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.contact_email}</p>
@@ -860,7 +860,7 @@ export default function AddSalon() {
                     }}
                     inputProps={{
                       placeholder: "أدخل رقم هاتف التواصل",
-                      className: fieldErrors.contact_number || contactPhoneError ? "border-red-500" : "",
+                      // className: fieldErrors.contact_number || contactPhoneError ? "border-red-500" : "",
                     }}
                   />
                   {(contactPhoneError || fieldErrors.contact_number) && (
@@ -893,7 +893,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.business_contact_email ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.business_contact_email && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.business_contact_email}</p>
@@ -931,7 +931,7 @@ export default function AddSalon() {
                     }}
                     inputProps={{
                       placeholder: "أدخل رقم هاتف الأعمال",
-                      className: fieldErrors.business_contact_number || businessContactPhoneError ? "border-red-500" : "",
+                      // className: fieldErrors.business_contact_number || businessContactPhoneError ? "border-red-500" : "",
                     }}
                   />
                   {(businessContactPhoneError || fieldErrors.business_contact_number) && (
@@ -962,7 +962,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.contact_name ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.contact_name && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.contact_name}</p>
@@ -987,7 +987,7 @@ export default function AddSalon() {
                     }
                   }}
                   className={fieldErrors.business_contact_name ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.business_contact_name && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.business_contact_name}</p>
@@ -1011,7 +1011,7 @@ export default function AddSalon() {
                 }}
                 placeholder="العنوان التفصيلي"
                 className={`min-h-[80px] ${fieldErrors.address ? "border-red-500" : ""}`}
-                required
+                // required
               />
               {fieldErrors.address && (
                 <p className="text-sm text-red-500 mt-1">{fieldErrors.address}</p>
@@ -1036,7 +1036,7 @@ export default function AddSalon() {
                   }
                 }}
                 className={fieldErrors.city_street_name ? "border-red-500" : ""}
-                required
+                // required
               />
               {fieldErrors.city_street_name && (
                 <p className="text-sm text-red-500 mt-1">{fieldErrors.city_street_name}</p>
@@ -1063,7 +1063,7 @@ export default function AddSalon() {
                   }}
                   placeholder="مثال: 24.431126"
                   className={fieldErrors.latitude ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.latitude && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.latitude}</p>
@@ -1088,7 +1088,7 @@ export default function AddSalon() {
                   }}
                   placeholder="مثال: 54.649244"
                   className={fieldErrors.longitude ? "border-red-500" : ""}
-                  required
+                  // required
                 />
                 {fieldErrors.longitude && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.longitude}</p>
@@ -1371,7 +1371,7 @@ export default function AddSalon() {
                     موقع تقديم الخدمة <span className="text-red-500">*</span>
                   </Label>
                   <Select
-                    required
+                    // required
                     value={formData.service_location}
                     onValueChange={(value) =>
                       setFormData((prev) => ({
@@ -1410,7 +1410,7 @@ export default function AddSalon() {
                       }
                     }}
                     className={fieldErrors.bank_name ? "border-red-500" : ""}
-                    required
+                    // required
                   />
                   {fieldErrors.bank_name && (
                     <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_name}</p>
@@ -1434,7 +1434,7 @@ export default function AddSalon() {
                       }
                     }}
                     className={fieldErrors.bank_account_number ? "border-red-500" : ""}
-                    required
+                    // required
                   />
                   {fieldErrors.bank_account_number && (
                     <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_number}</p>
@@ -1461,7 +1461,7 @@ export default function AddSalon() {
                       }
                     }}
                     className={fieldErrors.bank_account_holder_name ? "border-red-500" : ""}
-                    required
+                    // required
                   />
                   {fieldErrors.bank_account_holder_name && (
                     <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_holder_name}</p>
@@ -1485,7 +1485,7 @@ export default function AddSalon() {
                       }
                     }}
                     className={fieldErrors.bank_account_iban ? "border-red-500" : ""}
-                    required
+                    // required
                   />
                   {fieldErrors.bank_account_iban && (
                     <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_iban}</p>
@@ -1512,7 +1512,7 @@ export default function AddSalon() {
                       }
                     }}
                     className={fieldErrors.vat_number ? "border-red-500" : ""}
-                    required
+                    // required
                   />
                   {fieldErrors.vat_number && (
                     <p className="text-sm text-red-500 mt-1">{fieldErrors.vat_number}</p>
