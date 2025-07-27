@@ -319,9 +319,9 @@ export default function AddSalon() {
     if (!formData.bank_account_iban.trim()) {
       errors['bank_account_iban'] = 'رقم الآيبان مطلوب';
     }
-    if (!formData.vat_number.trim()) {
-      errors['vat_number'] = 'الرقم الضريبي مطلوب';
-    }
+    // if (!formData.vat_number.trim()) {
+    //   errors['vat_number'] = 'الرقم الضريبي مطلوب';
+    // }
 
     // Files validation
     if (!formData.services_list.trim() && !servicesListFile) {
@@ -1500,7 +1500,7 @@ export default function AddSalon() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="vat_number">
-                    الرقم الضريبي <span className="text-red-500">*</span>
+                    الرقم الضريبي 
                   </Label>
                   <Input
                     id="vat_number"
