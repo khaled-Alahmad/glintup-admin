@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { DatePicker } from "@/components/ui/date-picker";
 import dynamic from "next/dynamic";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
@@ -640,23 +641,26 @@ export default function AddSalon() {
                 <Label htmlFor="birth_date">
                   تاريخ الميلاد <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="birth_date"
-                  type="date"
-                  value={formData.user.birth_date}
-                  onChange={(e) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      user: { ...prev.user, birth_date: e.target.value },
-                    }));
-                    // Clear error when user starts typing
-                    if (fieldErrors.birth_date) {
-                      setFieldErrors(prev => ({ ...prev, birth_date: '' }));
-                    }
-                  }}
-                  className={fieldErrors.birth_date ? "border-red-500" : ""}
-                  // required
-                />
+                <div className={fieldErrors.birth_date ? "border border-red-500 rounded-md" : ""}>
+                  <DatePicker
+                    selected={formData.user.birth_date ? new Date(formData.user.birth_date) : undefined}
+                    onSelect={(date) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        user: { 
+                          ...prev.user, 
+                          birth_date: date ? date.toISOString().split('T')[0] : "" 
+                        },
+                      }));
+                      // Clear error when user selects a date
+                      if (fieldErrors.birth_date) {
+                        setFieldErrors(prev => ({ ...prev, birth_date: '' }));
+                      }
+                    }}
+                    placeholder="اختر تاريخ الميلاد"
+                    maxDate={new Date()} // Don't allow future dates for birth date
+                  />
+                </div>
                 {fieldErrors.birth_date && (
                   <p className="text-sm text-red-500 mt-1">{fieldErrors.birth_date}</p>
                 )}

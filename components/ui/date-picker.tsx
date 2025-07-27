@@ -12,6 +12,7 @@ interface DatePickerProps {
   onSelect: (date: Date | undefined) => void
   placeholder?: string
   minDate?: Date
+  maxDate?: Date
   disabled?: boolean
 }
 
@@ -20,6 +21,7 @@ export function DatePicker({
   onSelect,
   placeholder = "حدد تاريخ",
   minDate,
+  maxDate,
   disabled
 }: DatePickerProps) {
   return (
@@ -41,7 +43,11 @@ export function DatePicker({
           onSelect={onSelect}
           initialFocus
           locale={ar}
-          disabled={(date) => minDate ? date < minDate : false}
+          disabled={(date) => {
+            if (minDate && date < minDate) return true;
+            if (maxDate && date > maxDate) return true;
+            return false;
+          }}
         />
       </PopoverContent>
     </Popover>
