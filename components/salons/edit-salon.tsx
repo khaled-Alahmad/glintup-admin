@@ -250,9 +250,9 @@ export default function EditSalon({ salonId }: EditSalonProps) {
 
         // حفظ في الخريطة
         validResults.forEach(result => {
-          setImageFileMap(prev => new Map(prev.set(result.id, { 
-            file: result.file, 
-            imageName: result.name 
+          setImageFileMap(prev => new Map(prev.set(result.id, {
+            file: result.file,
+            imageName: result.name
           })));
         });
 
@@ -412,13 +412,13 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           ...hour,
           salon_id: Number(salonId),
         };
-        
+
         // التحقق من وجود فترة راحة أم لا
-        const hasBreakTime = hour.break_start && 
-                           hour.break_start !== "no_break" && 
-                           hour.break_end && 
-                           hour.break_end !== "no_break";
-        
+        const hasBreakTime = hour.break_start &&
+          hour.break_start !== "no_break" &&
+          hour.break_end &&
+          hour.break_end !== "no_break";
+
         if (hasBreakTime) {
           // إضافة أوقات الراحة إذا كانت موجودة
           cleanedHour.break_start = hour.break_start;
@@ -428,7 +428,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
           // إرسال إشارة لحذف فترة الراحة
           cleanedHour.delete_break_time = true;
         }
-        
+
         // فلترة القيم الفارغة
         const filteredHour = Object.fromEntries(
           Object.entries(cleanedHour).filter(([key, value]) => {
@@ -1487,7 +1487,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                     setEditingWorkingHour(null);
                                     toast({
                                       title: "تم بنجاح",
-                                      description: "تم تعديل يوم العمل بنجاح",
+                                      description: response.message,
                                     });
                                   }
                                 } else {
@@ -1503,7 +1503,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                     setIsWorkingHourDialogOpen(false);
                                     toast({
                                       title: "تم بنجاح",
-                                      description: "تم إضافة يوم العمل بنجاح",
+                                      description: response.message,
                                     });
                                   }
                                 }
@@ -1514,7 +1514,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                 );
                                 toast({
                                   title: "خطأ",
-                                  description: "حدث خطأ أثناء حفظ البيانات",
+                                  description: error instanceof Error ? error.message : "حدث خطأ أثناء حفظ ساعات العمل",
                                   variant: "destructive",
                                 });
                               }
@@ -1628,11 +1628,11 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                       setWorkingHours((hours) =>
                                         hours.map((h) =>
                                           h.day_of_week === workDay.day_of_week
-                                            ? { 
-                                                ...h, 
-                                                break_start: (value === "no_break" ? undefined : value) as string | undefined,
-                                                break_end: value === "no_break" ? undefined : h.break_end
-                                              }
+                                            ? {
+                                              ...h,
+                                              break_start: (value === "no_break" ? undefined : value) as string | undefined,
+                                              break_end: value === "no_break" ? undefined : h.break_end
+                                            }
                                             : h
                                         )
                                       );
@@ -1667,10 +1667,10 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                       setWorkingHours((hours) =>
                                         hours.map((h) =>
                                           h.day_of_week === workDay.day_of_week
-                                            ? { 
-                                                ...h, 
-                                                break_end: (value === "no_break" ? undefined : value) as string | undefined
-                                              }
+                                            ? {
+                                              ...h,
+                                              break_end: (value === "no_break" ? undefined : value) as string | undefined
+                                            }
                                             : h
                                         )
                                       );
@@ -1854,7 +1854,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                             // الصور المحلية لها id مؤقت من Date.now() (رقم كبير)
                             // الصور من قاعدة البيانات لها id صغير (عادة أقل من 1000000)
                             const isLocalImage = image.id > 1000000000000; // إذا كان ID أكبر من هذا الرقم، فهو مؤقت
-                            
+
                             if (!isLocalImage) {
                               // صورة من الخادم - أضفها لمصفوفة الحذف
                               setImagesToRemove((prev) => [...prev, image.id]);
@@ -1866,7 +1866,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                 return newMap;
                               });
                             }
-                            
+
                             setSalonImages((prev) =>
                               prev.filter((img) => img.id !== image.id)
                             );

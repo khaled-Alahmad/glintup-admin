@@ -31,7 +31,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: { ar: '', en: '' },
-    status: 'draft',
+    status: 'approved',
     button_text: { ar: '', en: '' },
     salon_id: '',
   });
@@ -302,6 +302,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
               <div className="space-y-2">
                 <Label htmlFor="image">صورة الإعلان</Label>
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <Input id="image" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                   {imagePreview ? (
                     <div className="relative w-full">
                       <img
@@ -314,7 +315,10 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                         variant="destructive"
                         size="sm"
                         className="absolute top-2 right-2"
-                        onClick={() => setImagePreview(null)}
+                        onClick={() => {
+                          setImagePreview(null);
+                          setUploadedImageName("");
+                        }}
                       >
                         حذف
                       </Button>
@@ -325,10 +329,9 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                       <p className="text-sm text-gray-600">اختر صورة الإعلان</p>
                     </div>
                   )}
-                  <Input id="image" type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                  <Label htmlFor="image" className="mt-4">
-                    <Button type="button" variant="outline">
-                      تغيير الصورة
+                  <Label htmlFor="image" className="mt-4 cursor-pointer">
+                    <Button type="button" variant="outline" className="pointer-events-none">
+                      {imagePreview ? "تغيير الصورة" : "اختر صورة"}
                     </Button>
                   </Label>
                 </div>

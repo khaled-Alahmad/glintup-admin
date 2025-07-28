@@ -52,9 +52,51 @@ export default function AddSalon() {
   const [contactPhoneError, setContactPhoneError] = useState<string | null>(
     null
   );
+  const [ibanError, setIbanError] = useState<string | null>(null);
+  const [bankAccountError, setBankAccountError] = useState<string | null>(null);
   // loading
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // IBAN validation function for UAE
+  const validateIBAN = (iban: string): boolean => {
+    // Remove spaces and convert to uppercase
+    const cleanIban = iban.replace(/\s+/g, '').toUpperCase();
+    
+    // UAE IBAN format: AE + 2 check digits + 19 digits (total 23 characters)
+    const uaeIbanRegex = /^AE\d{21}$/;
+    
+    if (!uaeIbanRegex.test(cleanIban)) {
+      return false;
+    }
+    
+    // IBAN checksum validation (modulo 97)
+    // Move first 4 characters to end and replace letters with numbers
+    const rearranged = cleanIban.slice(4) + cleanIban.slice(0, 4);
+    const numericString = rearranged.replace(/[A-Z]/g, (letter) => {
+      return (letter.charCodeAt(0) - 55).toString();
+    });
+    
+    // Calculate modulo 97
+    let remainder = '';
+    for (let i = 0; i < numericString.length; i++) {
+      remainder += numericString[i];
+      if (remainder.length >= 9) {
+        remainder = (parseInt(remainder) % 97).toString();
+      }
+    }
+    
+    return parseInt(remainder) % 97 === 1;
+  };
+
+  // Bank account number validation function
+  const validateBankAccount = (accountNumber: string): boolean => {
+    // Remove any non-digit characters
+    const cleanAccountNumber = accountNumber.replace(/\D/g, '');
+    
+    // Check if length is between 8 and 14 digits
+    return cleanAccountNumber.length >= 8 && cleanAccountNumber.length <= 14;
+  };
 
   const [formData, setFormData] = useState({
     user: {
@@ -310,9 +352,9 @@ export default function AddSalon() {
     if (!formData.bank_name.trim()) {
       errors['bank_name'] = 'اسم البنك مطلوب';
     }
-    if (!formData.bank_account_number.trim()) {
-      errors['bank_account_number'] = 'رقم الحساب البنكي مطلوب';
-    }
+    // if (!formData.bank_account_number.trim()) {
+    //   errors['bank_account_number'] = 'رقم الحساب البنكي مطلوب';
+    // }
     if (!formData.bank_account_holder_name.trim()) {
       errors['bank_account_holder_name'] = 'اسم صاحب الحساب البنكي مطلوب';
     }
@@ -349,6 +391,33 @@ export default function AddSalon() {
     setPhoneError(null);
     setContactPhoneError(null);
     setBusinessContactPhoneError(null);
+    setIbanError(null);
+    setBankAccountError(null);
+
+    // Validate bank account number before form submission
+    if (formData.bank_account_number && !validateBankAccount(formData.bank_account_number)) {
+      setBankAccountError("رقم الحساب البنكي يجب أن يكون بين 8 و 14 رقم");
+      toast({
+        title: "رقم الحساب البنكي غير صحيح",
+        description: "يجب أن يكون رقم الحساب البنكي بين 8 و 14 رقم",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate IBAN before form submission
+    if (formData.bank_account_iban) {
+      const cleanIban = formData.bank_account_iban.replace(/\s+/g, '');
+      if (!validateIBAN(cleanIban)) {
+        setIbanError("رقم الآيبان غير صحيح. يجب أن يكون بالتنسيق: AE60 0860 0000 0972 6532 952");
+        toast({
+          title: "رقم الآيبان غير صحيح",
+          description: "يرجى إدخال رقم آيبان صحيح للإمارات العربية المتحدة",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     // Validate all required fields
     const isValid = validateForm();
@@ -1264,8 +1333,14 @@ export default function AddSalon() {
                       <p className="text-sm text-gray-600 mb-1">
                         اسحب وأفلت صور المزود هنا أو انقر للتصفح
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 mb-1">
                         PNG, JPG حتى 5MB لكل صورة
+                      </p>
+                      <p className="text-xs text-blue-600 font-medium">
+                        📐 قياسات الصورة المطلوبة: نسبة 2:1 (العرض ضعفي الطول)
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        مثال: 1200x600 بكسل أو 1600x800 بكسل
                       </p>
                     </div>
                     <Input
@@ -1429,21 +1504,45 @@ export default function AddSalon() {
                     id="bank_account_number"
                     value={formData.bank_account_number}
                     onChange={(e) => {
+                      // Only allow numeric input
+                      const value = e.target.value.replace(/\D/g, '');
                       setFormData((prev) => ({
                         ...prev,
-                        bank_account_number: e.target.value,
+                        bank_account_number: value,
                       }));
+                      
+                      // Validate bank account number
+                      if (value.length > 0) {
+                        if (!validateBankAccount(value)) {
+                          setBankAccountError("رقم الحساب البنكي يجب أن يكون بين 8 و 14 رقم");
+                        } else {
+                          setBankAccountError(null);
+                        }
+                      } else {
+                        setBankAccountError(null);
+                      }
+                      
                       // Clear error when user starts typing
                       if (fieldErrors.bank_account_number) {
                         setFieldErrors(prev => ({ ...prev, bank_account_number: '' }));
                       }
                     }}
-                    className={fieldErrors.bank_account_number ? "border-red-500" : ""}
+                    className={`${fieldErrors.bank_account_number || bankAccountError ? "border-red-500" : ""}`}
+                    placeholder="مثال: 1234567890"
+                    maxLength={14}
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    style={{ fontFamily: 'monospace' }} // Use monospace for better number display
                     // required
                   />
-                  {fieldErrors.bank_account_number && (
-                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_number}</p>
+                  {(fieldErrors.bank_account_number || bankAccountError) && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {fieldErrors.bank_account_number || bankAccountError}
+                    </p>
                   )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    يجب أن يكون رقم الحساب البنكي بين 8 و 14 رقم
+                  </p>
                 </div>
               </div>
 
@@ -1480,21 +1579,49 @@ export default function AddSalon() {
                     id="bank_account_iban"
                     value={formData.bank_account_iban}
                     onChange={(e) => {
+                      let value = e.target.value.toUpperCase().replace(/\s+/g, '');
+                      
+                      // Format IBAN with spaces for better readability
+                      if (value.length > 2) {
+                        value = value.match(/.{1,4}/g)?.join(' ') || value;
+                      }
+                      
                       setFormData((prev) => ({
                         ...prev,
-                        bank_account_iban: e.target.value,
+                        bank_account_iban: value,
                       }));
+                      
+                      // Validate IBAN format (remove spaces for validation)
+                      const cleanValue = value.replace(/\s+/g, '');
+                      if (cleanValue.length > 0) {
+                        if (!validateIBAN(cleanValue)) {
+                          setIbanError("رقم الآيبان غير صحيح. يجب أن يكون بالتنسيق: AE60 0860 0000 0972 6532 952");
+                        } else {
+                          setIbanError(null);
+                        }
+                      } else {
+                        setIbanError(null);
+                      }
+                      
                       // Clear error when user starts typing
                       if (fieldErrors.bank_account_iban) {
                         setFieldErrors(prev => ({ ...prev, bank_account_iban: '' }));
                       }
                     }}
-                    className={fieldErrors.bank_account_iban ? "border-red-500" : ""}
+                    className={`${fieldErrors.bank_account_iban || ibanError ? "border-red-500" : ""}`}
+                    placeholder="مثال: AE60 0860 0000 0972 6532 952"
+                    maxLength={27} // 23 characters + 4 spaces
+                    style={{ fontFamily: 'monospace' }} // Use monospace for better IBAN display
                     // required
                   />
-                  {fieldErrors.bank_account_iban && (
-                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_iban}</p>
+                  {(fieldErrors.bank_account_iban || ibanError) && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {fieldErrors.bank_account_iban || ibanError}
+                    </p>
                   )}
+                  {/* <p className="text-xs text-gray-500 mt-1">
+                    تنسيق الآيبان الإماراتي: AE + 21 رقم (مثال: AE60 0860 0000 0972 6532 952)
+                  </p> */}
                 </div>
               </div>
 
