@@ -3315,7 +3315,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </Button>
                   {/* add filter by is_home_service,is_beautician */}
                   <div className="flex gap-4">
-                    <div className="w-[200px]">
+                    {/* <div className="w-[200px]">
                       <Select
                         value={isHomeService ? "home" : "all"}
                         onValueChange={(value) =>
@@ -3332,9 +3332,9 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
+                    </div> */}
 
-                    <div className="w-[200px]">
+                    {/* <div className="w-[200px]">
                       <Select
                         value={isBeautician ? "beautician" : "all"}
                         onValueChange={(value) =>
@@ -3351,7 +3351,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 <Separator />
