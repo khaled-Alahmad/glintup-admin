@@ -77,7 +77,7 @@ export default function SalonsManagement() {
         limit: perPage.toString(),
         ...(searchQuery && { search: searchQuery }),
         ...(statusFilter !== "all" && {
-          is_active: statusFilter === "نشط" ? "1" : "0",
+          is_active: statusFilter === "1" ? "1" : "0",
         }),
       });
 
