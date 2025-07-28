@@ -117,6 +117,8 @@ export default function AppointmentsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+  const [salons, setSalons] = useState<Salon[]>([]);
+  const [salonFilter, setSalonFilter] = useState("all");
   const { toast } = useToast();
   const [selectedDateFrom, setSelectedDateFrom] = useState<Date | undefined>(
     undefined
@@ -138,7 +140,23 @@ export default function AppointmentsManagement() {
     dateFilter,
     selectedDateFrom,
     selectedDateTo,
+    salonFilter,
   ]); // Add dependencies
+
+  useEffect(() => {
+    fetchSalons();
+  }, []);
+
+  const fetchSalons = async () => {
+    try {
+      const response = await fetchData("admin/salons");
+      if (response.success) {
+        setSalons(response.data);
+      }
+    } catch (error) {
+      console.error("فشل في جلب الصالونات:", error);
+    }
+  };
 
   const fetchBookings = async () => {
     try {
@@ -147,6 +165,7 @@ export default function AppointmentsManagement() {
         page: page.toString(),
         limit: perPage.toString(),
         ...(statusFilter !== "all" && { status: statusFilter }),
+        ...(salonFilter !== "all" && { salon_id: salonFilter }),
         ...(selectedDateFrom &&
           selectedDateTo && {
             date_from: new Date(selectedDateFrom.getTime() + 86400000)
@@ -405,6 +424,28 @@ export default function AppointmentsManagement() {
                       {statusOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={salonFilter}
+                    onValueChange={(value) => {
+                      setSalonFilter(value);
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <SelectValue placeholder="جميع الصالونات" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الصالونات</SelectItem>
+                      {salons.map((salon) => (
+                        <SelectItem key={salon.id} value={salon.id.toString()}>
+                          {salon.merchant_commercial_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
