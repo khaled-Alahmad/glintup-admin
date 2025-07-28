@@ -659,6 +659,7 @@ export default function AddSalon() {
                     }}
                     placeholder="اختر تاريخ الميلاد"
                     maxDate={new Date()} // Don't allow future dates for birth date
+                    showYearSelector={true} // Enable year selector for birth date
                   />
                 </div>
                 {fieldErrors.birth_date && (
