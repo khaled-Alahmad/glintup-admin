@@ -320,15 +320,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "نشط":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
-          >
-            نشط
-          </Badge>
-        );
+
       case "cancelled":
         return (
           <Badge
@@ -347,7 +339,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
             مؤكد
           </Badge>
         );
-      case "مكتمل":
+      case "completed":
         return (
           <Badge
             variant="outline"

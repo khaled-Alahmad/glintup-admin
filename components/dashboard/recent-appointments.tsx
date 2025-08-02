@@ -1,7 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CalendarCheck2, CalendarX2, Clock } from "lucide-react"
+import { CalendarCheck2, CalendarX2, Clock, Eye } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 interface Salon {
   id: number;
@@ -28,6 +29,7 @@ interface Appointment {
 }
 
 export function RecentAppointments({ appointments }: { appointments: Appointment[] }) {
+  const router = useRouter();
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "confirmed":
@@ -78,12 +80,9 @@ export function RecentAppointments({ appointments }: { appointments: Appointment
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-            {appointment.status === "cancelled" ? (
-              <CalendarX2 className="h-4 w-4 text-red-500" />
-            ) : (
-              <CalendarCheck2 className="h-4 w-4 text-green-500" />
-            )}
+          <Button onClick={() => router.push(`/appointments/${appointment.id}`)} variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+            <Eye className="h-4 w-4 text-green-500" />
+
           </Button>
         </div>
       ))}

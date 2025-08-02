@@ -741,9 +741,11 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
       if (!editingStaff) return;
 
       const formData = new FormData(e.currentTarget);
+      console.log(editingStaff, "editingStaff");
 
       try {
-        const response = await updateData(
+        // First update staff basic info
+        const staffResponse = await updateData(
           `admin/salon-staff/${editingStaff.id}`,
           {
             salon_id: salonId,
@@ -755,11 +757,19 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
             birth_date: formData.get("birth_date"),
             position: formData.get("position"),
             is_active: formData.get("is_active") === "1",
-            permissions: Array.from(formData.getAll("permissions")).map(Number),
           }
         );
 
-        if (response.success) {
+        // Then update permissions using the new endpoint
+        const permissionsToUpdate = Array.from(formData.getAll("permissions")).map(Number);
+        const permissionsResponse = await addData(
+          `admin/salon-staff/${editingStaff.id}/permissions`,
+          {
+            permissions: permissionsToUpdate,
+          }
+        );
+
+        if (staffResponse.success && permissionsResponse.success) {
           toast({
             title: "تم",
             description: "تم تحديث بيانات الموظف بنجاح",

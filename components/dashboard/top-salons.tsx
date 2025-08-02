@@ -66,7 +66,7 @@ export function TopSalons({ salons }: {
     name: string;
     logo: string;
     location: string;
-    images: string[];
+    images: Array<{ url: string; alt: string }>;
     bookingsCount: number;
     rating: number;
     maxBookings: number;
@@ -75,6 +75,8 @@ export function TopSalons({ salons }: {
     color: string;
   }>
 }) {
+  console.log("TopSalons component rendered with salons:", salons);
+
 
   return (
     <div className="space-y-4">
@@ -85,7 +87,9 @@ export function TopSalons({ salons }: {
         >
           <div className="flex items-center gap-4">
             <Avatar className="h-10 w-10 border ring-2 ring-primary/10">
-              <AvatarImage src={salon.images[0].url} alt={salon.merchant_commercial_name} />
+              {salon.images[0] && salon.images[0].url && (
+                <AvatarImage src={salon.images[0].url} alt={salon.merchant_commercial_name} />
+              )}
               <AvatarFallback>{salon.merchant_commercial_name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-1">
