@@ -7,8 +7,6 @@ interface NotificationItem {
   id: string;
   title: string;
   body: string;
-  icon?: string;
-  image?: string;
   duration?: number;
 }
 
@@ -38,8 +36,7 @@ const NotificationContainer = () => {
         addNotification({
           title: payload.notification.title,
           body: payload.notification.body,
-          icon: payload.notification.icon || '/logo.png',
-          image: payload.notification.image,
+          // icon: payload.notification.icon || '/logo.png',
           duration: 5000
         });
       }
@@ -64,8 +61,6 @@ const NotificationContainer = () => {
           key={notification.id}
           title={notification.title}
           body={notification.body}
-          icon={notification.icon}
-          image={notification.image}
           onClose={() => removeNotification(notification.id)}
           className="animate-in slide-in-from-right"
         />

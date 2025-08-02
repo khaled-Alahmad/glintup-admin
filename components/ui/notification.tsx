@@ -7,8 +7,6 @@ import { X } from "lucide-react";
 interface NotificationProps {
     title: string;
     body: string;
-    icon?: string;
-    image?: string;
     onClose?: () => void;
     className?: string;
 }
@@ -16,8 +14,6 @@ interface NotificationProps {
 const Notification = ({
     title,
     body,
-    icon = '/logo.png',
-    image,
     onClose,
     className,
 }: NotificationProps) => {
@@ -33,15 +29,7 @@ const Notification = ({
         >
             <div className="flex items-start p-4">
                 {/* Icon */}
-                {icon && (
-                    <div className="flex-shrink-0">
-                        <img
-                            className="h-10 w-10 rounded-full"
-                            src={icon}
-                            alt="Notification icon"
-                        />
-                    </div>
-                )}
+
 
                 {/* Content */}
                 <div className="ml-4 w-full">

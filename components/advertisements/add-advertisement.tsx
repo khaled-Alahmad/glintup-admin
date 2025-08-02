@@ -314,7 +314,13 @@ export default function AddAdvertisement() {
                     <p className="text-sm text-gray-600 mb-1">
                       اسحب وأفلت الصورة هنا أو انقر للتصفح
                     </p>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF حتى 5MB</p>
+                    <p className="text-xs text-gray-500">PNG, JPG حتى 5MB لكل صورة</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      📐 قياسات الصورة المطلوبة: نسبة 2:1 (العرض ضعفي الطول)
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      مثال: 1200x600 بكسل أو 1600x800 بكسل
+                    </p>
                   </div>
                 </Label>
               )}
