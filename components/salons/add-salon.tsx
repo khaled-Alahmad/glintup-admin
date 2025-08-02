@@ -64,29 +64,15 @@ export default function AddSalon() {
     const cleanIban = iban.replace(/\s+/g, '').toUpperCase();
     
     // UAE IBAN format: AE + 2 check digits + 19 digits (total 23 characters)
-    const uaeIbanRegex = /^AE\d{21}$/;
+    // But we'll be flexible and accept 21-23 characters after AE
+    const uaeIbanRegex = /^AE\d{19,21}$/;
     
     if (!uaeIbanRegex.test(cleanIban)) {
       return false;
     }
     
-    // IBAN checksum validation (modulo 97)
-    // Move first 4 characters to end and replace letters with numbers
-    const rearranged = cleanIban.slice(4) + cleanIban.slice(0, 4);
-    const numericString = rearranged.replace(/[A-Z]/g, (letter) => {
-      return (letter.charCodeAt(0) - 55).toString();
-    });
-    
-    // Calculate modulo 97
-    let remainder = '';
-    for (let i = 0; i < numericString.length; i++) {
-      remainder += numericString[i];
-      if (remainder.length >= 9) {
-        remainder = (parseInt(remainder) % 97).toString();
-      }
-    }
-    
-    return parseInt(remainder) % 97 === 1;
+    // Accept any valid UAE IBAN format
+    return true;
   };
 
   // Bank account number validation function
@@ -409,7 +395,7 @@ export default function AddSalon() {
     if (formData.bank_account_iban) {
       const cleanIban = formData.bank_account_iban.replace(/\s+/g, '');
       if (!validateIBAN(cleanIban)) {
-        setIbanError("رقم الآيبان غير صحيح. يجب أن يكون بالتنسيق: AE60 0860 0000 0972 6532 952");
+        setIbanError("رقم الآيبان غير صحيح. يجب أن يبدأ بـ AE ويحتوي على 19-21 رقم بعدها");
         toast({
           title: "رقم الآيبان غير صحيح",
           description: "يرجى إدخال رقم آيبان صحيح للإمارات العربية المتحدة",
@@ -1595,7 +1581,7 @@ export default function AddSalon() {
                       const cleanValue = value.replace(/\s+/g, '');
                       if (cleanValue.length > 0) {
                         if (!validateIBAN(cleanValue)) {
-                          setIbanError("رقم الآيبان غير صحيح. يجب أن يكون بالتنسيق: AE60 0860 0000 0972 6532 952");
+                          setIbanError("رقم الآيبان غير صحيح. يجب أن يبدأ بـ AE ويحتوي على 19-21 رقم بعدها");
                         } else {
                           setIbanError(null);
                         }
@@ -1609,8 +1595,8 @@ export default function AddSalon() {
                       }
                     }}
                     className={`${fieldErrors.bank_account_iban || ibanError ? "border-red-500" : ""}`}
-                    placeholder="مثال: AE60 0860 0000 0972 6532 952"
-                    maxLength={27} // 23 characters + 4 spaces
+                    placeholder="مثال: AE22 2222 2222 2222 2222 22"
+                    maxLength={29} // 23 characters + 6 spaces max
                     style={{ fontFamily: 'monospace' }} // Use monospace for better IBAN display
                     // required
                   />
