@@ -46,7 +46,7 @@ export default function EditGift({ giftId }: EditGiftProps) {
     const fetchGift = async () => {
       try {
         const response = await fetchData(`admin/gifts/${giftId}`);
-        
+
         if (response.success) {
           const giftData = response.data;
           setGift(giftData);
@@ -121,16 +121,16 @@ export default function EditGift({ giftId }: EditGiftProps) {
 
       try {
         console.log("رفع الصورة الجديدة:", file.name, "حجم:", file.size);
-        
+
         const imageFormData = new FormData();
         imageFormData.append("folder", "gifts");
         imageFormData.append("image", file);
 
         console.log("إرسال طلب رفع الصورة إلى: general/upload-image");
         const imageResponse = await addData("general/upload-image", imageFormData, {}, true);
-        
+
         console.log("استجابة رفع الصورة:", imageResponse);
-        
+
         if (imageResponse.success) {
           setUploadedIconName(imageResponse.data.image_name);
           setIconPreview(imageResponse.data.image_url);
@@ -183,7 +183,7 @@ export default function EditGift({ giftId }: EditGiftProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name_ar.trim() || !formData.name_en.trim()) {
       toast({
         variant: "destructive",
@@ -196,25 +196,27 @@ export default function EditGift({ giftId }: EditGiftProps) {
     setIsLoading(true);
 
     try {
-      // Submit gift data (image already uploaded if changed)
-      const submitData = new FormData();
-      submitData.append("name[ar]", formData.name_ar);
-      submitData.append("name[en]", formData.name_en);
-      submitData.append("is_active", formData.is_active ? "1" : "0");
-      submitData.append("order", formData.order.toString());
-      submitData.append("_method", "PUT");
-      
+      // Submit gift data as JSON object
+      const submitData: any = {
+        name: {
+          ar: formData.name_ar,
+          en: formData.name_en,
+        },
+        is_active: formData.is_active,
+        order: formData.order,
+      };
+
+      // Add icon data only if there are changes
       if (uploadedIconName) {
         if (uploadedIconName === "remove") {
-          // إرسال قيمة فارغة لحذف الصورة
-          submitData.append("icon", "");
+          submitData.icon = "";
         } else {
-          // إرسال اسم الصورة الجديدة
-          submitData.append("icon", uploadedIconName);
+          submitData.icon = uploadedIconName;
         }
       }
+      // If no uploadedIconName, don't include icon field to preserve existing image
 
-      const response = await updateData(`admin/gifts/${giftId}`, submitData, true);
+      const response = await updateData(`admin/gifts/${giftId}`, submitData);
 
       if (response.success) {
         toast({
@@ -459,7 +461,7 @@ export default function EditGift({ giftId }: EditGiftProps) {
                   )}
                 </div>
               )}
-              
+
               <div className="text-center">
                 <Input
                   type="file"
@@ -490,8 +492,8 @@ export default function EditGift({ giftId }: EditGiftProps) {
               إلغاء
             </Button>
           </Link>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading || isUploadingIcon}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >

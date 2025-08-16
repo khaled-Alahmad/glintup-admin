@@ -14,12 +14,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Filter, MoreHorizontal, Search } from "lucide-react"
+import { Calendar, Filter, MoreHorizontal, Search, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import Link from "next/link"
-import { fetchData, updateData } from "@/lib/apiHelper"
+import { fetchData, updateData, deleteData } from "@/lib/apiHelper"
 import { useToast } from "@/hooks/use-toast"
 import { PaginationWithInfo } from "../ui/pagination-with-info"
 import { DateRange } from "react-day-picker"
@@ -67,6 +77,9 @@ export default function AdvertisementsManagement() {
   const [totalItems, setTotalItems] = useState(0);
   // add filter for get_app_ads_available and it 1 or 0
   const [availableFilter, setAvailableFilter] = useState(0);
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [adToDelete, setAdToDelete] = useState<Advertisement | null>(null);
 
   const [perPage, setPerPage] = useState(10);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
@@ -124,6 +137,37 @@ export default function AdvertisementsManagement() {
     } catch (error) {
       console.error("Failed to update status:", error);
     }
+  };
+
+  const handleDeleteAd = async () => {
+    if (!adToDelete) return;
+    
+    try {
+      const response = await deleteData(`admin/promotion-ads/${adToDelete.id}`);
+      if (response.success) {
+        await fetchAdvertisements();
+        toast({
+          title: "تم حذف الإعلان بنجاح",
+          description: "تم حذف الإعلان من النظام",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete advertisement:", error);
+      toast({
+        title: "خطأ في حذف الإعلان",
+        description: "فشل في حذف الإعلان، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setAdToDelete(null);
+    }
+  };
+
+  const openDeleteDialog = (ad: Advertisement) => {
+    setAdToDelete(ad);
+    setDeleteDialogOpen(true);
   };
   // const filteredAds = advertisements.filter((ad) => {
   //   const matchesSearch =
@@ -274,7 +318,7 @@ export default function AdvertisementsManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>الإعلان</TableHead>
-                    <TableHead>المزود</TableHead>
+                    {/* <TableHead>المزود</TableHead> */}
                     <TableHead>الفترة</TableHead>
                     <TableHead>المشاهدات</TableHead>
                     <TableHead>النقرات</TableHead>
@@ -343,7 +387,7 @@ export default function AdvertisementsManagement() {
                           <span className="font-medium">{ad.title.ar}</span>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         {ad.salon && (
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8 border">
@@ -353,7 +397,7 @@ export default function AdvertisementsManagement() {
                             <span>{ad.salon.merchant_commercial_name}</span>
                           </div>
                         )}
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <div className="flex flex-col text-sm">
                           <div className="flex items-center">
@@ -427,6 +471,14 @@ export default function AdvertisementsManagement() {
                                 إيقاف الإعلان
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => openDeleteDialog(ad)}
+                            >
+                              <Trash2 className="h-4 w-4 ml-2" />
+                              حذف الإعلان
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -450,6 +502,27 @@ export default function AdvertisementsManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد حذف الإعلان</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من رغبتك في حذف إعلان "{adToDelete?.title.ar}"؟ هذا الإجراء لا يمكن التراجع عنه.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAd}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              حذف الإعلان
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -81,16 +81,16 @@ export default function AddGift() {
 
       try {
         console.log("رفع الصورة:", file.name, "حجم:", file.size);
-        
+
         const imageFormData = new FormData();
         imageFormData.append("folder", "gifts");
         imageFormData.append("image", file);
 
         console.log("إرسال طلب رفع الصورة إلى: general/upload-image");
         const imageResponse = await addData("general/upload-image", imageFormData, {}, true);
-        
+
         console.log("استجابة رفع الصورة:", imageResponse);
-        
+
         if (imageResponse.success) {
           setUploadedIconName(imageResponse.data.image_name);
           setIconPreview(imageResponse.data.image_url);
@@ -136,7 +136,7 @@ export default function AddGift() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name_ar.trim() || !formData.name_en.trim()) {
       toast({
         variant: "destructive",
@@ -155,7 +155,7 @@ export default function AddGift() {
       submitData.append("name[en]", formData.name_en);
       submitData.append("is_active", formData.is_active ? "1" : "0");
       submitData.append("order", formData.order.toString());
-      
+
       if (uploadedIconName) {
         submitData.append("icon", uploadedIconName);
       }
@@ -322,10 +322,25 @@ export default function AddGift() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="w-32 h-32 mx-auto rounded-xl border-2 border-dashed border-muted flex items-center justify-center bg-muted/10">
+                  {/* <div className="w-32 h-32 mx-auto rounded-xl border-2 border-dashed border-muted flex items-center justify-center bg-muted/10">
                     <Upload className="h-8 w-8 text-muted-foreground" />
-                  </div>
+                  </div> */}
                   <div className="text-center">
+                    <div className="flex flex-col items-center mb-2">
+                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        اسحب وأفلت صور المزود هنا أو انقر للتصفح
+                      </p>
+                      <p className="text-xs text-gray-500 mb-1">
+                        PNG, JPG حتى 5MB لكل صورة
+                      </p>
+                      <p className="text-xs text-blue-600 font-medium">
+                        📐 قياسات الصورة المطلوبة: نسبة 2:1 (العرض ضعفي الطول)
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        مثال: 1200x600 بكسل أو 1600x800 بكسل
+                      </p>
+                    </div>
                     <Input
                       type="file"
                       accept="image/*"
@@ -357,8 +372,8 @@ export default function AddGift() {
               إلغاء
             </Button>
           </Link>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading || isUploadingIcon}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >

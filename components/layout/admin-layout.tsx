@@ -53,6 +53,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [visibleNotifications, setVisibleNotifications] = useState(5); // عدد الإشعارات المعروضة
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -276,7 +277,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div> */}
 
           <div className="flex items-center mr-auto gap-4">
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={(open) => {
+              if (!open) {
+                // إعادة تعيين عدد الإشعارات المعروضة عند إغلاق القائمة
+                setVisibleNotifications(5);
+              }
+            }}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -293,18 +299,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <span className="sr-only">الإشعارات</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 mt-1">
+              <DropdownMenuContent align="end" className="w-80 mt-1 max-h-[400px] overflow-y-auto">
                 <DropdownMenuLabel className="flex items-center justify-between">
                   <span>الإشعارات</span>
-                  {/* <Button
-                    variant="ghost"
-                    onClick={handleMarkAllAsRead}
-                    disabled={isLoading}
-                    size="sm"
-                    className="h-auto p-1 text-xs text-primary"
-                  >
-                    تعيين الكل كمقروء
-                  </Button> */}
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      onClick={handleMarkAllAsRead}
+                      disabled={isLoading}
+                      size="sm"
+                      className="h-auto p-1 text-xs text-primary"
+                    >
+                      تعيين الكل كمقروء
+                    </Button>
+                  )}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications.length === 0 ? (
@@ -312,46 +320,71 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     لا توجد إشعارات جديدة
                   </DropdownMenuItem>
                 ) : (
-                  notifications.map((notification, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      className="flex flex-col items-start py-2 px-4 cursor-pointer hover:bg-accent focus:bg-accent"
-                      onClick={() => {
-                        if (notification.notificationable_type && notification.notificationable_id) {
-                          handleNavigateToDetails(notification);
-                        } else {
-                          handleMarkAsRead(notification.id);
-                        }
-                      }}
-                    >
-                      <div className="flex w-full items-start gap-2">
-                        <div
-                          className={`h-2 w-2 mt-1.5 rounded-full ${notification.is_read ? "bg-gray-300" : "bg-blue-500"
-                            } flex-shrink-0`}
-                        ></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-medium">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs font-medium mt-1">
-                            {new Date(notification.created_at).toLocaleString(
-                              "ar-SA",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
-                          </p>
+                  <>
+                    {notifications.slice(0, visibleNotifications).map((notification, index) => (
+                      <DropdownMenuItem
+                        key={index}
+                        className="flex flex-col items-start py-2 px-4 cursor-pointer hover:bg-accent focus:bg-accent"
+                        onClick={() => {
+                          if (notification.notificationable_type && notification.notificationable_id) {
+                            handleNavigateToDetails(notification);
+                          } else {
+                            handleMarkAsRead(notification.id);
+                          }
+                        }}
+                      >
+                        <div className="flex w-full items-start gap-2">
+                          <div
+                            className={`h-2 w-2 mt-1.5 rounded-full ${notification.is_read ? "bg-gray-300" : "bg-blue-500"
+                              } flex-shrink-0`}
+                          ></div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              {notification.title}
+                            </p>
+                            <p className="text-xs text-medium">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs font-medium mt-1">
+                              {new Date(notification.created_at).toLocaleString(
+                                "ar-SA",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </DropdownMenuItem>
-                  ))
+                      </DropdownMenuItem>
+                    ))}
+                    
+                    {/* زر عرض المزيد */}
+                    {/* {notifications.length > visibleNotifications && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setVisibleNotifications(prev => Math.min(prev + 5, notifications.length))}
+                          className="justify-center text-primary cursor-pointer text-sm py-2"
+                        >
+                          عرض المزيد ({notifications.length - visibleNotifications} متبقي)
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                     */}
+                    {/* زر عرض أقل إذا كان هناك أكثر من 5 إشعارات معروضة */}
+                    {visibleNotifications > 5 && (
+                      <DropdownMenuItem
+                        onClick={() => setVisibleNotifications(5)}
+                        className="justify-center text-muted-foreground cursor-pointer text-sm py-1"
+                      >
+                        عرض أقل
+                      </DropdownMenuItem>
+                    )}
+                  </>
                 )}
                 {isLoading && (
                   <DropdownMenuItem className="text-center text-sm text-muted-foreground">

@@ -201,7 +201,7 @@ export default function AddAdvertisement() {
           </div>
 
           {/* Update salon select */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="salon_id">المزود</Label>
             <Select name="salon_id" required>
               <SelectTrigger className="w-full">
@@ -229,7 +229,7 @@ export default function AddAdvertisement() {
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           {/* Update description fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

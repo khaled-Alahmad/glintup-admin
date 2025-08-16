@@ -216,8 +216,9 @@ function SortableGroupRow({ group, onEdit, onDelete, onViewServices, onAddServic
                           {groupService.service.name.ar}
                         </span>
                         <div className="flex items-center gap-1 text-green-600 ml-2">
-                          <DollarSign className="h-3 w-3" />
                           <span className="font-bold text-xs">{groupService.service.final_price}</span>
+                        د.إ
+
                         </div>
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">

@@ -33,7 +33,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
     title: { ar: '', en: '' },
     status: 'approved',
     button_text: { ar: '', en: '' },
-    salon_id: '',
+    // salon_id: '',
   });
   const [uploadedImageName, setUploadedImageName] = useState<string>("");
   const [salons, setSalons] = useState([]);
@@ -70,7 +70,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
           title: ad.title,
           button_text: ad.button_text,
           status: ad.status,
-          salon_id: ad.salon_id ? String(ad.salon_id) : '',
+          // salon_id: ad.salon_id ? String(ad.salon_id) : '',
         });
       }
     } catch (error) {
@@ -145,7 +145,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
           ar: formData.button_text.ar,
           en: formData.button_text.en,
         },
-        salon_id: formData.salon_id ? Number(formData.salon_id) : null,
+        // salon_id: formData.salon_id ? Number(formData.salon_id) : null,
         is_active: isActive ? 1 : 0,
         image: uploadedImageName || null,
         status: formData.status,
@@ -234,7 +234,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                 </div>
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="salon_id">المزود</Label>
                 <Select name="salon_id" value={formData.salon_id}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, salon_id: value }))}
@@ -264,7 +264,7 @@ export default function EditAdvertisement({ advertisementId }: EditAdvertisement
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
