@@ -61,16 +61,16 @@ export default function AddSalon() {
   // IBAN validation function for UAE
   const validateIBAN = (iban: string): boolean => {
     // Remove spaces and convert to uppercase
-    const cleanIban = iban.replace(/\s+/g, '').toUpperCase();
-    
+    const cleanIban = iban.replace(/\s+/g, "").toUpperCase();
+
     // UAE IBAN format: AE + 2 check digits + 19 digits (total 23 characters)
     // But we'll be flexible and accept 21-23 characters after AE
     const uaeIbanRegex = /^AE\d{19,21}$/;
-    
+
     if (!uaeIbanRegex.test(cleanIban)) {
       return false;
     }
-    
+
     // Accept any valid UAE IBAN format
     return true;
   };
@@ -78,8 +78,8 @@ export default function AddSalon() {
   // Bank account number validation function
   const validateBankAccount = (accountNumber: string): boolean => {
     // Remove any non-digit characters
-    const cleanAccountNumber = accountNumber.replace(/\D/g, '');
-    
+    const cleanAccountNumber = accountNumber.replace(/\D/g, "");
+
     // Check if length is between 8 and 14 digits
     return cleanAccountNumber.length >= 8 && cleanAccountNumber.length <= 14;
   };
@@ -142,7 +142,7 @@ export default function AddSalon() {
         }));
         // Clear logo error when logo is uploaded
         if (fieldErrors.logo) {
-          setFieldErrors(prev => ({ ...prev, logo: '' }));
+          setFieldErrors((prev) => ({ ...prev, logo: "" }));
         }
       }
       setIsLoading(false);
@@ -211,7 +211,7 @@ export default function AddSalon() {
 
         // Clear gallery error when images are added
         if (fieldErrors.gallery && validResults.length > 0) {
-          setFieldErrors(prev => ({ ...prev, gallery: '' }));
+          setFieldErrors((prev) => ({ ...prev, gallery: "" }));
         }
 
         setIsLoading(false);
@@ -233,8 +233,11 @@ export default function AddSalon() {
 
   const [servicesListFile, setServicesListFile] = useState<File | null>(null);
   const [tradeLicenseFile, setTradeLicenseFile] = useState<File | null>(null);
-  const [vatCertificateFile, setVatCertificateFile] = useState<File | null>(null);
-  const [bankAccountCertificateFile, setBankAccountCertificateFile] = useState<File | null>(null);
+  const [vatCertificateFile, setVatCertificateFile] = useState<File | null>(
+    null
+  );
+  const [bankAccountCertificateFile, setBankAccountCertificateFile] =
+    useState<File | null>(null);
 
   // Form validation errors
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
@@ -245,107 +248,109 @@ export default function AddSalon() {
 
     // Owner information validation
     if (!formData.user.first_name.trim()) {
-      errors['first_name'] = 'الاسم الأول مطلوب';
+      errors["first_name"] = "الاسم الأول مطلوب";
     }
     if (!formData.user.last_name.trim()) {
-      errors['last_name'] = 'الاسم الأخير مطلوب';
+      errors["last_name"] = "الاسم الأخير مطلوب";
     }
     if (!formData.user.password.trim()) {
-      errors['password'] = 'كلمة المرور مطلوبة';
+      errors["password"] = "كلمة المرور مطلوبة";
     }
     if (formData.user.password.length < 8) {
-      errors['password'] = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+      errors["password"] = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
     }
     if (!formData.user.password_confirmation.trim()) {
-      errors['password_confirmation'] = 'تأكيد كلمة المرور مطلوب';
+      errors["password_confirmation"] = "تأكيد كلمة المرور مطلوب";
     }
     if (formData.user.password !== formData.user.password_confirmation) {
-      errors['password_confirmation'] = 'كلمة المرور وتأكيدها غير متطابقتين';
+      errors["password_confirmation"] = "كلمة المرور وتأكيدها غير متطابقتين";
     }
     if (!formData.user.phone.trim()) {
-      errors['phone'] = 'رقم الهاتف مطلوب';
+      errors["phone"] = "رقم الهاتف مطلوب";
     } else if (!isValidPhone(formData.user.phone)) {
-      errors['phone'] = 'رقم الهاتف غير صحيح';
+      errors["phone"] = "رقم الهاتف غير صحيح";
     }
     if (!formData.user.birth_date.trim()) {
-      errors['birth_date'] = 'تاريخ الميلاد مطلوب';
+      errors["birth_date"] = "تاريخ الميلاد مطلوب";
     }
 
     // Provider information validation
     if (!formData.merchant_legal_name.trim()) {
-      errors['merchant_legal_name'] = 'الاسم القانوني مطلوب';
+      errors["merchant_legal_name"] = "الاسم القانوني مطلوب";
     }
     if (!formData.merchant_commercial_name.trim()) {
-      errors['merchant_commercial_name'] = 'الاسم التجاري مطلوب';
+      errors["merchant_commercial_name"] = "الاسم التجاري مطلوب";
     }
     if (!formData.type.trim()) {
-      errors['type'] = 'نوع المزود مطلوب';
+      errors["type"] = "نوع المزود مطلوب";
     }
 
     // Contact information validation
     if (!formData.contact_email.trim()) {
-      errors['contact_email'] = 'البريد الإلكتروني للتواصل مطلوب';
+      errors["contact_email"] = "البريد الإلكتروني للتواصل مطلوب";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email)) {
-      errors['contact_email'] = 'البريد الإلكتروني غير صحيح';
+      errors["contact_email"] = "البريد الإلكتروني غير صحيح";
     }
     if (!formData.contact_number.trim()) {
-      errors['contact_number'] = 'رقم هاتف التواصل مطلوب';
+      errors["contact_number"] = "رقم هاتف التواصل مطلوب";
     } else if (!isValidPhone(formData.contact_number)) {
-      errors['contact_number'] = 'رقم هاتف التواصل غير صحيح';
+      errors["contact_number"] = "رقم هاتف التواصل غير صحيح";
     }
     if (!formData.business_contact_email.trim()) {
-      errors['business_contact_email'] = 'البريد الإلكتروني للأعمال مطلوب';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.business_contact_email)) {
-      errors['business_contact_email'] = 'البريد الإلكتروني للأعمال غير صحيح';
+      errors["business_contact_email"] = "البريد الإلكتروني للأعمال مطلوب";
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.business_contact_email)
+    ) {
+      errors["business_contact_email"] = "البريد الإلكتروني للأعمال غير صحيح";
     }
     if (!formData.business_contact_number.trim()) {
-      errors['business_contact_number'] = 'رقم هاتف الأعمال مطلوب';
+      errors["business_contact_number"] = "رقم هاتف الأعمال مطلوب";
     } else if (!isValidPhone(formData.business_contact_number)) {
-      errors['business_contact_number'] = 'رقم هاتف الأعمال غير صحيح';
+      errors["business_contact_number"] = "رقم هاتف الأعمال غير صحيح";
     }
     if (!formData.contact_name.trim()) {
-      errors['contact_name'] = 'اسم جهة الاتصال مطلوب';
+      errors["contact_name"] = "اسم جهة الاتصال مطلوب";
     }
     if (!formData.business_contact_name.trim()) {
-      errors['business_contact_name'] = 'اسم جهة الاتصال للأعمال مطلوب';
+      errors["business_contact_name"] = "اسم جهة الاتصال للأعمال مطلوب";
     }
 
     // Address validation
     if (!formData.address.trim()) {
-      errors['address'] = 'العنوان مطلوب';
+      errors["address"] = "العنوان مطلوب";
     }
     if (!formData.city_street_name.trim()) {
-      errors['city_street_name'] = 'اسم الشارع والمدينة مطلوب';
+      errors["city_street_name"] = "اسم الشارع والمدينة مطلوب";
     }
     if (!formData.latitude.trim()) {
-      errors['latitude'] = 'خط العرض مطلوب';
+      errors["latitude"] = "خط العرض مطلوب";
     }
     if (!formData.longitude.trim()) {
-      errors['longitude'] = 'خط الطول مطلوب';
+      errors["longitude"] = "خط الطول مطلوب";
     }
 
     // Logo validation
     if (!formData.icon.trim() && !logoPreview) {
-      errors['logo'] = 'شعار المزود مطلوب';
+      errors["logo"] = "شعار المزود مطلوب";
     }
 
     // Gallery images validation
     if (salonImages.length === 0) {
-      errors['gallery'] = 'يجب إضافة صورة واحدة على الأقل للمعرض';
+      errors["gallery"] = "يجب إضافة صورة واحدة على الأقل للمعرض";
     }
 
     // Bank information validation
     if (!formData.bank_name.trim()) {
-      errors['bank_name'] = 'اسم البنك مطلوب';
+      errors["bank_name"] = "اسم البنك مطلوب";
     }
     // if (!formData.bank_account_number.trim()) {
     //   errors['bank_account_number'] = 'رقم الحساب البنكي مطلوب';
     // }
     if (!formData.bank_account_holder_name.trim()) {
-      errors['bank_account_holder_name'] = 'اسم صاحب الحساب البنكي مطلوب';
+      errors["bank_account_holder_name"] = "اسم صاحب الحساب البنكي مطلوب";
     }
     if (!formData.bank_account_iban.trim()) {
-      errors['bank_account_iban'] = 'رقم الآيبان مطلوب';
+      errors["bank_account_iban"] = "رقم الآيبان مطلوب";
     }
     // if (!formData.vat_number.trim()) {
     //   errors['vat_number'] = 'الرقم الضريبي مطلوب';
@@ -353,16 +358,19 @@ export default function AddSalon() {
 
     // Files validation
     if (!formData.services_list.trim() && !servicesListFile) {
-      errors['services_list'] = 'قائمة الخدمات مطلوبة';
+      errors["services_list"] = "قائمة الخدمات مطلوبة";
     }
     if (!formData.trade_license.trim() && !tradeLicenseFile) {
-      errors['trade_license'] = 'الرخصة التجارية مطلوبة';
+      errors["trade_license"] = "الرخصة التجارية مطلوبة";
     }
     if (!formData.vat_certificate.trim() && !vatCertificateFile) {
-      errors['vat_certificate'] = 'شهادة ضريبة القيمة المضافة مطلوبة';
+      errors["vat_certificate"] = "شهادة ضريبة القيمة المضافة مطلوبة";
     }
-    if (!formData.bank_account_certificate.trim() && !bankAccountCertificateFile) {
-      errors['bank_account_certificate'] = 'شهادة الحساب البنكي مطلوبة';
+    if (
+      !formData.bank_account_certificate.trim() &&
+      !bankAccountCertificateFile
+    ) {
+      errors["bank_account_certificate"] = "شهادة الحساب البنكي مطلوبة";
     }
 
     setFieldErrors(errors);
@@ -381,7 +389,10 @@ export default function AddSalon() {
     setBankAccountError(null);
 
     // Validate bank account number before form submission
-    if (formData.bank_account_number && !validateBankAccount(formData.bank_account_number)) {
+    if (
+      formData.bank_account_number &&
+      !validateBankAccount(formData.bank_account_number)
+    ) {
       setBankAccountError("رقم الحساب البنكي يجب أن يكون بين 8 و 14 رقم");
       toast({
         title: "رقم الحساب البنكي غير صحيح",
@@ -393,9 +404,11 @@ export default function AddSalon() {
 
     // Validate IBAN before form submission
     if (formData.bank_account_iban) {
-      const cleanIban = formData.bank_account_iban.replace(/\s+/g, '');
+      const cleanIban = formData.bank_account_iban.replace(/\s+/g, "");
       if (!validateIBAN(cleanIban)) {
-        setIbanError("رقم الآيبان غير صحيح. يجب أن يبدأ بـ AE ويحتوي على 19-21 رقم بعدها");
+        setIbanError(
+          "رقم الآيبان غير صحيح. يجب أن يبدأ بـ AE ويحتوي على 19-21 رقم بعدها"
+        );
         toast({
           title: "رقم الآيبان غير صحيح",
           description: "يرجى إدخال رقم آيبان صحيح للإمارات العربية المتحدة",
@@ -414,7 +427,7 @@ export default function AddSalon() {
         if (firstErrorField) {
           const element = document.getElementById(firstErrorField);
           if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         }
       }, 100);
@@ -556,14 +569,16 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.first_name) {
-                      setFieldErrors(prev => ({ ...prev, first_name: '' }));
+                      setFieldErrors((prev) => ({ ...prev, first_name: "" }));
                     }
                   }}
                   className={fieldErrors.first_name ? "border-red-500" : ""}
                   // required
                 />
                 {fieldErrors.first_name && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.first_name}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.first_name}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -580,14 +595,16 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.last_name) {
-                      setFieldErrors(prev => ({ ...prev, last_name: '' }));
+                      setFieldErrors((prev) => ({ ...prev, last_name: "" }));
                     }
                   }}
                   className={fieldErrors.last_name ? "border-red-500" : ""}
                   // required
                 />
                 {fieldErrors.last_name && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.last_name}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.last_name}
+                  </p>
                 )}
               </div>
             </div>
@@ -608,14 +625,16 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.password) {
-                      setFieldErrors(prev => ({ ...prev, password: '' }));
+                      setFieldErrors((prev) => ({ ...prev, password: "" }));
                     }
                   }}
                   className={fieldErrors.password ? "border-red-500" : ""}
                   // required
                 />
                 {fieldErrors.password && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.password}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.password}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -636,14 +655,21 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.password_confirmation) {
-                      setFieldErrors(prev => ({ ...prev, password_confirmation: '' }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        password_confirmation: "",
+                      }));
                     }
                   }}
-                  className={fieldErrors.password_confirmation ? "border-red-500" : ""}
+                  className={
+                    fieldErrors.password_confirmation ? "border-red-500" : ""
+                  }
                   // required
                 />
                 {fieldErrors.password_confirmation && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.password_confirmation}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.password_confirmation}
+                  </p>
                 )}
               </div>
             </div>
@@ -679,7 +705,7 @@ export default function AddSalon() {
 
                       // Clear field error when user starts typing
                       if (fieldErrors.phone) {
-                        setFieldErrors(prev => ({ ...prev, phone: '' }));
+                        setFieldErrors((prev) => ({ ...prev, phone: "" }));
                       }
                     }}
                     inputProps={{
@@ -689,27 +715,41 @@ export default function AddSalon() {
                   />
                 </div>
                 {(phoneError || fieldErrors.phone) && (
-                  <p className="text-sm text-red-500 mt-1">{phoneError || fieldErrors.phone}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {phoneError || fieldErrors.phone}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="birth_date">
                   تاريخ الميلاد <span className="text-red-500">*</span>
                 </Label>
-                <div className={fieldErrors.birth_date ? "border border-red-500 rounded-md" : ""}>
+                <div
+                  className={
+                    fieldErrors.birth_date
+                      ? "border border-red-500 rounded-md"
+                      : ""
+                  }
+                >
                   <DatePicker
-                    selected={formData.user.birth_date ? new Date(formData.user.birth_date) : undefined}
+                    selected={
+                      formData.user.birth_date
+                        ? new Date(formData.user.birth_date)
+                        : undefined
+                    }
                     onSelect={(date) => {
                       setFormData((prev) => ({
                         ...prev,
-                        user: { 
-                          ...prev.user, 
-                          birth_date: date ? date.toISOString().split('T')[0] : "" 
+                        user: {
+                          ...prev.user,
+                          birth_date: date
+                            ? date.toISOString().split("T")[0]
+                            : "",
                         },
                       }));
                       // Clear error when user selects a date
                       if (fieldErrors.birth_date) {
-                        setFieldErrors(prev => ({ ...prev, birth_date: '' }));
+                        setFieldErrors((prev) => ({ ...prev, birth_date: "" }));
                       }
                     }}
                     placeholder="اختر تاريخ الميلاد"
@@ -718,7 +758,9 @@ export default function AddSalon() {
                   />
                 </div>
                 {fieldErrors.birth_date && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.birth_date}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.birth_date}
+                  </p>
                 )}
               </div>
             </div>
@@ -742,14 +784,21 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.merchant_legal_name) {
-                      setFieldErrors(prev => ({ ...prev, merchant_legal_name: '' }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        merchant_legal_name: "",
+                      }));
                     }
                   }}
-                  className={fieldErrors.merchant_legal_name ? "border-red-500" : ""}
+                  className={
+                    fieldErrors.merchant_legal_name ? "border-red-500" : ""
+                  }
                   // required
                 />
                 {fieldErrors.merchant_legal_name && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.merchant_legal_name}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.merchant_legal_name}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -766,14 +815,21 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.merchant_commercial_name) {
-                      setFieldErrors(prev => ({ ...prev, merchant_commercial_name: '' }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        merchant_commercial_name: "",
+                      }));
                     }
                   }}
-                  className={fieldErrors.merchant_commercial_name ? "border-red-500" : ""}
+                  className={
+                    fieldErrors.merchant_commercial_name ? "border-red-500" : ""
+                  }
                   // required
                 />
                 {fieldErrors.merchant_commercial_name && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.merchant_commercial_name}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.merchant_commercial_name}
+                  </p>
                 )}
               </div>
             </div>
@@ -822,11 +878,14 @@ export default function AddSalon() {
                     }));
                     // Clear error when user selects
                     if (fieldErrors.type) {
-                      setFieldErrors(prev => ({ ...prev, type: '' }));
+                      setFieldErrors((prev) => ({ ...prev, type: "" }));
                     }
                   }}
                 >
-                  <SelectTrigger id="type" className={fieldErrors.type ? "border-red-500" : ""}>
+                  <SelectTrigger
+                    id="type"
+                    className={fieldErrors.type ? "border-red-500" : ""}
+                  >
                     <SelectValue placeholder="اختر نوع المزود" />
                   </SelectTrigger>
                   <SelectContent>
@@ -837,7 +896,9 @@ export default function AddSalon() {
                   </SelectContent>
                 </Select>
                 {fieldErrors.type && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.type}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.type}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -878,14 +939,19 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.contact_email) {
-                      setFieldErrors(prev => ({ ...prev, contact_email: '' }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        contact_email: "",
+                      }));
                     }
                   }}
                   className={fieldErrors.contact_email ? "border-red-500" : ""}
                   // required
                 />
                 {fieldErrors.contact_email && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.contact_email}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.contact_email}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -915,7 +981,10 @@ export default function AddSalon() {
                       }
                       // Clear field error when user starts typing
                       if (fieldErrors.contact_number) {
-                        setFieldErrors(prev => ({ ...prev, contact_number: '' }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          contact_number: "",
+                        }));
                       }
                     }}
                     inputProps={{
@@ -949,14 +1018,21 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.business_contact_email) {
-                      setFieldErrors(prev => ({ ...prev, business_contact_email: '' }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        business_contact_email: "",
+                      }));
                     }
                   }}
-                  className={fieldErrors.business_contact_email ? "border-red-500" : ""}
+                  className={
+                    fieldErrors.business_contact_email ? "border-red-500" : ""
+                  }
                   // required
                 />
                 {fieldErrors.business_contact_email && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.business_contact_email}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.business_contact_email}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -986,7 +1062,10 @@ export default function AddSalon() {
                       }
                       // Clear field error when user starts typing
                       if (fieldErrors.business_contact_number) {
-                        setFieldErrors(prev => ({ ...prev, business_contact_number: '' }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          business_contact_number: "",
+                        }));
                       }
                     }}
                     inputProps={{
@@ -994,9 +1073,11 @@ export default function AddSalon() {
                       // className: fieldErrors.business_contact_number || businessContactPhoneError ? "border-red-500" : "",
                     }}
                   />
-                  {(businessContactPhoneError || fieldErrors.business_contact_number) && (
+                  {(businessContactPhoneError ||
+                    fieldErrors.business_contact_number) && (
                     <p className="text-sm text-red-500 mt-1">
-                      {businessContactPhoneError || fieldErrors.business_contact_number}
+                      {businessContactPhoneError ||
+                        fieldErrors.business_contact_number}
                     </p>
                   )}
                 </div>
@@ -1018,14 +1099,16 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.contact_name) {
-                      setFieldErrors(prev => ({ ...prev, contact_name: '' }));
+                      setFieldErrors((prev) => ({ ...prev, contact_name: "" }));
                     }
                   }}
                   className={fieldErrors.contact_name ? "border-red-500" : ""}
                   // required
                 />
                 {fieldErrors.contact_name && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.contact_name}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.contact_name}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -1043,14 +1126,21 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.business_contact_name) {
-                      setFieldErrors(prev => ({ ...prev, business_contact_name: '' }));
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        business_contact_name: "",
+                      }));
                     }
                   }}
-                  className={fieldErrors.business_contact_name ? "border-red-500" : ""}
+                  className={
+                    fieldErrors.business_contact_name ? "border-red-500" : ""
+                  }
                   // required
                 />
                 {fieldErrors.business_contact_name && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.business_contact_name}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.business_contact_name}
+                  </p>
                 )}
               </div>
             </div>
@@ -1066,15 +1156,19 @@ export default function AddSalon() {
                   setFormData((prev) => ({ ...prev, address: e.target.value }));
                   // Clear error when user starts typing
                   if (fieldErrors.address) {
-                    setFieldErrors(prev => ({ ...prev, address: '' }));
+                    setFieldErrors((prev) => ({ ...prev, address: "" }));
                   }
                 }}
                 placeholder="العنوان التفصيلي"
-                className={`min-h-[80px] ${fieldErrors.address ? "border-red-500" : ""}`}
+                className={`min-h-[80px] ${
+                  fieldErrors.address ? "border-red-500" : ""
+                }`}
                 // required
               />
               {fieldErrors.address && (
-                <p className="text-sm text-red-500 mt-1">{fieldErrors.address}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {fieldErrors.address}
+                </p>
               )}
             </div>
 
@@ -1092,14 +1186,19 @@ export default function AddSalon() {
                   }));
                   // Clear error when user starts typing
                   if (fieldErrors.city_street_name) {
-                    setFieldErrors(prev => ({ ...prev, city_street_name: '' }));
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      city_street_name: "",
+                    }));
                   }
                 }}
                 className={fieldErrors.city_street_name ? "border-red-500" : ""}
                 // required
               />
               {fieldErrors.city_street_name && (
-                <p className="text-sm text-red-500 mt-1">{fieldErrors.city_street_name}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {fieldErrors.city_street_name}
+                </p>
               )}
             </div>
 
@@ -1118,7 +1217,7 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.latitude) {
-                      setFieldErrors(prev => ({ ...prev, latitude: '' }));
+                      setFieldErrors((prev) => ({ ...prev, latitude: "" }));
                     }
                   }}
                   placeholder="مثال: 24.431126"
@@ -1126,7 +1225,9 @@ export default function AddSalon() {
                   // required
                 />
                 {fieldErrors.latitude && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.latitude}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.latitude}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -1143,7 +1244,7 @@ export default function AddSalon() {
                     }));
                     // Clear error when user starts typing
                     if (fieldErrors.longitude) {
-                      setFieldErrors(prev => ({ ...prev, longitude: '' }));
+                      setFieldErrors((prev) => ({ ...prev, longitude: "" }));
                     }
                   }}
                   placeholder="مثال: 54.649244"
@@ -1151,7 +1252,9 @@ export default function AddSalon() {
                   // required
                 />
                 {fieldErrors.longitude && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.longitude}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.longitude}
+                  </p>
                 )}
               </div>
             </div>
@@ -1252,7 +1355,11 @@ export default function AddSalon() {
                 <Label htmlFor="logo">
                   شعار المزود <span className="text-red-500">*</span>
                 </Label>
-                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.logo ? "border-red-500" : "border-gray-300"}`}>
+                <div
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    fieldErrors.logo ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
                   {logoPreview ? (
                     <div className="relative w-full">
                       <img
@@ -1273,7 +1380,7 @@ export default function AddSalon() {
                           }));
                           // Clear error when logo is removed
                           if (fieldErrors.logo) {
-                            setFieldErrors(prev => ({ ...prev, logo: '' }));
+                            setFieldErrors((prev) => ({ ...prev, logo: "" }));
                           }
                         }}
                       >
@@ -1292,6 +1399,19 @@ export default function AddSalon() {
                         {/* <Button type="button" variant="outline">
                           اختر شعار
                         </Button> */}
+                        <div className="flex flex-col items-center">
+                       
+                          <p className="text-xs text-gray-500 mb-1">
+                            PNG, JPG حتى 5MB لكل صورة
+                          </p>
+                          <p className="text-xs text-blue-600 font-medium">
+                            📐 قياسات الصورة المطلوبة: نسبة 2:1 (العرض ضعفي
+                            الطول)
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            مثال: 1200x600 بكسل أو 1600x800 بكسل
+                          </p>
+                        </div>
                         <Input
                           id="logo"
                           type="file"
@@ -1304,7 +1424,9 @@ export default function AddSalon() {
                   )}
                 </div>
                 {fieldErrors.logo && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.logo}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.logo}
+                  </p>
                 )}
               </div>
               <div className="space-y-4">
@@ -1312,7 +1434,11 @@ export default function AddSalon() {
                 <Label htmlFor="gallery">
                   عدة صور للغلاف<span className="text-red-500">*</span>
                 </Label>
-                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.gallery ? "border-red-500" : "border-gray-300"}`}>
+                <div
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    fieldErrors.gallery ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
                   <Label htmlFor="gallery" className="mt-4">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
@@ -1341,7 +1467,9 @@ export default function AddSalon() {
                   </Label>
                 </div>
                 {fieldErrors.gallery && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.gallery}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.gallery}
+                  </p>
                 )}
 
                 {salonImages.length > 0 && (
@@ -1365,7 +1493,10 @@ export default function AddSalon() {
                             removeGalleryImage(index);
                             // Clear gallery error if at least one image remains
                             if (fieldErrors.gallery && salonImages.length > 1) {
-                              setFieldErrors(prev => ({ ...prev, gallery: '' }));
+                              setFieldErrors((prev) => ({
+                                ...prev,
+                                gallery: "",
+                              }));
                             }
                           }}
                         >
@@ -1452,7 +1583,9 @@ export default function AddSalon() {
                     <SelectContent>
                       <SelectItem value="in_center">في المركز</SelectItem>
                       <SelectItem value="in_house">في المنزل</SelectItem>
-                      <SelectItem value="in_house_and_center">في المركز والمنزل</SelectItem>
+                      <SelectItem value="in_house_and_center">
+                        في المركز والمنزل
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1472,14 +1605,16 @@ export default function AddSalon() {
                       }));
                       // Clear error when user starts typing
                       if (fieldErrors.bank_name) {
-                        setFieldErrors(prev => ({ ...prev, bank_name: '' }));
+                        setFieldErrors((prev) => ({ ...prev, bank_name: "" }));
                       }
                     }}
                     className={fieldErrors.bank_name ? "border-red-500" : ""}
                     // required
                   />
                   {fieldErrors.bank_name && (
-                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_name}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {fieldErrors.bank_name}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -1491,34 +1626,43 @@ export default function AddSalon() {
                     value={formData.bank_account_number}
                     onChange={(e) => {
                       // Only allow numeric input
-                      const value = e.target.value.replace(/\D/g, '');
+                      const value = e.target.value.replace(/\D/g, "");
                       setFormData((prev) => ({
                         ...prev,
                         bank_account_number: value,
                       }));
-                      
+
                       // Validate bank account number
                       if (value.length > 0) {
                         if (!validateBankAccount(value)) {
-                          setBankAccountError("رقم الحساب البنكي يجب أن يكون بين 8 و 14 رقم");
+                          setBankAccountError(
+                            "رقم الحساب البنكي يجب أن يكون بين 8 و 14 رقم"
+                          );
                         } else {
                           setBankAccountError(null);
                         }
                       } else {
                         setBankAccountError(null);
                       }
-                      
+
                       // Clear error when user starts typing
                       if (fieldErrors.bank_account_number) {
-                        setFieldErrors(prev => ({ ...prev, bank_account_number: '' }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          bank_account_number: "",
+                        }));
                       }
                     }}
-                    className={`${fieldErrors.bank_account_number || bankAccountError ? "border-red-500" : ""}`}
+                    className={`${
+                      fieldErrors.bank_account_number || bankAccountError
+                        ? "border-red-500"
+                        : ""
+                    }`}
                     placeholder="مثال: 1234567890"
                     maxLength={14}
                     pattern="[0-9]*"
                     inputMode="numeric"
-                    style={{ fontFamily: 'monospace' }} // Use monospace for better number display
+                    style={{ fontFamily: "monospace" }} // Use monospace for better number display
                     // required
                   />
                   {(fieldErrors.bank_account_number || bankAccountError) && (
@@ -1535,7 +1679,8 @@ export default function AddSalon() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="bank_account_holder_name">
-                    اسم صاحب الحساب البنكي <span className="text-red-500">*</span>
+                    اسم صاحب الحساب البنكي{" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="bank_account_holder_name"
@@ -1547,14 +1692,23 @@ export default function AddSalon() {
                       }));
                       // Clear error when user starts typing
                       if (fieldErrors.bank_account_holder_name) {
-                        setFieldErrors(prev => ({ ...prev, bank_account_holder_name: '' }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          bank_account_holder_name: "",
+                        }));
                       }
                     }}
-                    className={fieldErrors.bank_account_holder_name ? "border-red-500" : ""}
+                    className={
+                      fieldErrors.bank_account_holder_name
+                        ? "border-red-500"
+                        : ""
+                    }
                     // required
                   />
                   {fieldErrors.bank_account_holder_name && (
-                    <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_holder_name}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {fieldErrors.bank_account_holder_name}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -1565,39 +1719,50 @@ export default function AddSalon() {
                     id="bank_account_iban"
                     value={formData.bank_account_iban}
                     onChange={(e) => {
-                      let value = e.target.value.toUpperCase().replace(/\s+/g, '');
-                      
+                      let value = e.target.value
+                        .toUpperCase()
+                        .replace(/\s+/g, "");
+
                       // Format IBAN with spaces for better readability
                       if (value.length > 2) {
-                        value = value.match(/.{1,4}/g)?.join(' ') || value;
+                        value = value.match(/.{1,4}/g)?.join(" ") || value;
                       }
-                      
+
                       setFormData((prev) => ({
                         ...prev,
                         bank_account_iban: value,
                       }));
-                      
+
                       // Validate IBAN format (remove spaces for validation)
-                      const cleanValue = value.replace(/\s+/g, '');
+                      const cleanValue = value.replace(/\s+/g, "");
                       if (cleanValue.length > 0) {
                         if (!validateIBAN(cleanValue)) {
-                          setIbanError("رقم الآيبان غير صحيح. يجب أن يبدأ بـ AE ويحتوي على 19-21 رقم بعدها");
+                          setIbanError(
+                            "رقم الآيبان غير صحيح. يجب أن يبدأ بـ AE ويحتوي على 19-21 رقم بعدها"
+                          );
                         } else {
                           setIbanError(null);
                         }
                       } else {
                         setIbanError(null);
                       }
-                      
+
                       // Clear error when user starts typing
                       if (fieldErrors.bank_account_iban) {
-                        setFieldErrors(prev => ({ ...prev, bank_account_iban: '' }));
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          bank_account_iban: "",
+                        }));
                       }
                     }}
-                    className={`${fieldErrors.bank_account_iban || ibanError ? "border-red-500" : ""}`}
+                    className={`${
+                      fieldErrors.bank_account_iban || ibanError
+                        ? "border-red-500"
+                        : ""
+                    }`}
                     placeholder="مثال: AE22 2222 2222 2222 2222 22"
                     maxLength={29} // 23 characters + 6 spaces max
-                    style={{ fontFamily: 'monospace' }} // Use monospace for better IBAN display
+                    style={{ fontFamily: "monospace" }} // Use monospace for better IBAN display
                     // required
                   />
                   {(fieldErrors.bank_account_iban || ibanError) && (
@@ -1613,9 +1778,7 @@ export default function AddSalon() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="vat_number">
-                    الرقم الضريبي 
-                  </Label>
+                  <Label htmlFor="vat_number">الرقم الضريبي</Label>
                   <Input
                     id="vat_number"
                     value={formData.vat_number}
@@ -1626,14 +1789,16 @@ export default function AddSalon() {
                       }));
                       // Clear error when user starts typing
                       if (fieldErrors.vat_number) {
-                        setFieldErrors(prev => ({ ...prev, vat_number: '' }));
+                        setFieldErrors((prev) => ({ ...prev, vat_number: "" }));
                       }
                     }}
                     className={fieldErrors.vat_number ? "border-red-500" : ""}
                     // required
                   />
                   {fieldErrors.vat_number && (
-                    <p className="text-sm text-red-500 mt-1">{fieldErrors.vat_number}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {fieldErrors.vat_number}
+                    </p>
                   )}
                 </div>
               </div>
@@ -1643,22 +1808,27 @@ export default function AddSalon() {
                 <Label htmlFor="services_list">
                   قائمة الخدمات (PDF) <span className="text-red-500">*</span>
                 </Label>
-                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.services_list ? "border-red-500" : "border-gray-300"}`}>
+                <div
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    fieldErrors.services_list
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                >
                   <Label htmlFor="services_list" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-1">
                         اسحب وأفلت ملف PDF هنا أو انقر للتصفح
                       </p>
-                      <p className="text-xs text-gray-500">
-                        PDF حتى 10MB
-                      </p>
+                      <p className="text-xs text-gray-500">PDF حتى 10MB</p>
                     </div>
                     <Input
                       id="services_list"
                       type="file"
                       accept="application/pdf"
-                      className="hidden" onChange={async (e) => {
+                      className="hidden"
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           try {
@@ -1666,7 +1836,10 @@ export default function AddSalon() {
                             uploadFormData.append("file", file);
                             uploadFormData.append("folder", "salons");
 
-                            const response = await addData("general/upload-file", uploadFormData);
+                            const response = await addData(
+                              "general/upload-file",
+                              uploadFormData
+                            );
 
                             if (response.success) {
                               setServicesListFile(file);
@@ -1676,14 +1849,18 @@ export default function AddSalon() {
                               }));
                               // Clear error when file is uploaded
                               if (fieldErrors.services_list) {
-                                setFieldErrors(prev => ({ ...prev, services_list: '' }));
+                                setFieldErrors((prev) => ({
+                                  ...prev,
+                                  services_list: "",
+                                }));
                               }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
                             toast({
                               title: "خطأ في رفع الملف",
-                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              description:
+                                "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
                               variant: "destructive",
                             });
                           }
@@ -1716,7 +1893,9 @@ export default function AddSalon() {
                   )}
                 </div>
                 {fieldErrors.services_list && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.services_list}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.services_list}
+                  </p>
                 )}
               </div>
 
@@ -1725,22 +1904,27 @@ export default function AddSalon() {
                 <Label htmlFor="trade_license">
                   الرخصة التجارية (PDF) <span className="text-red-500">*</span>
                 </Label>
-                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.trade_license ? "border-red-500" : "border-gray-300"}`}>
+                <div
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    fieldErrors.trade_license
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                >
                   <Label htmlFor="trade_license" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-1">
                         اسحب وأفلت ملف PDF هنا أو انقر للتصفح
                       </p>
-                      <p className="text-xs text-gray-500">
-                        PDF حتى 10MB
-                      </p>
+                      <p className="text-xs text-gray-500">PDF حتى 10MB</p>
                     </div>
                     <Input
                       id="trade_license"
                       type="file"
                       accept="application/pdf"
-                      className="hidden" onChange={async (e) => {
+                      className="hidden"
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           try {
@@ -1748,7 +1932,10 @@ export default function AddSalon() {
                             uploadFormData.append("file", file);
                             uploadFormData.append("folder", "salons");
 
-                            const response = await addData("general/upload-file", uploadFormData);
+                            const response = await addData(
+                              "general/upload-file",
+                              uploadFormData
+                            );
 
                             if (response.success) {
                               setTradeLicenseFile(file);
@@ -1758,14 +1945,18 @@ export default function AddSalon() {
                               }));
                               // Clear error when file is uploaded
                               if (fieldErrors.trade_license) {
-                                setFieldErrors(prev => ({ ...prev, trade_license: '' }));
+                                setFieldErrors((prev) => ({
+                                  ...prev,
+                                  trade_license: "",
+                                }));
                               }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
                             toast({
                               title: "خطأ في رفع الملف",
-                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              description:
+                                "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
                               variant: "destructive",
                             });
                           }
@@ -1798,31 +1989,39 @@ export default function AddSalon() {
                   )}
                 </div>
                 {fieldErrors.trade_license && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.trade_license}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.trade_license}
+                  </p>
                 )}
               </div>
 
               {/* شهادة ضريبة القيمة المضافة PDF */}
               <div className="space-y-4">
                 <Label htmlFor="vat_certificate">
-                  شهادة ضريبة القيمة المضافة (PDF) <span className="text-red-500">*</span>
+                  شهادة ضريبة القيمة المضافة (PDF){" "}
+                  <span className="text-red-500">*</span>
                 </Label>
-                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.vat_certificate ? "border-red-500" : "border-gray-300"}`}>
+                <div
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    fieldErrors.vat_certificate
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                >
                   <Label htmlFor="vat_certificate" className="mt-4 w-full">
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-1">
                         اسحب وأفلت ملف PDF هنا أو انقر للتصفح
                       </p>
-                      <p className="text-xs text-gray-500">
-                        PDF حتى 10MB
-                      </p>
+                      <p className="text-xs text-gray-500">PDF حتى 10MB</p>
                     </div>
                     <Input
                       id="vat_certificate"
                       type="file"
                       accept="application/pdf"
-                      className="hidden" onChange={async (e) => {
+                      className="hidden"
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           try {
@@ -1830,7 +2029,10 @@ export default function AddSalon() {
                             uploadFormData.append("file", file);
                             uploadFormData.append("folder", "salons");
 
-                            const response = await addData("general/upload-file", uploadFormData);
+                            const response = await addData(
+                              "general/upload-file",
+                              uploadFormData
+                            );
 
                             if (response.success) {
                               setVatCertificateFile(file);
@@ -1840,14 +2042,18 @@ export default function AddSalon() {
                               }));
                               // Clear error when file is uploaded
                               if (fieldErrors.vat_certificate) {
-                                setFieldErrors(prev => ({ ...prev, vat_certificate: '' }));
+                                setFieldErrors((prev) => ({
+                                  ...prev,
+                                  vat_certificate: "",
+                                }));
                               }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
                             toast({
                               title: "خطأ في رفع الملف",
-                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              description:
+                                "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
                               variant: "destructive",
                             });
                           }
@@ -1864,7 +2070,6 @@ export default function AddSalon() {
                       <Button
                         variant="destructive"
                         size="icon"
-
                         className="ml-2"
                         onClick={() => {
                           setVatCertificateFile(null);
@@ -1881,31 +2086,42 @@ export default function AddSalon() {
                   )}
                 </div>
                 {fieldErrors.vat_certificate && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.vat_certificate}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.vat_certificate}
+                  </p>
                 )}
               </div>
 
               {/* شهادة الحساب البنكي PDF */}
               <div className="space-y-4">
                 <Label htmlFor="bank_account_certificate">
-                  شهادة الحساب البنكي (PDF) <span className="text-red-500">*</span>
+                  شهادة الحساب البنكي (PDF){" "}
+                  <span className="text-red-500">*</span>
                 </Label>
-                <div className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${fieldErrors.bank_account_certificate ? "border-red-500" : "border-gray-300"}`}>
-                  <Label htmlFor="bank_account_certificate" className="mt-4 w-full">
+                <div
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    fieldErrors.bank_account_certificate
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <Label
+                    htmlFor="bank_account_certificate"
+                    className="mt-4 w-full"
+                  >
                     <div className="flex flex-col items-center">
                       <Upload className="h-12 w-12 text-gray-400 mb-2" />
                       <p className="text-sm text-gray-600 mb-1">
                         اسحب وأفلت ملف PDF هنا أو انقر للتصفح
                       </p>
-                      <p className="text-xs text-gray-500">
-                        PDF حتى 10MB
-                      </p>
+                      <p className="text-xs text-gray-500">PDF حتى 10MB</p>
                     </div>
                     <Input
                       id="bank_account_certificate"
                       type="file"
                       accept="application/pdf"
-                      className="hidden" onChange={async (e) => {
+                      className="hidden"
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           try {
@@ -1913,24 +2129,32 @@ export default function AddSalon() {
                             uploadFormData.append("file", file);
                             uploadFormData.append("folder", "salons");
 
-                            const response = await addData("general/upload-file", uploadFormData);
+                            const response = await addData(
+                              "general/upload-file",
+                              uploadFormData
+                            );
 
                             if (response.success) {
                               setBankAccountCertificateFile(file);
                               setFormData((prev) => ({
                                 ...prev,
-                                bank_account_certificate: response.data.file_name,
+                                bank_account_certificate:
+                                  response.data.file_name,
                               }));
                               // Clear error when file is uploaded
                               if (fieldErrors.bank_account_certificate) {
-                                setFieldErrors(prev => ({ ...prev, bank_account_certificate: '' }));
+                                setFieldErrors((prev) => ({
+                                  ...prev,
+                                  bank_account_certificate: "",
+                                }));
                               }
                             }
                           } catch (error) {
                             console.error("File upload failed:", error);
                             toast({
                               title: "خطأ في رفع الملف",
-                              description: "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
+                              description:
+                                "تعذر رفع الملف، الرجاء المحاولة مرة أخرى",
                               variant: "destructive",
                             });
                           }
@@ -1963,7 +2187,9 @@ export default function AddSalon() {
                   )}
                 </div>
                 {fieldErrors.bank_account_certificate && (
-                  <p className="text-sm text-red-500 mt-1">{fieldErrors.bank_account_certificate}</p>
+                  <p className="text-sm text-red-500 mt-1">
+                    {fieldErrors.bank_account_certificate}
+                  </p>
                 )}
               </div>
             </div>
@@ -1997,7 +2223,7 @@ export default function AddSalon() {
             <Button variant="outline" type="button" asChild>
               <Link href="/salons">إلغاء</Link>
             </Button>
-            <Button type="submit" >
+            <Button type="submit">
               {isLoading ? "جاري الحفظ..." : "حفظ المزود"}
             </Button>
           </CardFooter>

@@ -620,7 +620,7 @@ export default function ComplaintsManagement() {
                                   className="text-red-600 cursor-pointer"
                                   onClick={() => handleDelete(item.id)}
                                 >
-                                  حذف الشكوى
+                                 حذف الشكوى / الدعم
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
