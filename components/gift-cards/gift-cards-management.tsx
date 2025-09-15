@@ -419,8 +419,10 @@ export default function GiftCardsManagement() {
                   <TableHead>نوع البطاقة</TableHead>
 
                   <TableHead>تفاصيل</TableHead>
-                  <TableHead>تاريخ الاستلام</TableHead>
+                  <TableHead> حالة البطاقة</TableHead>
                   <TableHead>تاريخ الانشاء</TableHead>
+                  <TableHead>تاريخ الاستلام</TableHead>
+                  
                   <TableHead>المرسل</TableHead>
                   <TableHead>المستلم</TableHead>
 
@@ -430,7 +432,7 @@ export default function GiftCardsManagement() {
               {/* ... existing table header ... */}
               <TableBody>
                 {isLoading ? (
-                  Array.from({ length: 5 }).map((_, index) => (
+                  Array.from({ length: 6 }).map((_, index) => (
                     <TableRow key={`loading-${index}`} className="animate-pulse">
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -523,6 +525,7 @@ export default function GiftCardsManagement() {
                         </Badge>
                       </TableCell>
                       <TableCell>{card.created_at}</TableCell>
+                      <TableCell>{card.received_at || "لم يتم الاستلام بعد"}</TableCell>
                       <TableCell>{card.sender?.full_name || "غير مسجل"}</TableCell>
 
                       <TableCell>{card.recipient?.full_name || "غير مسجل"}</TableCell>
