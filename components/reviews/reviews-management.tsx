@@ -383,7 +383,7 @@ export default function ReviewsManagement() {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-5 w-5 ${i < 4 ? "text-yellow-500 fill-yellow-500" : "text-gray-300 fill-gray-300"}`}
+                    className={`h-5 w-5 ${i <reviewsInfo.average_rating  ? "text-yellow-500 fill-yellow-500" : "text-gray-300 fill-gray-300"}`}
                   />
                 ))}
               </div>

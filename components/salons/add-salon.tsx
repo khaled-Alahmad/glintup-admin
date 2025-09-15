@@ -2203,7 +2203,7 @@ export default function AddSalon() {
                 <div className="space-y-0.5">
                   <Label htmlFor="featured">مزود مميز</Label>
                   <p className="text-sm text-muted-foreground">
-                    عرض المزود في قسم المزودات المميزة
+                    عرض المزود في قسم المزودينالمميزة
                   </p>
                 </div>
                 <Switch id="featured" className="switch-custom " />

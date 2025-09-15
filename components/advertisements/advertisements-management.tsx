@@ -169,6 +169,29 @@ export default function AdvertisementsManagement() {
     setAdToDelete(ad);
     setDeleteDialogOpen(true);
   };
+
+  // Calculate statistics from advertisements data
+  const getStatistics = () => {
+    const totalAds = advertisements.length;
+    const activeAds = advertisements.filter(ad => ad.is_active).length;
+    const pendingAds = advertisements.filter(ad => ad.status === 'in_review').length;
+    const totalViews = advertisements.reduce((sum, ad) => sum + ad.views, 0);
+    const totalClicks = advertisements.reduce((sum, ad) => sum + ad.clicks, 0);
+    
+    // Calculate estimated revenue (example: 10 AED per 100 views)
+    const estimatedRevenue = Math.round((totalViews / 100) * 10);
+    
+    return {
+      totalAds,
+      activeAds,
+      pendingAds,
+      totalViews,
+      totalClicks,
+      estimatedRevenue
+    };
+  };
+
+  const stats = getStatistics();
   // const filteredAds = advertisements.filter((ad) => {
   //   const matchesSearch =
   //     ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -215,7 +238,7 @@ export default function AdvertisementsManagement() {
             <CardTitle className="text-sm font-medium">إجمالي الإعلانات</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{stats.totalAds}</div>
             <p className="text-xs text-muted-foreground mt-1">في النظام</p>
           </CardContent>
         </Card>
@@ -225,7 +248,7 @@ export default function AdvertisementsManagement() {
             <CardTitle className="text-sm font-medium">إعلانات نشطة</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
+            <div className="text-2xl font-bold">{stats.activeAds}</div>
             <p className="text-xs text-muted-foreground mt-1">حالياً</p>
           </CardContent>
         </Card>
@@ -235,18 +258,18 @@ export default function AdvertisementsManagement() {
             <CardTitle className="text-sm font-medium">إعلانات قيد المراجعة</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">{stats.pendingAds}</div>
             <p className="text-xs text-muted-foreground mt-1">بحاجة للمراجعة</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+            <CardTitle className="text-sm font-medium">إجمالي المشاهدات</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15,600 AED</div>
-            <p className="text-xs text-muted-foreground mt-1">من الإعلانات</p>
+            <div className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">مشاهدة إعلان</p>
           </CardContent>
         </Card>
       </div>

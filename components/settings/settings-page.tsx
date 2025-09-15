@@ -307,8 +307,8 @@ export default function SettingsPage() {
               <Button
                 variant={activeTab === "general" ? "default" : "ghost"}
                 className={`justify-start transition-colors duration-200 ${
-                  activeTab === "general" 
-                    ? "bg-primary text-primary-foreground" 
+                  activeTab === "general"
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-primary hover:text-accent-foreground"
                 }`}
                 onClick={() => setActiveTab("general")}
@@ -321,8 +321,8 @@ export default function SettingsPage() {
                   activeTab === "experience_artists" ? "default" : "ghost"
                 }
                 className={`justify-start transition-colors duration-200 ${
-                  activeTab === "experience_artists" 
-                    ? "bg-primary text-primary-foreground" 
+                  activeTab === "experience_artists"
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-primary hover:text-accent-foreground"
                 }`}
                 onClick={() => setActiveTab("experience_artists")}
@@ -333,8 +333,8 @@ export default function SettingsPage() {
               <Button
                 variant={activeTab === "commissions" ? "default" : "ghost"}
                 className={`justify-start transition-colors duration-200 ${
-                  activeTab === "commissions" 
-                    ? "bg-primary text-primary-foreground" 
+                  activeTab === "commissions"
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-primary hover:text-accent-foreground"
                 }`}
                 onClick={() => setActiveTab("commissions")}
@@ -345,8 +345,8 @@ export default function SettingsPage() {
               <Button
                 variant={activeTab === "app" ? "default" : "ghost"}
                 className={`justify-start transition-colors duration-200 ${
-                  activeTab === "app" 
-                    ? "bg-primary text-primary-foreground" 
+                  activeTab === "app"
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-primary hover:text-accent-foreground"
                 }`}
                 onClick={() => setActiveTab("app")}
@@ -357,8 +357,8 @@ export default function SettingsPage() {
               <Button
                 variant={activeTab === "social-media" ? "default" : "ghost"}
                 className={`justify-start transition-colors duration-200 ${
-                  activeTab === "social-media" 
-                    ? "bg-primary text-primary-foreground" 
+                  activeTab === "social-media"
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-primary hover:text-accent-foreground"
                 }`}
                 onClick={() => setActiveTab("social-media")}
@@ -381,24 +381,37 @@ export default function SettingsPage() {
                   {/* Home Service */}
                   <div className="space-y-2">
                     <Label htmlFor="makeup_artist_home_service_text_ar">
-                      نص خدمة "نصلك أينما كنت" <span className="text-muted-foreground">(عربي / English)</span>
+                      نص خدمة "نصلك أينما كنت"{" "}
+                      <span className="text-muted-foreground">
+                        (عربي / English)
+                      </span>
                     </Label>
                     <div className="flex gap-2">
                       <Textarea
                         id="makeup_artist_home_service_text_ar"
                         placeholder="نص الخدمة بالعربي"
-                        value={formData["makeup_artist_home_service_text_ar"] || ""}
+                        value={
+                          formData["makeup_artist_home_service_text_ar"] || ""
+                        }
                         onChange={(e) =>
-                          handleInputChange("makeup_artist_home_service_text_ar", e.target.value)
+                          handleInputChange(
+                            "makeup_artist_home_service_text_ar",
+                            e.target.value
+                          )
                         }
                         className="w-1/2"
                       />
                       <Textarea
                         id="makeup_artist_home_service_text_en"
-                        placeholder='Home Service Text (English)'
-                        value={formData["makeup_artist_home_service_text_en"] || ""}
+                        placeholder="Home Service Text (English)"
+                        value={
+                          formData["makeup_artist_home_service_text_en"] || ""
+                        }
                         onChange={(e) =>
-                          handleInputChange("makeup_artist_home_service_text_en", e.target.value)
+                          handleInputChange(
+                            "makeup_artist_home_service_text_en",
+                            e.target.value
+                          )
                         }
                         className="w-1/2"
                       />
@@ -407,24 +420,37 @@ export default function SettingsPage() {
                   {/* Center Service */}
                   <div className="space-y-2">
                     <Label htmlFor="makeup_artist_center_service_text_ar">
-                      نص خدمة "خدمتنا في مقرنا" <span className="text-muted-foreground">(عربي / English)</span>
+                      نص خدمة "خدمتنا في مقرنا"{" "}
+                      <span className="text-muted-foreground">
+                        (عربي / English)
+                      </span>
                     </Label>
                     <div className="flex gap-2">
                       <Textarea
                         id="makeup_artist_center_service_text_ar"
                         placeholder="نص الخدمة بالعربي"
-                        value={formData["makeup_artist_center_service_text_ar"] || ""}
+                        value={
+                          formData["makeup_artist_center_service_text_ar"] || ""
+                        }
                         onChange={(e) =>
-                          handleInputChange("makeup_artist_center_service_text_ar", e.target.value)
+                          handleInputChange(
+                            "makeup_artist_center_service_text_ar",
+                            e.target.value
+                          )
                         }
                         className="w-1/2"
                       />
                       <Textarea
                         id="makeup_artist_center_service_text_en"
-                        placeholder='Center Service Text (English)'
-                        value={formData["makeup_artist_center_service_text_en"] || ""}
+                        placeholder="Center Service Text (English)"
+                        value={
+                          formData["makeup_artist_center_service_text_en"] || ""
+                        }
                         onChange={(e) =>
-                          handleInputChange("makeup_artist_center_service_text_en", e.target.value)
+                          handleInputChange(
+                            "makeup_artist_center_service_text_en",
+                            e.target.value
+                          )
                         }
                         className="w-1/2"
                       />
@@ -433,24 +459,41 @@ export default function SettingsPage() {
                   {/* Center & Home Service */}
                   <div className="space-y-2">
                     <Label htmlFor="makeup_artist_center_and_home_service_text_ar">
-                      نص خدمة "نقدم الخدمة في منزلك أو مقرنا" <span className="text-muted-foreground">(عربي / English)</span>
+                      نص خدمة "نقدم الخدمة في منزلك أو مقرنا"{" "}
+                      <span className="text-muted-foreground">
+                        (عربي / English)
+                      </span>
                     </Label>
                     <div className="flex gap-2">
                       <Textarea
                         id="makeup_artist_center_and_home_service_text_ar"
                         placeholder="نص الخدمة بالعربي"
-                        value={formData["makeup_artist_center_and_home_service_text_ar"] || ""}
+                        value={
+                          formData[
+                            "makeup_artist_center_and_home_service_text_ar"
+                          ] || ""
+                        }
                         onChange={(e) =>
-                          handleInputChange("makeup_artist_center_and_home_service_text_ar", e.target.value)
+                          handleInputChange(
+                            "makeup_artist_center_and_home_service_text_ar",
+                            e.target.value
+                          )
                         }
                         className="w-1/2"
                       />
                       <Textarea
                         id="makeup_artist_center_and_home_service_text_en"
-                        placeholder='Center & Home Service Text (English)'
-                        value={formData["makeup_artist_center_and_home_service_text_en"] || ""}
+                        placeholder="Center & Home Service Text (English)"
+                        value={
+                          formData[
+                            "makeup_artist_center_and_home_service_text_en"
+                          ] || ""
+                        }
                         onChange={(e) =>
-                          handleInputChange("makeup_artist_center_and_home_service_text_en", e.target.value)
+                          handleInputChange(
+                            "makeup_artist_center_and_home_service_text_en",
+                            e.target.value
+                          )
                         }
                         className="w-1/2"
                       />
@@ -1107,7 +1150,7 @@ export default function SettingsPage() {
                     {/* //home_service_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="home_service_provider_percentage">
-                        نسبة مزودات الخدمات المنزلية (%)
+                        نسبة الخدمات المنزلية (%)
                       </Label>
                       <Input
                         id="home_service_provider_percentage"
@@ -1157,7 +1200,7 @@ export default function SettingsPage() {
                     {/* salons_provider_percentage */}
                     <div className="space-y-2">
                       <Label htmlFor="salons_provider_percentage">
-                        نسبة المزودين(%)
+                        نسبة الصالونات (%)
                       </Label>
                       <Input
                         min={0}

@@ -346,9 +346,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                               {notification.message}
                             </p>
                             <p className="text-xs font-medium mt-1">
-                              {new Date(notification.created_at).toLocaleString(
+                              {new Date(notification.created_at).toLocaleDateString(
                                 "ar-SA",
                                 {
+                                  calendar: "gregory",
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
