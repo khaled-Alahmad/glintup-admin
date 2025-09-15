@@ -97,7 +97,7 @@ export default function GiftsManagement() {
         toast({
           variant: "destructive",
           title: "خطأ في تحميل البيانات",
-          description: response.message || "فشل في تحميل قائمة الهدايا",
+          description: response.message || "فشل في تحميلقائمة التصاميم",
         });
       }
     } catch (error) {
@@ -105,7 +105,7 @@ export default function GiftsManagement() {
       toast({
         variant: "destructive",
         title: "خطأ في تحميل البيانات",
-        description: "حدث خطأ أثناء تحميل قائمة الهدايا",
+        description: "حدث خطأ أثناء تحميلقائمة التصاميم",
       });
     } finally {
       setIsLoading(false);
@@ -169,7 +169,7 @@ export default function GiftsManagement() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">إدارة الهدايا</h1>
+          <h1 className="text-3xl font-bold tracking-tight">إدارة تصاميم بطاقات الهدايا</h1>
           <p className="text-muted-foreground">
             إدارة وتنظيم الهدايا المتاحة في النظام
           </p>

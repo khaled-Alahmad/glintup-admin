@@ -367,7 +367,6 @@ export default function AppointmentsManagement() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-4">
               {/* Update status filter */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-between">
                 <div className="relative w-full sm:w-auto">
                   <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -377,6 +376,7 @@ export default function AppointmentsManagement() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-between">
                 <div className="flex gap-2 flex-wrap">
                   {/* <Button
                     variant="outline"
@@ -388,6 +388,7 @@ export default function AppointmentsManagement() {
                     <FileText className="h-4 w-4" />
                     تصدير PDF
                   </Button> */}
+                  <div className="w-[180px]" >
                   <DatePicker
                     selected={selectedDateFrom}
                     onSelect={(date) => {
@@ -397,6 +398,8 @@ export default function AppointmentsManagement() {
                     placeholder="بداية تاريخ الحجز"
                     // mode="single"
                   />
+                  </div>
+                  <div className="w-[180px]" >
                   <DatePicker
                     selected={selectedDateTo}
                     onSelect={(date) => {
@@ -407,6 +410,7 @@ export default function AppointmentsManagement() {
                     minDate={selectedDateFrom}
                     // mode="single"
                   />
+                  </div>
                   <Select
                     value={statusFilter}
                     onValueChange={(value) => {

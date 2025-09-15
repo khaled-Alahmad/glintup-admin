@@ -156,7 +156,7 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       requiredPermission: "gift-cards",
     },
     {
-      name: "الهدايا",
+      name: " تصاميم بطاقات الهدايا",
       href: "/gifts",
       icon: Gift,
       active: pathname.startsWith("/gifts"),
