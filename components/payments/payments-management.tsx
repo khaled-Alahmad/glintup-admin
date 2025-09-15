@@ -172,6 +172,9 @@ export default function PaymentsManagement() {
       ad: "إعلان",
       booking: "حجز",
       gift_card: "بطاقة هدية",
+      gift_card_money: "بطاقة هدية مالية",
+      gift_card_service: "بطاقة هدية خدمة",
+      menu_population: "تعبئة قائمة الخدمات",
     };
     return types[type as keyof typeof types] || type;
   }
@@ -305,12 +308,15 @@ export default function PaymentsManagement() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
+              </div>
                 <div className="flex gap-2 flex-wrap">
+              <div className="w-[180px]" >
                   <DatePicker
                     selected={dateFilter}
                     onSelect={setDateFilter}
                     placeholder="تاريخ المعاملة"
                   />
+                  </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="جميع الحالات" />
@@ -333,10 +339,12 @@ export default function PaymentsManagement() {
                       <SelectItem value="ad">إعلان</SelectItem>
                       <SelectItem value="booking">حجز</SelectItem>
                       <SelectItem value="gift_card">بطاقة هدية</SelectItem>
+                      <SelectItem value="gift_card_money">بطاقة هدية مالية</SelectItem>
+                      <SelectItem value="gift_card_service">بطاقة هدية خدمة</SelectItem>
+                      <SelectItem value="menu_population">تعبئة قائمة الخدمات</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
               <div className="rounded-md border overflow-hidden">
                 <Table>
