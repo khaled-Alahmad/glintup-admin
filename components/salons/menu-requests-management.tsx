@@ -34,7 +34,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MoreHorizontal } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MoreHorizontal, Search } from "lucide-react";
 import Link from "next/link";
 import { fetchData, updateData } from "@/lib/apiHelper";
 import { useToast } from "@/hooks/use-toast";
@@ -107,13 +108,40 @@ export default function MenuRequestsTab() {
         showReject: false,
         adminNote: ""
     });
-    const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("all");    const fetchMenuRequests = useCallback(async () => {
+    const [statusFilter, setStatusFilter] = useState<RequestStatus | "all">("all");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+    // Debounce search term to prevent excessive API calls
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Reset pagination when search term or status filter changes
+    useEffect(() => {
+        setPagination(prev => ({ ...prev, currentPage: 1 }));
+    }, [debouncedSearchTerm, statusFilter]);    const fetchMenuRequests = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Fixed the extra curly brace in the URL
-            const response = await fetchData(
-                `admin/salon-menu-requests?page=${pagination.currentPage}&per_page=${pagination.perPage}${statusFilter !== "all" ? `&status=${statusFilter}` : ""}`
-            );
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: pagination.currentPage.toString(),
+                per_page: pagination.perPage.toString()
+            });
+            
+            if (statusFilter !== "all") {
+                params.append("status", statusFilter);
+            }
+            
+            if (debouncedSearchTerm.trim()) {
+                params.append("search", debouncedSearchTerm.trim());
+            }
+            
+            const response = await fetchData(`admin/salon-menu-requests?${params.toString()}`);
             setMenuRequests(response.data);
             setPagination(prev => ({
                 ...prev,
@@ -131,7 +159,7 @@ export default function MenuRequestsTab() {
         } finally {
             setIsLoading(false);
         }
-    }, [pagination.currentPage, pagination.perPage, statusFilter, toast]);
+    }, [pagination.currentPage, pagination.perPage, statusFilter, debouncedSearchTerm, toast]);
     
     useEffect(() => {
         fetchMenuRequests();
@@ -207,7 +235,7 @@ export default function MenuRequestsTab() {
     // Get status badge for a request
     const getStatusBadge = useCallback((status: string) => {
         const { label, className } = statusMap[status] || { label: status, className: "bg-gray-100 text-gray-800" };
-        return <span className={`px-2 py-1 text-xs font-medium rounded-md ${className}`}>{label}</span>;
+        return <span className={`px-2 py-1 text-xs text-nowrap font-medium rounded-md ${className}`}>{label}</span>;
     }, [statusMap]);
     
     // Helper function to render salon title with avatar
@@ -236,13 +264,22 @@ export default function MenuRequestsTab() {
                 <CardHeader className="space-y-2 ">
                     <CardTitle className="text-lg font-semibold">إدارة طلبات القوائم</CardTitle>                <div className="flex items-center justify-between gap-4">
                         <p className="text-sm text-gray-500">إدارة طلبات قوائم الصالونات</p>
-                        <div className="flex items-center justify-eng gap-4 mt-2">
+                        <div className="flex items-center justify-end gap-4 mt-2">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                <Input
+                                    placeholder="البحث في الطلبات..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10 pr-4 w-[250px]"
+                                    dir="rtl"
+                                />
+                            </div>
                             <div className="flex items-center justify-between">
                                 <Select
                                     value={statusFilter}
                                     onValueChange={(value: string) => {
                                         setStatusFilter(value as "pending" | "approved" | "rejected" | "all");
-                                        setPagination(prev => ({...prev, currentPage: 1})); // Reset to first page on filter change
                                     }}
                                     defaultValue="all"
                                     dir="rtl"

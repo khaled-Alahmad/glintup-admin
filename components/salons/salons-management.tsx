@@ -172,7 +172,7 @@ export default function SalonsManagement() {
         return (
           <Badge
             variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
+            className="bg-green-50 text-nowrap text-green-700 border-green-200"
           >
             نشط
           </Badge>
@@ -181,7 +181,7 @@ export default function SalonsManagement() {
         return (
           <Badge
             variant="outline"
-            className="bg-amber-50 text-amber-700 border-amber-200"
+            className="bg-amber-50  text-nowrap text-amber-700 border-amber-200"
           >
             غير نشط
           </Badge>

@@ -49,6 +49,7 @@ import {
   X,
   Trash2,
   Search,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -406,6 +407,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   const [salonSearchTerm, setSalonSearchTerm] = useState("");
   const [uploadedIcon, setUploadedIcon] = useState<string>("");
   const [iconPreview, setIconPreview] = useState<string>("");
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [currentGiftCard, setCurrentGiftCard] = useState<GiftCard | null>(null);
@@ -2091,6 +2093,28 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
   };
 
   const handleIconUpload = async (file: File) => {
+    // File validation
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "خطأ في نوع الملف",
+        description: "يرجى رفع صورة بصيغة PNG أو JPG فقط",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (file.size > maxSize) {
+      toast({
+        title: "حجم الملف كبير جداً",
+        description: "يرجى رفع صورة بحجم أقل من 5 ميجابايت",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const formData = new FormData();
     formData.append("image", file);
     formData.append("folder", "services");
@@ -2101,9 +2125,39 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
         console.log(response);
         setUploadedIcon(response.data.image_name);
         setIconPreview(URL.createObjectURL(file));
+        toast({
+          title: "تم رفع الصورة بنجاح",
+          description: "تم رفع أيقونة الخدمة بنجاح",
+        });
       }
     } catch (error) {
       console.error("Failed to upload image:", error);
+      toast({
+        title: "خطأ في رفع الصورة",
+        description: "حدث خطأ أثناء رفع الصورة، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      handleIconUpload(file);
     }
   };
   // تعديل خدمة
@@ -3874,26 +3928,62 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="icon">أيقونة الخدمة</Label>
-                    <div className="flex items-center gap-4">
-                      <Input
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                        isDragOver 
+                          ? "border-blue-400 bg-blue-50" 
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <input
                         id="icon"
                         name="icon"
                         type="file"
-                        accept="image/*"
+                        accept="image/png,image/jpeg,image/jpg"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) handleIconUpload(file);
                         }}
-                        className="flex-1"
+                        className="hidden"
                       />
-                      {iconPreview && (
-                        <div className="relative w-12 h-12">
-                          <img
-                            src={iconPreview}
-                            alt="Icon preview"
-                            className="w-full h-full object-cover rounded-md"
-                          />
+                      
+                      {iconPreview ? (
+                        <div className="space-y-3">
+                          <div className="relative w-32 h-16 mx-auto border rounded-md overflow-hidden bg-gray-50">
+                            <img
+                              src={iconPreview}
+                              alt="Icon preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <label
+                            htmlFor="icon"
+                            className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-500"
+                          >
+                            <Upload className="h-4 w-4" />
+                            تغيير الصورة
+                          </label>
                         </div>
+                      ) : (
+                        <label
+                          htmlFor="icon"
+                          className="cursor-pointer flex flex-col items-center gap-2"
+                        >
+                          <Upload className="h-8 w-8 text-gray-400" />
+                          <div className="text-sm">
+                            <span className="font-medium text-blue-600 hover:text-blue-500">
+                              حب وأفلت صور المزود هنا أو انقر للتصفح
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <p>PNG, JPG حتى 5MB لكل صورة</p>
+                            <p className="font-medium">📐 قياسات الصورة المطلوبة: نسبة 2:1 (العرض ضعفي الطول)</p>
+                            <p className="text-gray-400">مثال: 1200x600 بكسل أو 1600x800 بكسل</p>
+                          </div>
+                        </label>
                       )}
                     </div>
                     <Input type="hidden" name="icon" value={uploadedIcon} />
@@ -4122,26 +4212,62 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="icon">أيقونة الخدمة</Label>
-                  <div className="flex items-center gap-4">
-                    <Input
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      isDragOver 
+                        ? "border-blue-400 bg-blue-50" 
+                        : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <input
                       id="icon"
                       name="icon_file"
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/jpg"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) handleIconUpload(file);
                       }}
-                      className="flex-1"
+                      className="hidden"
                     />
-                    {(iconPreview || editingService.icon_url) && (
-                      <div className="relative w-12 h-12">
-                        <img
-                          src={iconPreview || editingService.icon_url}
-                          alt="Icon preview"
-                          className="w-full h-full object-cover rounded-md"
-                        />
+                    
+                    {(iconPreview || editingService.icon_url) ? (
+                      <div className="space-y-3">
+                        <div className="relative w-32 h-16 mx-auto border rounded-md overflow-hidden bg-gray-50">
+                          <img
+                            src={iconPreview || editingService.icon_url}
+                            alt="Icon preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <label
+                          htmlFor="icon"
+                          className="cursor-pointer inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-500"
+                        >
+                          <Upload className="h-4 w-4" />
+                          تغيير الصورة
+                        </label>
                       </div>
+                    ) : (
+                      <label
+                        htmlFor="icon"
+                        className="cursor-pointer flex flex-col items-center gap-2"
+                      >
+                        <Upload className="h-8 w-8 text-gray-400" />
+                        <div className="text-sm">
+                          <span className="font-medium text-blue-600 hover:text-blue-500">
+                            حب وأفلت صور المزود هنا أو انقر للتصفح
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <p>PNG, JPG حتى 5MB لكل صورة</p>
+                          <p className="font-medium">📐 قياسات الصورة المطلوبة: نسبة 2:1 (العرض ضعفي الطول)</p>
+                          <p className="text-gray-400">مثال: 1200x600 بكسل أو 1600x800 بكسل</p>
+                        </div>
+                      </label>
                     )}
                   </div>
                   <Input
