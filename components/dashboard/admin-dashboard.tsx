@@ -177,7 +177,7 @@ export default function AdminDashboard() {
         <Card className="stats-card card-hover overflow-hidden">
           <div className="absolute inset-x-0 top-0 h-1 bg-primary"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مزودات مسجلة</CardTitle>
+            <CardTitle className="text-sm font-medium">المزودين المسجلين</CardTitle>
             <Store className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
