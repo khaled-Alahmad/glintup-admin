@@ -292,7 +292,7 @@ export default function GiftCardsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="amount" className="text-right">
-                    المبلغ (د.إ)
+                    المبلغ (AED)
                   </Label>
                   <Input
                     id="amount"
@@ -515,7 +515,7 @@ export default function GiftCardsManagement() {
 
                         </> : <>
 
-                          {card.amount} د.إ
+                          {card.amount} AED
                         </>}
 
                       </TableCell>
@@ -648,7 +648,7 @@ export default function GiftCardsManagement() {
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">
                     تفاصيل
                   </h3>
-                  <p className="font-medium">{currentGiftCard.amount} د.إ</p>
+                  <p className="font-medium">{currentGiftCard.amount} AED</p>
                 </div>
               </> :
                 <>

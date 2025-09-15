@@ -2803,7 +2803,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                               تفاصيل
                             </h3>
                             <p className="font-medium">
-                              {currentGiftCard.amount} د.إ
+                              {currentGiftCard.amount} AED
                             </p>
                           </div>
                         </>
@@ -3311,7 +3311,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                           <div className="text-right">
                             <p className="font-medium">
                               {" "}
-                              {service.price + " د.إ"}
+                              {service.price + " AED"}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {service.duration_minutes} حجز
@@ -3755,7 +3755,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                                 {getAppointmentStatusBadge(appointment.status)}
                               </TableCell>
                               <TableCell>
-                                {appointment.total_price} د.إ
+                                {appointment.total_price} AED
                               </TableCell>
                               <TableCell>
                                 <div className="flex justify-end">
@@ -3851,7 +3851,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="price">السعر (د.إ)</Label>
+                      <Label htmlFor="price">السعر (AED)</Label>
                       <Input
                         id="price"
                         name="price"
@@ -4109,7 +4109,7 @@ export default function SalonDetails({ salonId }: SalonDetailsProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">السعر (د.إ)</Label>
+                    <Label htmlFor="price">السعر (AED)</Label>
                     <Input
                       id="price"
                       name="price"
@@ -4406,7 +4406,7 @@ function ServiceCard({
             <div className="space-y-1">
               <p className="text-xs font-medium">السعر:</p>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-sm">{service.price} د.إ</span>
+                <span className="font-medium text-sm">{service.price} AED</span>
 
               </div>
               {service.discount_percentage > 0 && (
@@ -4416,7 +4416,7 @@ function ServiceCard({
               )}
               {service.discount_percentage > 0 && (
                 <p className="text-xs text-green-600 font-medium">
-                  السعر بعد الخصم: {service.final_price} د.إ
+                  السعر بعد الخصم: {service.final_price} AED
                 </p>
               )}
             </div>

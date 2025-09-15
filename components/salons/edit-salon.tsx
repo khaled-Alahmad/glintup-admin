@@ -1945,7 +1945,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="service-price" className="text-right">
-                            السعر (د.إ)
+                            السعر (AED)
                           </Label>
                           <Input
                             id="service-price"
@@ -2031,7 +2031,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                               </Badge>
                             </TableCell>
                             <TableCell>{service.duration} دقيقة</TableCell>
-                            <TableCell>{service.price} د.إ</TableCell>
+                            <TableCell>{service.price} AED</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
                                 <Button
@@ -2104,7 +2104,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                           htmlFor="edit-service-price"
                           className="text-right"
                         >
-                          السعر (د.إ)
+                          السعر (AED)
                         </Label>
                         <Input
                           id="edit-service-price"
@@ -2176,7 +2176,7 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                     <SelectContent>
                       {availableCollections.map((collection) => (
                         <SelectItem key={collection.id} value={collection.id}>
-                          {collection.name} - {collection.price} د.إ
+                          {collection.name} - {collection.price} AED
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -2219,8 +2219,8 @@ export default function EditSalon({ salonId }: EditSalonProps) {
                                 })}
                               </div>
                             </TableCell>
-                            <TableCell>{collection.price} د.إ</TableCell>
-                            <TableCell>{collection.discount} د.إ</TableCell>
+                            <TableCell>{collection.price} AED</TableCell>
+                            <TableCell>{collection.discount} AED</TableCell>
                             <TableCell>
                               <Button
                                 variant="ghost"

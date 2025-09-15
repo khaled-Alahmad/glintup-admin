@@ -222,7 +222,7 @@ export default function AdminDashboard() {
             <Banknote className="h-4 w-4 text-pink-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.total_revenue} د.إ</div>
+            <div className="text-2xl font-bold">{dashboardData.total_revenue} AED</div>
           </CardContent>
         </Card>
       </div>
@@ -409,10 +409,10 @@ export default function AdminDashboard() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `${value} د.إ`}
+                  tickFormatter={(value) => `${value} AED`}
                 />
                 <Tooltip
-                  formatter={(value) => [`${value} د.إ`, "الإيرادات"]}
+                  formatter={(value) => [`${value} AED`, "الإيرادات"]}
                   labelFormatter={(label) => `شهر ${label}`}
                 />
                 <Line

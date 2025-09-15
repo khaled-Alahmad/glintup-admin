@@ -245,7 +245,7 @@ export default function AdvertisementsManagement() {
             <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15,600 د.إ</div>
+            <div className="text-2xl font-bold">15,600 AED</div>
             <p className="text-xs text-muted-foreground mt-1">من الإعلانات</p>
           </CardContent>
         </Card>

@@ -386,7 +386,7 @@ export default function MenuRequestsTab() {
                       <TableCell dir="ltr">
                         {request.salon.contact_number}
                       </TableCell>
-                      <TableCell>{request.cost} د.إ</TableCell>
+                      <TableCell>{request.cost} AED</TableCell>
                       <TableCell>
                         <div
                           className="max-w-[200px] truncate"

@@ -230,7 +230,7 @@ export default function EditAppointment({
                   <SelectContent>
                     {availableServices.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
-                        {service.name} ({service.price} د.إ - {service.duration}{" "}
+                        {service.name} ({service.price} AED - {service.duration}{" "}
                         دقيقة)
                       </SelectItem>
                     ))}
@@ -256,9 +256,9 @@ export default function EditAppointment({
                     <tr>
                       <th className="text-right p-3">الخدمة</th>
                       <th className="text-center p-3">المدة (دقيقة)</th>
-                      <th className="text-center p-3">السعر (د.إ)</th>
+                      <th className="text-center p-3">السعر (AED)</th>
                       <th className="text-center p-3">الكمية</th>
-                      <th className="text-center p-3">الإجمالي (د.إ)</th>
+                      <th className="text-center p-3">الإجمالي (AED)</th>
                       <th className="p-3"></th>
                     </tr>
                   </thead>
@@ -327,7 +327,7 @@ export default function EditAppointment({
                       <td className="p-3"></td>
                       <td className="p-3"></td>
                       <td className="p-3 text-center font-bold">
-                        {totalPrice} د.إ
+                        {totalPrice} AED
                       </td>
                       <td className="p-3"></td>
                     </tr>

@@ -69,7 +69,7 @@ const refunds = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     requestDate: "2024-04-02",
     processDate: "2024-04-03",
-    amount: "200 د.إ",
+    amount: "200 AED",
     reason: "إلغاء الحجز من قبل المزود",
     status: "مكتمل",
     bookingId: "B-1237",
@@ -82,7 +82,7 @@ const refunds = [
     salonLogo: "/placeholder.svg?height=32&width=32",
     requestDate: "2024-04-03",
     processDate: "",
-    amount: "150 د.إ",
+    amount: "150 AED",
     reason: "عدم رضا عن الخدمة",
     status: "قيد المراجعة",
     bookingId: "B-1240",
@@ -246,7 +246,7 @@ export default function PaymentsManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">22,458 د.إ</div>
+            <div className="text-2xl font-bold">22,458 AED</div>
             <p className="text-xs text-muted-foreground mt-1">هذا الشهر</p>
           </CardContent>
         </Card>
@@ -258,7 +258,7 @@ export default function PaymentsManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,245 د.إ</div>
+            <div className="text-2xl font-bold">2,245 AED</div>
             <p className="text-xs text-muted-foreground mt-1">هذا الشهر</p>
           </CardContent>
         </Card>
@@ -270,7 +270,7 @@ export default function PaymentsManagement() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">450 د.إ</div>
+            <div className="text-2xl font-bold">450 AED</div>
             <p className="text-xs text-muted-foreground mt-1">هذا الشهر</p>
           </CardContent>
         </Card>

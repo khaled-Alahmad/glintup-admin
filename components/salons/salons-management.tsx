@@ -338,7 +338,7 @@ export default function SalonsManagement() {
                           style={{ unicodeBidi: "plaintext" }}
                           className=" text-right"
                         >
-                          {salon.total_revenue + " د.إ"}
+                          {salon.total_revenue + " AED"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center align-items-center ">

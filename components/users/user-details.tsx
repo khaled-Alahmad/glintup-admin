@@ -595,7 +595,7 @@ export default function UserDetails({ userId }: UserDetailsProps) {
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell>{booking.total_price} د.إ</TableCell>
+                            <TableCell>{booking.total_price} AED</TableCell>
                             <TableCell>
                               {getStatusBadge(booking.status)}
                             </TableCell>

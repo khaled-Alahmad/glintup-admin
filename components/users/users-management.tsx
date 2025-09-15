@@ -190,7 +190,7 @@ export default function UsersManagement() {
             <CardTitle className="text-sm font-medium">متوسط الإنفاق</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userInfo?.average_spending.toFixed(2) || 0} د.إ</div>
+            <div className="text-2xl font-bold">{userInfo?.average_spending.toFixed(2) || 0} AED</div>
             <p className="text-xs text-muted-foreground mt-1">لكل مستخدم</p>
           </CardContent>
         </Card>
@@ -310,7 +310,7 @@ export default function UsersManagement() {
                               <span className="text-xs text-right" style={{ unicodeBidi: "plaintext" }}>{user.full_phone}</span>
                             </div>
                           </TableCell>
-                          <TableCell>{user.balance} د.إ</TableCell>
+                          <TableCell>{user.balance} AED</TableCell>
                           <TableCell>
                             {getStatusBadge(user.is_active ? 'نشط' : 'محظور')}
                           </TableCell>

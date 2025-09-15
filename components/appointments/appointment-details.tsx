@@ -566,7 +566,7 @@ export default function AppointmentDetails({
                       <td className="p-3"></td>
                       <td className="p-3 text-center font-bold">
                         {totalPrice}{" "}
-                        {booking.booking_services[0]?.service.currency || "د.إ"}
+                        {booking.booking_services[0]?.service.currency || "AED"}
                       </td>
                     </tr>
                   </tbody>
@@ -711,16 +711,16 @@ export default function AppointmentDetails({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">المبلغ الإجمالي:</span>
-                    <span className="font-medium">{booking.invoice.total_amount} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                    <span className="font-medium">{booking.invoice.total_amount} {booking.booking_services[0]?.service.currency || "AED"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">المبلغ المدفوع:</span>
-                    <span className="font-medium">{booking.invoice.total_paid} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                    <span className="font-medium">{booking.invoice.total_paid} {booking.booking_services[0]?.service.currency || "AED"}</span>
                   </div>
                   {booking.invoice.discount > 0 && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">الخصم:</span>
-                      <span className="font-medium text-green-600">{booking.invoice.discount} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                      <span className="font-medium text-green-600">{booking.invoice.discount} {booking.booking_services[0]?.service.currency || "AED"}</span>
                     </div>
                   )}
                   {booking.invoice.coupon_discount && booking.invoice.coupon_discount !== "0 AED" && (
@@ -732,7 +732,7 @@ export default function AppointmentDetails({
                   {booking.invoice.tax > 0 && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">الضريبة:</span>
-                      <span className="font-medium">{booking.invoice.tax} {booking.booking_services[0]?.service.currency || "د.إ"}</span>
+                      <span className="font-medium">{booking.invoice.tax} {booking.booking_services[0]?.service.currency || "AED"}</span>
                     </div>
                   )}
                   <div className="flex justify-between border-t pt-2">

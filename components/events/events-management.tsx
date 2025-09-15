@@ -345,7 +345,7 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="price" className="text-right">
-                    السعر (د.إ)
+                    السعر (AED)
                   </Label>
                   <Input
                     id="price"
@@ -661,7 +661,7 @@ export default function EventsManagement() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-price" className="text-right">
-                    السعر (د.إ)
+                    السعر (AED)
                   </Label>
                   <Input
                     id="edit-price"

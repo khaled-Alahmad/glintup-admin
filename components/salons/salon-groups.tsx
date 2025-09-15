@@ -217,7 +217,7 @@ function SortableGroupRow({ group, onEdit, onDelete, onViewServices, onAddServic
                         </span>
                         <div className="flex items-center gap-1 text-green-600 ml-2">
                           <span className="font-bold text-xs">{groupService.service.final_price}</span>
-                        د.إ
+                        AED
 
                         </div>
                       </div>
