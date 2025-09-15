@@ -147,6 +147,16 @@ export default function AppointmentsManagement() {
     fetchSalons();
   }, []);
 
+  // Clear all filters function
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setSalonFilter("all");
+    setSelectedDateFrom(undefined);
+    setSelectedDateTo(undefined);
+    setPage(1);
+  };
+
   const fetchSalons = async () => {
     try {
       const response = await fetchData("admin/salons");
@@ -454,6 +464,14 @@ export default function AppointmentsManagement() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="flex items-center gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    مسح الفلاتر
+                  </Button>
                 </div>
               </div>
             </div>

@@ -91,6 +91,14 @@ const refunds = [
 interface Transaction {
   id: number;
   user_id: number;
+  user:{
+    id:number;
+    first_name:string;
+    last_name:string;
+    email:string;
+    phone:string;
+    avatar:string|null;
+  }
   amount: string;
   currency: string;
   formatted_amount: string;
@@ -598,9 +606,10 @@ export default function PaymentsManagement() {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
-              تفاصيل المعاملة #{selectedTransaction?.id}
+             {/* عنوان الاعلان */}
+             {selectedTransaction?.description.ar}
             </DialogTitle>
-            <DialogDescription>عرض تفاصيل المعاملة المالية</DialogDescription>
+            <DialogDescription>{selectedTransaction?.user.first_name + " " +selectedTransaction?.user.last_name} </DialogDescription>
           </DialogHeader>
           {selectedTransaction && (
             <div className="grid gap-4 py-4">
